@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.dao.sport.HelpDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.yymt.entity.sport.HelpEntity" id="helpMap">
+        <result property="id" column="id"/>
+        <result property="helpContent" column="help_content"/>
+        <result property="helpUserId" column="help_user_id"/>
+        <result property="isAnonymous" column="is_anonymous"/>
+        <result property="helpType" column="help_type"/>
+        <result property="helpCreateTime" column="help_create_time"/>
+        <result property="isSolve" column="is_solve"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <!--APP、后台求助详情-->
+    <select id="helpDetail" resultType="java.util.Map">
+        SELECT th.id AS id,help_content AS helpContent,help_user_id AS helpUserId,is_anonymous AS isAnonymous,help_type AS helpType
+            ,help_create_time AS helpCreateTime,is_solve AS isSolve,th.remark
+            ,tu.nick_name,user_avatar,sd.`value` AS helpTypeName
+            ,IF(thc.replyNum,thc.replyNum,0) AS replyNum,
+            IF(th.is_anonymous=1,'匿名',tu.nick_name) AS nickName,
+            IF(tu.user_type=1,tu.real_name,tu.nick_name) AS realName,
+            tu.user_type
+        FROM tb_help th
+            LEFT JOIN tb_user tu ON th.help_user_id = tu.user_id
+            LEFT JOIN sys_dict sd ON sd.id = th.help_type AND sd.type='helpTag'
+            LEFT JOIN (
+                          SELECT help_id,count(*) AS replyNum
+                          FROM tb_help_comment
+                          GROUP BY help_id
+                      ) AS thc ON thc.help_id = th.id
+        WHERE th.id = #{id}
+    </select>
+    <!--后台已采纳的评论详情-->
+    <select id="bestCommentDetail" resultType="java.util.Map">
+        SELECT th.id AS id,comment_content AS commentContent
+            ,comment_createtime AS commentCreateTime,is_solve AS isSolve
+            ,tu.nick_name,user_avatar
+        FROM tb_help_comment thc
+            LEFT JOIN tb_user tu ON thc.from_user_id = tu.user_id
+            LEFT JOIN tb_help th ON thc.help_id = th.id
+        WHERE th.is_solve=1 AND thc.is_best_answer=1 AND th.id = #{id}
+    </select>
+
+    <!--APP求助列表-->
+<select id="queryAppHelpPage" resultType="java.util.Map">
+    SELECT th.id,th.is_solve AS isSolve,help_content AS helpContent,help_user_id AS helpUserId
+    ,th.is_anonymous as isAnonymous,IF(th.is_anonymous=1,'匿名',tu.nick_name) AS nickName,IF(tu.user_type=1,tu.real_name,tu.nick_name) AS realName,tu.user_type,IF(th.is_anonymous=1,'',tu.user_avatar) AS userAvatar
+    ,th.help_create_time AS helpCreatetime,IF(thc.replyNum,thc.replyNum,0) AS replyNum,sd.`value` AS helpTypeName
+    FROM tb_help th
+    LEFT JOIN tb_user tu ON tu.user_id = th.help_user_id
+    LEFT JOIN (
+    SELECT help_id,count(*) AS replyNum
+    FROM tb_help_comment
+    GROUP BY help_id
+    ) AS thc ON thc.help_id = th.id
+    LEFT JOIN sys_dict sd ON sd.id = th.help_type AND sd.type='helpTag'
+    <where>
+        <if test="userId != null and userId != '' ">
+            AND th.help_user_id = #{userId}
+        </if>
+    </where>
+</select>
+
+    <!--后台求助列表-->
+<select id="queryHelpPage" resultType="java.util.Map">
+    SELECT * FROM(
+        SELECT th.id,th.is_solve AS isSolve,help_content AS helpContent
+        -- ,IF(th.is_anonymous=1,'匿名',tu.username) AS userName
+        ,IF(tu.real_name,tu.real_name,tu.nick_name) AS userName,tu.user_id AS userId
+        ,th.help_create_time AS helpCreatetime
+        ,IF(thc.replyNum,thc.replyNum,0) AS replyNum
+        ,thc.lastReplyTime,thc.lastReplyId,tu1.nick_name AS lastReplyUser
+        ,IF(tr.revealNum,1,0) AS isReveal
+        ,IF(tr.revealNum,tr.revealNum,0) AS revealNum
+        FROM tb_help th
+        LEFT JOIN tb_user tu ON tu.user_id = th.help_user_id
+        LEFT JOIN (SELECT
+        SUBSTRING_INDEX(
+        GROUP_CONCAT(comment_createtime ORDER BY comment_createtime DESC),
+        ',',
+        1
+        ) AS lastReplyTime,
+        SUBSTRING_INDEX(
+        GROUP_CONCAT(from_user_id ORDER BY from_user_id DESC),
+        ',',
+        1
+        ) AS lastReplyId,
+        help_id,count(*) AS replyNum
+        FROM tb_help_comment
+        where parent_id is null
+        GROUP BY help_id) AS thc ON thc.help_id = th.id
+        LEFT JOIN tb_user tu1 ON tu1.user_id = thc.lastReplyId
+        LEFT JOIN (select reveal_content_id,count(*) AS revealNum from tb_reveal where reveal_type=0 GROUP BY reveal_content_id) AS tr ON th.id = tr.reveal_content_id
+        ) AS tmp
+        <where>
+            <if test="userId != null and userId != '' ">
+                AND userId = #{userId}
+            </if>
+            <if test="isSolve != null and isSolve != '' ">
+                AND isSolve = #{isSolve}
+            </if>
+            <if test="isReveal != null and isReveal != '' ">
+                AND isReveal = #{isReveal}
+            </if>
+            <if test="keyword != null and keyword != '' ">
+                AND (helpContent LIKE CONCAT('%',CONCAT(#{keyword}, '%'))
+                or userName LIKE CONCAT('%',CONCAT(#{keyword}, '%'))
+                or lastReplyUser LIKE CONCAT('%',CONCAT(#{keyword}, '%'))
+                )
+            </if>
+        </where>
+</select>
+
+</mapper>

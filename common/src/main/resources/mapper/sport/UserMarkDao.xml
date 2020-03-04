@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.dao.sport.UserMarkDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.yymt.entity.sport.UserMarkEntity" id="userMarkMap">
+        <result property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="markId" column="mark_id"/>
+        <result property="markType" column="mark_type"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+    <delete id="cancelMark" parameterType="com.yymt.entity.sport.UserMarkEntity">
+        DELETE FROM tb_user_mark WHERE user_id = #{userId} AND mark_id = #{markId} and mark_type = #{markType}
+    </delete>
+    <!--type
+        0：文章
+        1：心健康
+        2：心情
+        3：求助
+    -->
+    <select id="selectNewsPage" resultType="java.util.Map">
+        select
+         tn.* ,if(author_type=1,su1.username,tu.real_name) AS author_name
+         from tb_user_mark tum
+         LEFT JOIN tb_news tn on tum.mark_id = tn.id
+         LEFT JOIN tb_user tu on news_author = tu.user_id
+         Left JOIN sys_user su1 on news_author = su1.user_id
+         where tum.user_id = #{userId} and tum.mark_type = #{markType}
+    </select>
+    <select id="selectFeelingsPage" resultType="java.util.Map">
+
+      select tf.*,tu.nick_name,tu.real_name,tu.user_type,if(temp.count,temp.count,0) as great
+          from tb_user_mark tum
+           LEFT JOIN tb_feelings tf on tum.mark_id = tf.id
+           LEFT JOIN tb_user tu on tf.user_id = tu.user_id
+					 LEFT JOIN (select feelings_id,count(1) as count from tb_feelings_greats tfg GROUP BY feelings_id) temp on temp.feelings_id = tum.mark_id
+         where tum.user_id = #{userId} and tum.mark_type = 2
+    </select>
+    <select id="selectHelpPage" resultType="java.util.Map">
+        select
+        th.*,tu.user_avatar,tu.nick_name,sd.`value`,tu.real_name,tu.user_type
+        ,IF(thc.count is NULL,0,thc.count) as count
+        from tb_user_mark tum
+        LEFT JOIN tb_help th on tum.mark_id = th.id
+        LEFT JOIN tb_user tu on th.help_user_id = tu.user_id
+        LEFT JOIN sys_dict sd on th.help_type = sd.id
+        LEFT JOIN
+         (SELECT COUNT(1) as count,help_id FROM tb_help_comment GROUP BY help_id) thc on thc.help_id = th.id
+         where tum.user_id = #{userId} and tum.mark_type = 3
+    </select>
+
+    <select id="queryCountById" resultType="java.lang.Integer">
+        select count(1) as mark from tb_user_mark where mark_id = #{id} and mark_type = #{type}
+    </select>
+    
+    <!--<select id="selectUserMarkPage" resultType="java.util.Map">
+        select
+        <choose>
+         <when test="markType == 0">
+
+         </when>
+         <when test="markType == 1">
+             tn.* ,if(author_type=1,su1.username,tu.nick_name) AS author_name
+         </when>
+          <when test="markType == 2">
+              tf.*,tu.nick_name
+          </when>
+          <when test="markType == 3">
+              th.*,tu.nick_name
+          </when>
+        </choose>
+        from tb_user_mark tum
+        <choose>
+            <when test="markType == 0">
+                LEFT JOIN tb_news tn on tum.mark_id = tn.id
+                LEFT JOIN tb_user tu on news_author = tu.user_id
+                Left JOIN sys_user su1 on news_author = su1.user_id
+            </when>
+            <when test="markType == 1">
+                LEFT JOIN tb_news tn on tum.mark_id = tn.id
+                LEFT JOIN tb_user tu on news_author = tu.user_id
+                Left JOIN sys_user su1 on news_author = su1.user_id
+            </when>
+            <when test="markType == 2">
+                LEFT JOIN tb_feelings tf on tum.mark_id = tf.id
+                LEFT JOIN tb_user tu on tum.user_id = tu.user_id
+            </when>
+            <when test="markType == 3">
+                LEFT JOIN tb_help th on tum.mark_id = th.id
+                LEFT JOIN tb_user tu on tum.user_id = tu.user_id
+            </when>
+        </choose>
+        where tum.user_id = #{userId} and tum.mark_type = #{markType}
+    </select>-->
+</mapper>

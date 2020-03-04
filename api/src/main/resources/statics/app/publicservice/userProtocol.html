@@ -1,0 +1,239 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>用户注册协议</title>
+  <link rel="stylesheet" type="text/css" href="css/aui.css">
+    <style>
+        body {
+            margin: 0px;
+            padding: 0px;
+            background: #fff;
+        }
+
+        header table {
+            text-align: center;
+            position: relative;
+        }
+
+        .header {
+            background-color: #525252;
+            width: 100%;
+            position: absolute;
+            top: 0px;
+        }
+
+        .middle_outer {
+            position: absolute !important;
+            position: relative;
+            /*header部分的高度*/
+            top: 0;
+            bottom: 52px;
+            /*footer部分的高度*/
+            width: 100%;
+            overflow: hidden;
+            /*外层div不滚动，而是内层div滚动，实现自适应*/
+            height: auto !important;
+            height: 100%;
+        }
+
+        .middle_inner {
+            height: 100%;
+            overflow-y: auto;
+            /*当内容超出后，就会出现滚动条*/
+        }
+
+        .title {
+            font-family: '微软雅黑';
+            font-size: 16px;
+            color: #282828;
+            text-align: center;
+        }
+
+        .articleAttr {
+            font-family: '微软雅黑';
+            font-size: 12px;
+            color: #989898;
+        }
+
+        .content {
+            margin: 0 16px;
+            word-break: break-all;
+            overflow: hidden;
+            color: #282828;
+            font-size: 14px;
+        }
+
+        .content p {
+            color: #282828;
+            font-size: 14px;
+            margin-top: 16px;
+        }
+
+        .content img {
+            max-width: 95%;
+            margin: 16px 16px 12px 16px;
+        }
+
+        .font01 {
+            font-family: '微软雅黑';
+            color: #FFFFFF;
+            font-size: 16px;
+        }
+        /*立即下载样式*/
+
+        .btn01 {
+            font-family: '微软雅黑';
+            color: #FFFFFF;
+            font-size: 12px;
+            border-radius: 5px;
+            background-color: #409aff;
+            padding: 6px 8px;
+        }
+
+        .btn02 {
+            margin: 0 16px;
+            font-family: '微软雅黑';
+            color: #fffefe;
+            font-size: 16px;
+            border-radius: 5px;
+            background-color: #409aff;
+            height: 36px;
+            line-height: 36px;
+            text-align: center;
+        }
+
+        .bottom {
+            position: fixed;
+            width: 100%;
+            bottom: 16px;
+        }
+    </style>
+</head>
+
+<body style="height:100%;">
+    <div class="header">
+    </div>
+    <div class='middle_outer'>
+        <div class='middle_inner' id="main">
+            <!--<div style="margin-top:16px;margin-bottom:20px;text-align:center;">
+                <span class="title" id="title" style="display:inline-block;">开展长跑活动群众健身活动的报名公告</span>
+            </div>
+            <div style="margin:0 16px 4px 16px;">
+                <table border="0" cellspacing="0" cellpadding="0" align="center" width="100%;">
+                    <tr>
+                        <td align="left">
+                            <span class="articleAttr"><label id="time">2018-08-16</label></span>
+                            <span class="articleAttr" style="margin-left:8px;"><label id="author">admin</label></span>
+                        </td>
+                        <td align="right" style="width:34%;min-width:110px "><span class="articleAttr"><label id="readCount" style="color:#989898;">100</label>阅读</span></td>
+                    </tr>
+                </table>
+            </div>
+            <div id="content" class="content content-color">
+                <p>虽然北马的报名信息迟迟没公布，但下半年国内备受瞩目的马拉松比赛大多已经拉开报名的帷幕，包括上马、厦马、杭马、西安马等，一起来看看本周的赛事热点吧！
+                </p>
+                <p style="margin-top:5px;">杭州马拉松下周四开放报名，阿里首秀令人期待</p>
+
+                <p style="margin-top:5px;">上周，2018杭州马拉松召开发布会，宣布赛事将在11月4日开跑，报名将于8月16日正式启动。广汽本田继续冠名，杭州银行作为首席战略合作伙伴，浙江卫视作为首席电视转播。
+                </p>
+                <p>
+                    <img src="http://xinli.ruc.edu.cn/uploadfile/201511050948318068.jpg" width="100%" height="160px;" max-width="1024px;">
+                </p>
+                <p style="margin-top:5px;">
+                    比赛起点依然是黄龙体育中心，线路基本上和去年一致。今年杭马全程和半程规模增加，迷你马减少。报名时间为8月16日10时-8月30日17时，全程和半程共350个慈善名额，每个价格是2000元。
+                </p>
+                <p style="margin-top:5px;">
+                    今年的杭马亮点也不少，除了增加“杭马永久号” 、“老杭马直通车”、“好杭马直通车”“快杭马直通车”、“好浙马直通车” 、“合作马拉松直通车”等，还设立人性化的退出机制，并与被称为世界第九大马拉松的洛杉矶马拉松赛结成友好马拉松。
+                </p>
+                <p style="margin-top:5px;">
+                    今年的杭马亮点也不少，除了增加“杭马永久号” 、“老杭马直通车”、“好杭马直通车”“快杭马直通车”、“好浙马直通车” 、“合作马拉松直通车”等，还设立人性化的退出机制，并与被称为世界第九大马拉松的洛杉矶马拉松赛结成友好马拉松。
+                </p>
+                <p style="margin-top:5px;">
+                    今年的杭马亮点也不少，除了增加“杭马永久号” 、“老杭马直通车”、“好杭马直通车”“快杭马直通车”、“好浙马直通车” 、“合作马拉松直通车”等，还设立人性化的退出机制，并与被称为世界第九大马拉松的洛杉矶马拉松赛结成友好马拉松。
+                </p>
+            </div>
+          -->
+          <div class="aui-toast">
+            信息不存在
+          </div>
+        </div>
+    </div>
+</body>
+<script type="text/template" id="detail">
+  <!--<div style="margin-top:16px;margin-bottom:20px;text-align:center;">
+      <span class="title" id="title" style="display:inline-block;">用户注册协议</span>
+  </div>-->
+  <div id="content" class="content content-color" style="margin-top:16px;">
+   {{=htmlspecialchars_decode(it.newsContent)}}
+   <div style="height:52px;width:100%;">&nbsp;</div>
+  </div>
+</script>
+<script type="text/javascript" id="yytDESScript" src="./js/yytdes.js" data="0"></script>
+<script type="text/javascript" src="./js/api.js"></script>
+<script type="text/javascript" src="./js/jquery-3.3.1.min.js"></script>
+<script type="text/javascript" src="./js/common.js"></script>
+<script type="text/javascript" src="./js/doT.min.js"></script>
+<script type="text/javascript">
+    function getQueryVariable(variable) {
+        var query = window.location.search.substring(1);
+        var vars = query.split("&");
+        for (var i = 0; i < vars.length; i++) {
+            var pair = vars[i].split("=");
+            if (pair[0] == variable) {
+                return pair[1];
+            }
+        }
+        return 1;
+    }
+    $(document).ready(function() {
+        var id = getQueryVariable("id");
+        InitData(id);
+    });
+
+    function htmlspecialchars_decode(str) {
+        str = str.replace(/%26amp;/g, "\&");
+        str = str.replace(/%26lt;/g, "\<");
+        str = str.replace(/%26gt;/g, "\>");
+        str = str.replace(/%26quot;/g, "\"");
+        str = str.replace(/&nbsp;/g, " ");
+        return str;
+    }
+
+    function InitData(id) {
+        //获取新闻详情
+        ajaxRequest('news/detail/' + id, "POST", {}, function(ret, err) {
+            if (ret.code == 0) {
+                var data = JSON.parse(decryptByDESModeEBC(ret.data));
+                console.log(JSON.stringify(data));
+                if (data.info != null) {
+
+                    var list = $api.byId('main');
+                    // 编译模板函数
+                    var tempFn = doT.template($api.byId('detail').innerHTML);
+                    // 使用模板函数生成HTML文本
+                    var resultHTML = tempFn(data.info);
+                    $api.append(list, resultHTML);
+                      $("title").html(data.info.newsTitle);//修改title显示
+                }
+                else{
+                  $(".aui-toast").show();
+                  setTimeout(function(){
+                      $(".aui-toast").hide();
+                  }, 2000)
+                }
+            } else {
+              $(".aui-toast").show();
+              setTimeout(function(){
+                  $(".aui-toast").hide();
+              }, 2000)
+            }
+        });
+    }
+
+</script>
+
+</html>

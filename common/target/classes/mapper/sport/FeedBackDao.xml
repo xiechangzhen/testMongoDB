@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.dao.sport.FeedBackDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.yymt.entity.sport.FeedBackEntity" id="feedBackMap">
+        <result property="id" column="id"/>
+        <result property="feedBackTitle" column="feed_back_title"/>
+        <result property="feedBackContent" column="feed_back_content"/>
+        <result property="feedBackImages" column="feed_back_images"/>
+        <result property="feedBackMobile" column="feed_back_mobile"/>
+        <result property="feedBackUserId" column="feed_back_user_id"/>
+        <result property="feedBackCreate" column="feed_back_create"/>
+        <result property="feedBackStatus" column="feed_back_status"/>
+        <result property="feedBackReplayId" column="feed_back_replay_id"/>
+        <result property="feedBackReplayCreate" column="feed_back_replay_create"/>
+        <result property="feedBackLastReplyId" column="feed_back_last_reply_id"/>
+        <result property="feedBackLastReplyType" column="feed_back_last_reply_type"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        t.id AS id,feed_back_title AS feedBackTitle
+        ,feed_back_type AS feedBackType,feed_back_content AS feedBackContent
+        ,feed_back_images AS feedBackImages,feed_back_mobile AS feedBackMobile,feed_back_user_id AS feedBackUserId
+        ,feed_back_create AS feedBackCreate,feed_back_status AS feedBackStatus,feed_back_replay_id AS feedBackReplayId
+        ,feed_back_replay_create AS feedBackReplayCreate,t.remark
+        ,feed_back_last_reply_id AS feedBackLastReplyId,feed_back_last_reply_type AS feedBackLastReplyType
+    </sql>
+    <!--APP、后台 详情-->
+    <select id="feedbackDetail" resultType="java.util.Map">
+        SELECT
+        <include refid="Base_Column_List" />
+        ,su.username AS feedBackReplayAccount
+        ,tu.username AS feedBackAccount,tu.nick_name AS nickName,tu.user_avatar as userAvatar
+        ,s.`value` AS feedBackTypeName
+        FROM tb_feed_back t
+        LEFT JOIN sys_dict s ON s.id = t.feed_back_type
+        LEFT JOIN tb_user tu ON tu.user_id = t.feed_back_user_id
+        LEFT JOIN sys_user su ON su.user_id = t.feed_back_replay_id
+        WHERE t.id = #{id}
+    </select>
+
+    <!--后台-->
+    <select id="queryFeedbackList" resultType="java.util.Map" parameterType="Object">
+        SELECT
+            <include refid="Base_Column_List" />
+            ,su.username AS feedBackReplayAccount,tu.username AS feedBackAccount,s.`value` AS feedBackTypeName
+        FROM tb_feed_back t
+            LEFT JOIN sys_dict s ON s.id = t.feed_back_type
+            LEFT JOIN tb_user tu ON tu.user_id = t.feed_back_user_id
+            LEFT JOIN sys_user su ON su.user_id = t.feed_back_replay_id
+        <where>
+            <if test="feedBackStatus != null and feedBackStatus != '' ">
+                AND feed_back_status = #{feedBackStatus}
+            </if>
+            <if test="keyword != null and keyword != '' ">
+                AND (tu.username LIKE CONCAT('%',CONCAT(#{keyword}, '%'))
+                or feed_back_content LIKE CONCAT('%',CONCAT(#{keyword}, '%'))
+                or s.`value` LIKE CONCAT('%',CONCAT(#{keyword}, '%'))
+                )
+            </if>
+        </where>
+    </select>
+    <!--后台 统计未处理数-->
+    <select id="queryUnhandleFeedbackNum" resultType="java.lang.Integer" parameterType="Object">
+        SELECT
+           count(1)
+        FROM tb_feed_back t
+            LEFT JOIN sys_dict s ON s.id = t.feed_back_type
+            LEFT JOIN tb_user tu ON tu.user_id = t.feed_back_user_id
+            LEFT JOIN sys_user su ON su.user_id = t.feed_back_replay_id
+        <where>
+                feed_back_status = 0
+            <if test="keyword != null and keyword != '' ">
+                AND (tu.username LIKE CONCAT('%',CONCAT(#{keyword}, '%'))
+                or feed_back_content LIKE CONCAT('%',CONCAT(#{keyword}, '%'))
+                or s.`value` LIKE CONCAT('%',CONCAT(#{keyword}, '%'))
+                )
+            </if>
+        </where>
+    </select>
+
+    <!--APP反馈列表-->
+    <select id="queryFeedbackListApp" resultType="java.util.Map" parameterType="Object">
+        SELECT
+        t.id AS id
+        ,feed_back_type AS feedBackType,feed_back_content AS feedBackContent
+        ,feed_back_mobile AS feedBackMobile,feed_back_user_id AS feedBackUserId
+        ,feed_back_create AS feedBackCreate,feed_back_status AS feedBackStatus
+        ,IF(t.feed_back_last_reply_id IS NULL,u.user_avatar,IF(tu.user_id,tu.user_avatar,NULL)) AS lastReplyAvatar
+        ,IF(feed_back_last_reply_type,feed_back_last_reply_type,2) AS lastReplyUserType
+        FROM tb_feed_back t
+        LEFT JOIN tb_user u ON t.feed_back_user_id = u.user_id
+        LEFT JOIN sys_user su ON t.feed_back_last_reply_id = su.user_id AND t.feed_back_last_reply_type = 1
+        LEFT JOIN tb_user tu ON t.feed_back_last_reply_id = tu.user_id AND t.feed_back_last_reply_type = 2
+        <where>
+            <if test="status != null and status != ''">
+                and feed_back_status in
+                <foreach item="item" index="index" collection="status" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="userId != null and userId != '' ">
+                AND feed_back_user_id = #{userId}
+            </if>
+        </where>
+    </select>
+</mapper>

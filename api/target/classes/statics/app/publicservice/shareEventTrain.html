@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>赛事分享</title>
+
+    <style>
+        .middle_outer {
+            position: absolute !important;
+            position: relative;
+            top: 52px !important;
+            /*header部分的高度*/
+            top: 0;
+            bottom: 36px;
+            /*footer部分的高度*/
+            width: 100%;
+            overflow: hidden;
+            /*外层div不滚动，而是内层div滚动，实现自适应*/
+            height: auto !important;
+            height: 100%;
+        }
+
+        .middle_inner {
+            height: 100%;
+            overflow-y: auto;
+            /*当内容超出后，就会出现滚动条*/
+        }
+        /*立即下载样式*/
+
+        .btn01 {
+            font-family: '微软雅黑';
+            color: #FFFFFF;
+            font-size: 12px;
+            border-radius: 5px;
+            background-color: #409aff;
+            padding: 6px 8px;
+        }
+
+        .btn02 {
+            margin: 0 16px;
+            font-family: '微软雅黑';
+            color: #fffefe;
+            font-size: 16px;
+            border-radius: 5px;
+            background-color: #409aff;
+            height: 36px;
+            line-height: 36px;
+            text-align: center;
+        }
+
+        .bottom {
+            position: fixed;
+            width: 100%;
+            bottom: 16px;
+        }
+
+        body {
+            margin: 0px;
+            padding: 0px;
+            background: #fff;
+        }
+
+        header table {
+            text-align: center;
+            position: relative;
+        }
+
+        .header {
+            background-color: #525252;
+            /*width: 100%;
+            position: absolute;
+            top: 0px;*/
+        }
+
+        .title {
+            font-family: '微软雅黑';
+            font-size: 16px;
+            color: #282828;
+            text-align: center;
+        }
+
+        .articleAttr {
+            font-family: '微软雅黑';
+            font-size: 12px;
+            color: #282828;
+        }
+
+        .content {
+            margin: 0 16px;
+            word-break: break-all;
+            overflow: hidden;
+            color: #282828;
+            font-size: 14px;
+        }
+
+        .content p {
+            color: #282828;
+            font-size: 14px;
+            margin-top: 16px;
+        }
+
+        .content img {
+            max-width: 95%;
+            margin: 16px 16px 12px 16px;
+        }
+
+        .font01 {
+            font-family: '微软雅黑';
+            color: #FFFFFF;
+            font-size: 16px;
+        }
+
+        .joinInfo {
+            font-size: 12px;
+            color: #656565;
+        }
+
+        .font02 {
+            font-family: '微软雅黑';
+            font-size: 14px;
+            line-height: 40px;
+            color: #282828;
+        }
+
+        .status {
+            font-size: 12px;
+            margin: 10px 12px;
+        }
+
+        .event_enable {
+            background-color: #409aff;
+            color: white;
+            border: 1px solid #409aff;
+        }
+
+        .event_disable {
+            background-color: #a0a0a0;
+            border: 1px solid #a0a0a0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header" style="padding:8px 16px;">
+        <table border="0" cellspacing="0" cellpadding="0" style="width:100%;">
+            <tr>
+                <td width="32px"><img src="./image/logo02.png" style="width:100%;height:32px;" /></td>
+                <td width="15px;">&nbsp;</td>
+                <td><span class="font01">体育让梦想成真</span></td>
+                <td width="30%" align="right"><span class="btn01" onClick="downloadapp();">立即下载</span></td>
+            </tr>
+        </table>
+    </div>
+    <div class='middle_outer'>
+        <div class='middle_inner'>
+            <div style="margin:13px 8px 17px 8px;text-align:center;">
+                <span class="title" id="title" style="display:inline-block;">开展长跑活动群众健身活动的报名公告</span>
+                <img src="./image/Sponsor-icon.png" id="sponsor" style="display:none;height:25px;">
+            </div>
+            <div style="margin:0 16px 12px 16px;">
+                <table border="0" cellspacing="0" cellpadding="0" align="center" width="100%;">
+                    <tr>
+                        <td align="left">
+                            <span class="articleAttr"><label id="time">2018-08-16</label></span>
+                            <span class="articleAttr" style="margin-left:8px;"><label id="author">admin</label></span>
+                            <span class="articleAttr" style="margin-left:8px;">#<label id="gameAreaCode"></label></span>
+                            <span class="articleAttr" style="margin-left:8px;">#<label id="gameType"></label></span>
+                        </td>
+                        <td align="right" style="width:34%;min-width:110px "><span class="articleAttr" style="color:#989898;"><label id="readCount" >1000</label>阅读</span></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="content" style="border-top: 1px solid rgb(229,229,229);border-bottom: 1px solid #eeeeee;height:auto;">
+                <div style="width: 72%;float: left;">
+                    <div style="width:100%;margin-top:12px;margin-bottom:8px;" class="articleAttr">
+                        <span class="joinInfo">报名时间：  </span>
+                        <span id="joinTime" class="articleAttr" style="display:;">
+                        <label id="eventStartTime">2017-08-02</label>—
+                        <label id="eventEndTime">2017-08-02</label>
+                      </span>
+                    </div>
+                    <div class="articleAttr" style="margin-bottom:12px;">
+                        <span class="joinInfo">年龄条件：</span>
+                        <span id="ageLimit" class="articleAttr">
+                        <label id="startAge" class="articleAttr">20</label>岁—
+                        <label id="endAge" class="articleAttr">65</label>岁
+                      </span>
+
+                    </div>
+                </div>
+                <div style="width: 28%;float: left;">
+                    <div class="event_enable" id="statusDiv" style="float:right;text-align:center;color:#fff;border-radius: 8px;margin:12px 0;">
+                        <label id="status" class="status" style="display:inline-block;">报名中</label>
+                    </div>
+                </div>
+            </div>
+            <div style="width:100%;border-bottom: 8px solid #f2f2f2;">
+              <div class="font02" style="margin:0 16px;">
+                <span style="width:60px; font-size:12px;"><label id="limit">4000</label>人</span>
+                <label style="color:#409aff;margin-left:9px;font-size:10px;">限额</label>
+              </div>
+              <div class="font02" style="margin:0 16px;">
+                <span style="width:60px; font-size:12px"><label id="joinNum">3800</label>人</span>
+                <label style="color:#409aff;margin-left:9px;font-size:10px;">已报名</label>
+              </div>
+              <div id="joinList" style="width: 45%;float:right;margin-top:-60px;">
+                <!--<span><img src="../../image/bg1.png" style="width:40px; height:40px;border-radius:50%;" /></span>
+                <span style="margin-left:-7%;"><img src="../../image/bg1.png" style="width:40px; height:40px;border-radius:50%;" /></span>
+                <span style="margin-left:-7%;"><img src="../../image/bg1.png" style="width:40px; height:40px;border-radius:50%;" /></span>-->
+              </div>
+            </div>
+            <div id="content" class="content" style="margin-top:12px;"></div>
+        </div>
+    </div>
+    <div class="bottom">
+        <div class="btn02" onClick="downloadapp();">打开APP查看更多体育赛事</div>
+    </div>
+</body>
+<script type="text/template" id="list">
+    {{ for(var i=0;i<it.length;i++){ }}
+      {{if(i==0){}}
+        {{?isNullOrEmpty(it[i].user_avatar)}}
+          <span><img src="./image/logo02.png" style="width:40px; height:40px;border-radius:50%;" /></span>
+        {{??}}
+          <span><img src="{{=it[i].user_avatar}}" style="width:40px; height:40px;border-radius:50%;" /></span>
+        {{?}}
+      {{ }else{}}
+        {{?isNullOrEmpty(it[i].user_avatar)}}
+          <span style="margin-left:-7%;"><img src="./image/logo02.png" style="width:40px; height:40px;border-radius:50%;" /></span>
+        {{??}}
+          <span style="margin-left:-7%;"><img src="{{=it[i].user_avatar}}" style="width:40px; height:40px;border-radius:50%;" /></span>
+        {{?}}
+      {{ } }}
+    {{ } }}
+</script>
+<script type="text/javascript" id="yytDESScript" src="./js/yytdes.js" data="0"></script>
+<script type="text/javascript" src="./js/api.js"></script>
+<script type="text/javascript" src="./js/jquery-3.3.1.min.js"></script>
+<script type="text/javascript" src="./js/doT.min.js"></script>
+<script type="text/javascript" src="./js/common.js"></script>
+<script type="text/javascript">
+    function getQueryVariable(variable) {
+        var query = window.location.search.substring(1);
+        var vars = query.split("&");
+        for (var i = 0; i < vars.length; i++) {
+            var pair = vars[i].split("=");
+            if (pair[0] == variable) {
+                return pair[1];
+            }
+        }
+        return 1;
+    }
+    $(document).ready(function() {
+        var id = getQueryVariable("id");
+        InitData(id);
+    });
+
+    function InitData(id) {
+        //获取赛事详情
+        ajaxRequest('sport/games/info/' + id, "POST", {}, function(ret, err) {
+            if (ret.code == 0) {
+                var dataJson = JSON.parse(decryptByDESModeEBC(ret.data)); //解密数据
+                var list = dataJson.signup.list;
+
+                console.log(JSON.stringify(dataJson));
+                if (dataJson.games != null) {
+                    $api.text($api.byId('title'), dataJson.games.gamesTitle); //标题
+                    $api.text($api.byId('time'), getDateFormation(dataJson.games.gamesCreateTime, 'yyyy-MM-dd')); //赛事发布时间
+                    $api.text($api.byId('author'), dataJson.games.nickName);
+                    $api.text($api.byId('gameAreaCode'), dataJson.games.gameAreaName);
+                    $api.text($api.byId('gameType'), dataJson.games.sportName);
+
+                    //$api.text($api.byId('author'), data.games.authorSysUser.username);
+                    $api.text($api.byId('readCount'), dataJson.games.pv);
+
+                    if (!dataJson.games.game_is_open){
+                        $api.text($api.byId('eventStartTime'), "不限");
+                        $api.text($api.byId('eventEndTime'), "不限");
+                        $api.text($api.byId('startAge'), dataJson.games.game_age_limit_min);
+                        $api.text($api.byId('endAge'), dataJson.games.game_age_limit_max);
+                    }
+                    else{
+                        $api.text($api.byId('eventStartTime'), getDateFormation(dataJson.games.activity_start_time,"yyyy-MM-dd",true));
+                        $api.text($api.byId('eventEndTime'), getDateFormation(dataJson.games.activity_end_time,"yyyy-MM-dd",true));
+                        $api.text($api.byId('startAge'), dataJson.games.game_age_limit_min);
+                        $api.text($api.byId('endAge'), dataJson.games.game_age_limit_max);
+                    }
+
+                    if (dataJson.games.isFinished){
+                        $api.text($api.byId('status'), '报名结束');
+                        $api.addCls($api.byId('statusDiv'), 'event_disable');
+                        $api.text($api.byId('joinStatus'), '报名结束');
+                        $api.addCls($api.byId('joinDiv'), 'event_disable');
+                    }
+                    else{
+                        $api.text($api.byId('status'), '报名中');
+                        $api.addCls($api.byId('statusDiv'), 'event_enable');
+                    }
+
+                    if (dataJson.games.game_people_limit > 0)
+                    {
+                      $api.text($api.byId('limit'), dataJson.games.game_people_limit);
+                    }
+                    else {
+                      $api.text($api.byId('limit'), "不限");
+                    }
+
+                    $("#joinNum").text(dataJson.signup.totalCount);
+                    if (list.length > 0){
+                        var data = $api.byId('joinList');
+                        // 编译模板函数
+                        var tempFn = doT.template($api.byId('list').innerHTML);
+                        // 使用模板函数生成HTML文本
+                        var resultHTML = tempFn(list);
+                        $api.append(data, resultHTML);
+                        // 由于是动态的将元素添加到Dom树上，所以需要手动触发tapmode检查，列表中的元素才能实现点击加速的效果
+                        //api.parseTapmode();
+                    }
+
+                    $api.html($api.byId('content'),dataJson.games.gamesContent);
+                }
+            } else {
+                alert('无数据');
+            }
+        });
+    }
+</script>
+
+</html>

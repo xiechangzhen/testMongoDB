@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <title>赛事分享</title>
+    <link rel="stylesheet" type="text/css" href="css/aui.css">
+
+    <style>
+        .middle_outer {
+            position: absolute !important;
+            position: relative;
+            top: 52px !important;
+            /*header部分的高度*/
+            top: 0;
+            bottom: 54px;
+            /*footer部分的高度*/
+            width: 100%;
+            overflow: hidden;
+            /*外层div不滚动，而是内层div滚动，实现自适应*/
+            height: auto !important;
+            -webkit-box-orient: vertical;
+            -webkit-flex-flow: column;
+            flex-flow: column;
+            display: -webkit-box;
+            display: -webkit-flex;
+            display: flex;
+        }
+
+        .middle_inner {
+            -webkit-box-flex: 1;
+            -webkit-flex: 1;
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            /*当内容超出后，就会出现滚动条*/
+        }
+        /*立即下载样式*/
+
+        .btn01 {
+            font-family: '微软雅黑';
+            color: #FFFFFF;
+            font-size: 12px;
+            border-radius: 5px;
+            background-color: #409aff;
+            padding: 6px 8px;
+        }
+
+        .btn02 {
+            margin: 0 16px;
+            font-family: '微软雅黑';
+            color: #fffefe;
+            font-size: 16px;
+            border-radius: 5px;
+            background-color: #409aff;
+            height: 36px;
+            line-height: 36px;
+            text-align: center;
+        }
+
+        .bottom {
+            position: fixed;
+            width: 100%;
+            bottom: 16px;
+        }
+
+        body {
+            margin: 0px;
+            padding: 0px;
+            background: #fff;
+        }
+
+        header table {
+            text-align: center;
+            position: relative;
+        }
+
+        .header {
+            background-color: #525252;
+            /*width: 100%;
+            position: absolute;
+            top: 0px;*/
+        }
+
+        .title {
+            font-family: '微软雅黑';
+            font-size: 16px;
+            color: #282828;
+            text-align: center;
+        }
+
+        .articleAttr {
+            font-family: '微软雅黑';
+            font-size: 12px;
+            color: #282828;
+        }
+
+        .content {
+            margin: 0 16px;
+            word-break: break-all;
+            color: #282828;
+            font-size: 14px;
+        }
+
+        .content p {
+            color: #282828;
+            font-size: 14px;
+            margin-top: 16px;
+        }
+
+        .content img {
+            max-width: 95%;
+            margin: 16px 16px 12px 16px;
+        }
+
+        .font01 {
+            font-family: '微软雅黑';
+            color: #FFFFFF;
+            font-size: 16px;
+        }
+
+        .joinInfo {
+            font-size: 12px;
+            color: #656565;
+        }
+
+        .status {
+            font-size: 12px;
+            line-height: 30px;
+            margin: 0px 14px;
+        }
+
+        .event_enable {
+            background-color: #409aff;
+            color: white;
+            border: 1px solid #409aff;
+        }
+
+        .event_disable {
+            background-color: #a0a0a0;
+            border: 1px solid #a0a0a0;
+        }
+
+        .avatar {
+            float: left;
+            display: inline-block;
+            width: 25%;
+            height: auto;
+            margin-top: 19px;
+            margin-bottom: 16px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header" style="padding:8px 16px;">
+        <table border="0" cellspacing="0" cellpadding="0" style="width:100%;">
+            <tr>
+                <td width="32px"><img src="./image/logo02.png" style="width:100%;height:32px;" /></td>
+                <td width="15px;">&nbsp;</td>
+                <td><span class="font01">体育让梦想成真</span></td>
+                <td width="30%" align="right"><span class="btn01" onClick="downloadapp();">立即下载</span></td>
+            </tr>
+        </table>
+    </div>
+    <div class='middle_outer'>
+        <div class='middle_inner' id="main">
+            <!--<div style="margin:13px 8px 17px 8px;text-align:center;">
+                <span class="title" id="title" style="display:inline-block;">体育赛事标题</span>
+                <img src="./image/Sponsor-icon.png" id="sponsor" style="display:none;height:25px;">
+            </div>
+            <div style="margin:0 16px 12px 16px;">
+                <table border="0" cellspacing="0" cellpadding="0" align="center" width="100%;">
+                    <tr>
+                        <td align="left">
+                            <span class="articleAttr"><label id="time">2018-08-23</label></span>
+                            <span class="articleAttr" style="margin-left:8px;"><label id="author">admin</label></span>
+                        </td>
+                        <td align="right" style="width:34%;min-width:110px "><span class="articleAttr" style="color:#989898;"><label id="readCount" ></label>阅读</span></td>
+                    </tr>
+                </table>
+            </div>
+            <div style="margin:0 16px;border-top: 1px solid rgb(229,229,229);height:70px;">
+                <div style="width: 72%;float: left;">
+                    <div style="width:100%;margin-top:12px;margin-bottom:8px;" class="articleAttr">
+                        <span class="joinInfo">报名时间:</span>
+                        <span id="joinTime" class="articleAttr" style="display:;">
+                        <label id="eventStartTime">2018.09.02</label>—
+                        <label id="eventEndTime">2018.09.02</label>
+                      </span>
+                    </div>
+                    <div class="articleAttr" style="margin-bottom:12px;">
+                        <span class="joinInfo">年龄条件:</span>
+                        <span id="ageLimit" class="articleAttr">
+                        <label id="startAge" class="articleAttr">20</label>岁—
+                        <label id="endAge" class="articleAttr">60</label>岁
+                      </span>
+
+                    </div>
+                </div>
+                <div style="width: 28%;float: left;">
+                    <div class="event_enable" id="statusDiv" style="float:right;text-align:center;color:#fff;border-radius: 8px;margin:17px 0;">
+                        <label id="status" class="status" style="display:inline-block;">报名结束</label>
+                    </div>
+                </div>
+            </div>
+            <div style="margin:0 16px;border-top: 1px solid rgb(229,229,229);height:75px;">
+                <div style="width: 55%;float: left;">
+                    <div style="width:100%;margin-top:15px;" id="limitDiv" class="articleAttr">
+                        <span style="width:42px;"><label id="limit">100人</label></span>
+                        <label style="color:#409aff;margin-left:9px;font-size:10px;">限额</label>
+                    </div>
+                    <div style="width:100%;margin-top:10px;margin-bottom:12px;" class="articleAttr">
+                        <span style="width:42px;"><label id="joinNum">50</label>人</span>
+                        <label style="color:#409aff;margin-left:9px;font-size:10px;">已报名</label>
+                    </div>
+                </div>
+                <div id="joinList" style="width: 45%;float: left;">
+                     <div class="avatar">
+                      <img src="../../image/bg1.png" style="width:40px; height:40px;border-radius:50%;" />
+                  </div>
+                  <div class="avatar" style="margin-left:-7%;">
+                      <img src="../../image/bg0.png" style="width:40px; height:40px;border-radius:50%;" />
+                  </div>
+                </div>
+            </div>
+            <div id="sponsorDiv" style="margin:0 16px;border-top: 1px solid rgb(229,229,229);">
+                <table border="0" cellspacing="0" cellpadding="0" align="center" width="100%;" >
+                    <tr>
+                        <td align="left">
+                            <div style="width:100%;margin:16px 0;" class="joinInfo">
+                                赞助联系人：
+                                <label id="name" style="color:#232323;"></label>
+                            </div>
+                        </td>
+                        <td align="right" style="width:34%;min-width:110px ">
+                            <div style="margin-top:10px;margin-right:4px;">
+                                <img onclick="callContact();" src="./image/Tel-btn.png" style="width:23px; height:23px;" />
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div style="width:100%;border-bottom: 8px solid #f2f2f2;">
+            </div>
+            <div id="content" class="content content-color" style="margin-top:12px;">
+                 <p>虽然北马的报名信息迟迟没公布，但下半年国内备受瞩目的马拉松比赛大多已经拉开报名的帷幕，包括上马、厦马、杭马、西安马等，一起来看看本周的赛事热点吧！
+              </p>
+              <p style="margin-top:5px;">杭州马拉松下周四开放报名，阿里首秀令人期待</p>
+              <p style="margin-top:5px;">上周，2018杭州马拉松召开发布会，宣布赛事将在11月4日开跑，报名将于8月16日正式启动。广汽本田继续冠名，杭州银行作为首席战略合作伙伴，浙江卫视作为首席电视转播。
+              </p>
+              <p style="margin-top:5px;">
+                  比赛起点依然是黄龙体育中心，线路基本上和去年一致。今年杭马全程和半程规模增加，迷你马减少。报名时间为8月16日10时-8月30日17时，全程和半程共350个慈善名额，每个价格是2000元。
+              </p>
+              <p style="margin-top:5px;">
+                  今年的杭马亮点也不少，除了增加“杭马永久号” 、“老杭马直通车”、“好杭马直通车”“快杭马直通车”、“好浙马直通车” 、“合作马拉松直通车”等，还设立人性化的退出机制，并与被称为世界第九大马拉松的洛杉矶马拉松赛结成友好马拉松。
+              </p>
+              <p style="margin-top:5px;">
+                  今年的杭马亮点也不少，除了增加“杭马永久号” 、“老杭马直通车”、“好杭马直通车”“快杭马直通车”、“好浙马直通车” 、“合作马拉松直通车”等，还设立人性化的退出机制，并与被称为世界第九大马拉松的洛杉矶马拉松赛结成友好马拉松。
+              </p>
+              <p style="margin-top:5px;">
+                  今年的杭马亮点也不少，除了增加“杭马永久号” 、“老杭马直通车”、“好杭马直通车”“快杭马直通车”、“好浙马直通车” 、“合作马拉松直通车”等，还设立人性化的退出机制，并与被称为世界第九大马拉松的洛杉矶马拉松赛结成友好马拉松。
+              </p>
+            </div>
+          -->
+          <div class="aui-toast">
+            信息不存在
+          </div>
+        </div>
+    </div>
+    <div class="bottom">
+        <div class="btn02" onClick="downloadapp();">打开APP查看更多体育赛事</div>
+    </div>
+</body>
+<script type="text/template" id="list">
+    {{ for(var i=0;i  <it.length;i++){ }} {{if(i==0){ }} <div class="avatar">{{ }else{}}
+        <div class="avatar" style="margin-left:-7%;">{{ } }} {{if(isNullOrEmpty(it[i].user_avatar)){}}
+            <img src="./image/logo02.png" style="width:40px; height:40px;border-radius:50%;" /> {{ }else{}}
+            <img src="{{=it[i].user_avatar}}" style="width:40px; height:40px;border-radius:50%;" /> {{ } }}
+        </div>
+        {{ } }}
+</script>
+<script type="text/x-dot-template" id="detail">
+    <div style="margin:13px 8px 17px 8px;text-align:center;">
+        <span class="title" id="title" style="display:inline-block;">{{=it.games.gamesTitle}}</span> {{if(it.games.gameNeedSupport != 0) { }}
+        <img src="./image/Sponsor-icon.png" id="sponsor" style="display:inline-block;height:25px;"> {{ } }}
+    </div>
+    <div style="margin:0 16px 12px 16px;">
+        <table border="0" cellspacing="0" cellpadding="0" align="center" width="100%;">
+            <tr class="articleAttr">
+                <td align="left" width="68px;">
+                    {{=getDateFormation(it.games.gamesCreateTime, 'yyyy-MM-dd')}}
+                </td>
+                <td width="8px;">&nbsp;</td>
+                {{if (it.games.nickName=="admin") { }}
+                <td width="37px">
+                    {{ }else{ }}
+                    <td>
+                        {{ } }} {{=it.games.nickName}}
+                    </td>
+                    <td width="8px;">&nbsp;</td>
+                    <td width="44px;">#{{=it.games.gameAreaName}}</td>
+                    <td width="8px;">&nbsp;</td>
+                    <td>#{{=it.games.sportName}}</td>
+                    <td align="right" style="min-width:60px;">
+                        <span class="articleAttr" style="color:#989898;"><label id="readCount" >{{=it.games.pv}}</label>阅读</span>
+                    </td>
+            </tr>
+        </table>
+    </div>
+    <div style="margin:0 16px;border-top: 1px solid rgb(229,229,229);height:70px;">
+        <div style="float: left;">
+            <div style="width:100%;margin-top:12px;margin-bottom:8px;" class="articleAttr">
+                <span class="joinInfo">报名时间:</span>
+                <span id="joinTime" class="articleAttr">
+              <label id="eventStartTime">
+              {{if (!isNullOrEmpty(it.games.activity_start_time)) { }}
+                          {{=getDateFormation(it.games.activity_start_time, 'yyyy-MM-dd',true)}}
+                {{ }else{ }}
+                 不限
+                {{ } }}
+              </label>—
+              <label id="eventEndTime">
+              {{if (!isNullOrEmpty(it.games.activity_end_time)) { }}
+                          {{=getDateFormation(it.games.activity_end_time, 'yyyy-MM-dd',true)}}
+                {{ }else{ }}
+                 不限
+                {{ } }}
+              </label>
+            </span>
+            </div>
+            <div class="articleAttr" style="margin-bottom:12px;">
+                <span class="joinInfo">年龄条件:</span>
+                <span id="ageLimit" class="articleAttr">
+                      <label id="startAge" class="articleAttr">
+                      {{if (it.games.game_age_limit_min) { }}
+                          {{=it.games.game_age_limit_min}}岁—
+                      {{ }else{ }}
+                           不限
+                      {{ } }}
+                      </label>
+                      <label id="endAge" class="articleAttr">
+                      {{if (it.games.game_age_limit_max){ }}
+                           {{=it.games.game_age_limit_max}}岁
+                      {{ }else{ }}
+                            不限
+                      {{ } }}
+                      </label>
+              </span>
+            </div>
+        </div>
+        <div style="width:80px;float: right;">
+            {{if(!isNullOrEmpty(it.games.activity_start_time)){ }}
+            {{if (it.games.isFinished == 0) { }}
+            {{if(compare(it.games.serverTime,convertDate(it.games.activity_start_time))){ }}
+            {{if(it.games.game_people_limit!=0&&it.games.game_people_limit<=it.signup.totalCount){ }}
+            <div class="event_disable" id="statusDiv" style="float:right;text-align:center;color:#fff;border-radius: 8px;margin:18px 0;">
+                <label id="status" class="status">报名结束</label> {{ }else{ }}
+                <div class="event_enable" id="statusDiv" style="float:right;text-align:center;color:#fff;border-radius: 8px;margin:18px 0;">
+                    <label id="status" class="status">报名中</label> {{ } }} {{ }else{ }}
+                    <div class="event_enable" id="statusDiv" style="float:right;text-align:center;color:#fff;border-radius: 8px;margin:18px 0;">
+                        <label id="status" class="status">即将报名</label> {{ } }}
+                    </div>
+                    {{ }else{ }}
+                    <div class="event_disable" id="statusDiv" style="float:right;text-align:center;color:#fff;border-radius: 8px;margin:18px 0;">
+                        <label id="status" class="status">报名结束</label>
+                    </div>
+                    {{ } }} {{ } }}
+                </div>
+        </div>
+        <div style="margin:0 16px;border-top: 1px solid rgb(229,229,229);height:75px;">
+            <div style="width: 55%;float: left;">
+                <div style="width:100%;margin-top:15px;margin-bottom:10px;" id="limitDiv" class="articleAttr">
+                    <span style="width:42px;">
+              <label id="limit">
+              {{if (it.games.game_people_limit) { }}
+                            {{=it.games.game_people_limit}}人
+              {{ } else { }}
+                    无
+              {{ } }}
+              </label>
+              </span>
+                    <label style="color:#409aff;margin-left:9px;font-size:10px;">限额</label>
+                </div>
+                <div id="joinNumInfo" style="width:100%;margin-bottom:12px;" class="articleAttr">
+                    <span style="width:42px;">
+              {{if (isNullOrEmpty(it.signup)) { }}
+                    0
+              {{ } else { }}
+                    {{=it.signup.totalCount}}
+              {{ } }}人
+
+              </span>
+                    <label style="color:#409aff;margin-left:9px;font-size:10px;">已报名</label>
+                </div>
+            </div>
+            <div id="joinList" style="width: 45%;float: right;">
+                &nbsp; {{ for(var i=0;i
+                <it.signup.list.length;i++){ }} {{if(i==0){ }} <div class="avatar">{{ }else{ }}
+                    <div class="avatar" style="margin-left:-7%;">{{ } }} {{if(isNullOrEmpty(it.signup.list[i].user_avatar)){ }}
+                        <img src="./image/logo02.png" style="width:40px; height:40px;border-radius:50%;" /> {{ }else{ }}
+                        <img src="{{=it.signup.list[i].user_avatar}}" style="width:40px; height:40px;border-radius:50%;" /> {{ } }}
+                    </div>
+                    {{ } }}
+            </div>
+        </div>
+        {{if (it.games.gameNeedSupport != 0) { }}
+        <div id="sponsorDiv" style="margin:0 16px;border-top: 1px solid rgb(229,229,229);">
+            <table border="0" cellspacing="0" cellpadding="0" align="center" width="100%;">
+                <tr>
+                    <td align="left">
+                        <div style="width:100%;margin:16px 0;" class="joinInfo">
+                            赞助联系人：
+                            <label id="name" style="color:#232323;">
+                        {{if (it.games.gameSupportContactName) { }}
+                            {{=it.games.gameSupportContactName}}
+                        {{ } }}
+                        </label>
+                        </div>
+                    </td>
+                    <td align="right" style="width:34%;min-width:110px ">
+                        <div style="margin-top:10px;margin-right:4px;">
+                            {{if(!isNullOrEmpty(it.games.activity_start_time)){ }}
+                             {{if (it.games.isFinished == 0) { }}
+                             {{if(compare(it.games.serverTime,convertDate(it.games.activity_start_time))){ }}
+                              {{if(it.games.game_people_limit!=0&&it.games.game_people_limit<=it.signup.totalCount){ }}
+                            <img src="./image/tel-ash-icon.png" style="width:23px; height:23px;" /> {{ }else{ }}
+                            <img onclick="callContact();" src="./image/Tel-btn.png" style="width:23px; height:23px;" /> {{ } }}
+                             {{ } }}
+                             {{ }else{ }}
+                            <img src="./image/tel-ash-icon.png" style="width:23px; height:23px;" /> {{ } }}
+                             {{ } }}
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        {{ if (it.games.gameSupportContactName) { }}
+        <span id="contactNum" style="display:none;">{{=it.games.gameSupportContact}}</span> {{ } }} {{ } }}
+        <div style="width:100%;border-bottom: 8px solid #f2f2f2;">
+        </div>
+        <div id="content" class="content content-color" style="margin-top:12px;margin-bottom:22px;">
+            {{=htmlspecialchars_decode(it.games.gamesContent)}}
+        </div>
+</script>
+<script type="text/javascript" id="yytDESScript" src="./js/yytdes.js" data="0"></script>
+<script type="text/javascript" src="./js/api.js"></script>
+<script type="text/javascript" src="./js/jquery-3.3.1.min.js"></script>
+<script type="text/javascript" src="./js/doT.min.js"></script>
+<script type="text/javascript" src="./js/common.js"></script>
+<script type="text/javascript">
+    var typeList = "",
+        areaList = [];
+
+    function getQueryVariable(variable) {
+        var query = window.location.search.substring(1);
+        var vars = query.split("&");
+        for (var i = 0; i < vars.length; i++) {
+            var pair = vars[i].split("=");
+            if (pair[0] == variable) {
+                return pair[1];
+            }
+        }
+        return 1;
+    }
+    $(document).ready(function() {
+        var id = getQueryVariable("id");
+
+        InitData(id);
+    });
+
+    function compare(current, dateStr) {
+        console.log(current + "/" + dateStr);
+        var showDate = "";
+        var timeStamp = parseInt(DateToUnix(dateStr));
+        var diff = parseInt(DateToUnix(current) - timeStamp);
+        if (diff > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    function htmlspecialchars_decode(str) {
+        str = str.replace(/%26amp;/g, "\&");
+        str = str.replace(/%26lt;/g, "\<");
+        str = str.replace(/%26gt;/g, "\>");
+        str = str.replace(/%26quot;/g, "\"");
+        str = str.replace(/&nbsp;/g, " ");
+        return str;
+    }
+
+    function InitData(id) {
+        //获取赛事详情
+        ajaxRequest('sport/games/info/' + id, "POST", {}, function(ret, err) {
+            if (ret.code == 0) {
+                var data = JSON.parse(decryptByDESModeEBC(ret.data)); //解密数据
+                console.log(JSON.stringify(data));
+                if (data.games != null) {
+                    var list = $api.byId('main');
+                    // 编译模板函数
+                    var tempFn = doT.template($api.byId('detail').innerHTML);
+                    // 使用模板函数生成HTML文本
+                    var resultHTML = tempFn(data);
+                    $api.append(list, resultHTML);
+
+                    //表格报名不显示已报名人数
+                    if(data.games.signUpWay==2){//excel报名
+                      $api.css($api.byId('joinNumInfo'), 'display:none;');//隐藏已报名人数
+                  }
+                    $("title").html(data.games.gamesTitle);//修改title显示
+                }
+                else{
+                  $(".aui-toast").show();
+                  setTimeout(function(){
+                      $(".aui-toast").hide();
+                  }, 2000)
+                }
+            } else {
+              $(".aui-toast").show();
+              setTimeout(function(){
+                  $(".aui-toast").hide();
+              }, 2000)
+            }
+        });
+    }
+
+    function convertDate(timeStr){
+      var date = new Date(timeStr); //创建对象
+           var m = date.getMonth() + 1; //获取月份  返回0-11
+           var d = date.getDate()<10?"0"+date.getDate():date.getDate(); // 获取日
+           var h=date.getHours()<10?"0"+date.getHours():date.getHours();//获取时间
+           var min=date.getMinutes()<10?"0"+date.getMinutes():date.getMinutes();//获取分钟
+           var s=date.getSeconds()<10?"0"+date.getSeconds():date.getSeconds();//获取秒数
+
+           if (m < 10) {
+               m = "0" + m;
+           }
+           return date.getFullYear() + "-" + m + "-" + d+" "+h+":"+min+":"+s;
+    }
+
+</script>
+
+</html>

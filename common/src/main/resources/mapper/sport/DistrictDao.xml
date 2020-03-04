@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.dao.sport.DistrictDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.yymt.entity.sport.DistrictEntity" id="districtMap">
+        <result property="code" column="code"/>
+        <result property="level" column="level"/>
+        <result property="name" column="name"/>
+        <result property="parentCode" column="parent_code"/>
+        <result property="parentLevel" column="parent_level"/>
+    </resultMap>
+
+<select id="listDistrict" resultType="java.util.Map">
+  select name,code from tb_district where parent_code = #{areaCode}
+</select>
+    <select id="listProvince" resultType="java.util.Map">
+        select name,code from tb_district where level = #{level}
+    </select>
+
+    <!--  APP公共服务-城市区域：根据体育局提供的行政区域和排序返回相关数据 -->
+    <select id="queryDistrictByDict" resultType="java.util.Map">
+        select `value` AS `name`,`code` from sys_dict where type = 'ganzhou' ORDER BY order_num
+    </select>
+</mapper>

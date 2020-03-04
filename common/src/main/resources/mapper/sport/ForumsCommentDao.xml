@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.dao.sport.ForumsCommentDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.yymt.entity.sport.ForumsCommentEntity" id="forumsCommentMap">
+        <result property="id" column="id"/>
+        <result property="comment" column="comment"/>
+        <result property="forumsId" column="forums_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="rootId" column="root_id"/>
+        <result property="level" column="level"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <!--后台-获取社区评论回复列表  -->
+    <select id="selectCommentReplyListBack" resultType="java.util.Map">
+        select tfc.id,tfc.`comment`,tfc.forums_id,tfc.parent_id,tu.user_id,tu.user_avatar,tu.nick_name,
+        tfc.create_time,
+        if(commentcount,commentcount,0) as commentcount,
+        IF(greatTemp.greats,greatTemp.greats,0) as totalGreats
+        from tb_forums_comment tfc
+        LEFT JOIN tb_forums tf on tf.id = tfc.forums_id
+        LEFT JOIN tb_user tu on tfc.user_id = tu.user_id
+        LEFT JOIN (
+        select forums_comment_id,count(1) as greats from tb_forums_comment_greats GROUP BY forums_comment_id
+        )greatTemp on greatTemp.forums_comment_id = tfc.id
+        left JOIN (
+        select parent_id,count(*) as commentcount from tb_forums_comment  GROUP BY parent_id
+        )temp on temp.parent_id = tfc.id
+        where tfc.parent_id = #{commentId}
+    </select>
+
+    <!--APP-获取社区评论列表  -->
+    <select id="selectCommentList" resultType="java.util.Map">
+        select tfc.id,tfc.`comment`,tfc.forums_id,tfc.parent_id,tu.user_id,tu.user_avatar,tu.nick_name,
+        tfc.create_time,
+        if(commonetcount,commonetcount,0) as commentcount,
+        IF(greatTemp.greats,greatTemp.greats,0) as totalGreats,
+        IF(greatTemp1.isGreats,1,0) as isGreat
+        from tb_forums_comment tfc
+        LEFT JOIN tb_forums tf on tf.id = tfc.forums_id
+        LEFT JOIN tb_user tu on tfc.user_id = tu.user_id
+        LEFT JOIN (
+            select forums_comment_id,count(1) as greats from tb_forums_comment_greats GROUP BY forums_comment_id
+        )greatTemp on greatTemp.forums_comment_id = tfc.id
+        LEFT JOIN (
+            SELECT user_id,forums_comment_id,count(1) as isGreats from tb_forums_comment_greats
+            <where>
+                <if test="userId != null and userId != '' ">
+                    AND user_id = #{userId}
+                </if>
+            </where>
+            GROUP BY forums_comment_id
+        ) greatTemp1 on greatTemp1.forums_comment_id = tfc.id
+        left JOIN (
+            select parent_id,count(*) as commonetcount from tb_forums_comment  GROUP BY parent_id
+        )temp on temp.parent_id = tfc.id
+        where tfc.parent_id = 0 and forums_id = #{forumsId}
+    </select>
+
+    <!--APP-查询评论详情-->
+    <select id="selectCommentDetail" resultType="java.util.Map">
+        select tfc.id,tfc.`comment`,tfc.forums_id,tfc.parent_id,tu.user_id,tu.user_avatar,tu.nick_name,
+        tfc.create_time,
+        if(commonetcount,commonetcount,0) as commentcount,
+        IF(greatTemp.greats,greatTemp.greats,0) as totalGreats,
+        IF(greatTemp1.isGreats,greatTemp1.isGreats,0) as isGreat
+        from tb_forums_comment tfc
+        LEFT JOIN tb_forums tf on tf.id = tfc.forums_id
+        LEFT JOIN tb_user tu on tfc.user_id = tu.user_id
+        LEFT JOIN (
+        select forums_comment_id,count(1) as greats from tb_forums_comment_greats GROUP BY forums_comment_id
+        )greatTemp on greatTemp.forums_comment_id = tfc.id
+        LEFT JOIN (
+        SELECT user_id,forums_comment_id,count(1) as isGreats from tb_forums_comment_greats where user_id = #{userId} and forums_id = #{forumsId}
+        ) greatTemp1 on greatTemp1.forums_comment_id = tfc.id
+        left JOIN (
+        select parent_id,count(*) as commonetcount from tb_forums_comment  GROUP BY parent_id
+        )temp on temp.parent_id = tfc.id
+        where tfc.id = #{commentId}
+    </select>
+
+    <select id="selectChildCommentList" resultType="java.util.Map">
+        select tfc.*,tu.nick_name,tu.user_avatar ,temp.nick_name as parent_nick_name,temp.user_id as parent_user_id,
+        IF(greatTemp.greats,greatTemp.greats,0) as totalGreats,
+        IF(greatTemp1.isGreats,greatTemp1.isGreats,0) as isGreat
+        from tb_forums_comment tfc
+        LEFT JOIN tb_user tu on tfc.user_id = tu.user_id
+        LEFT JOIN (
+        select id,parent_id,nick_name,tu1.user_id from tb_forums_comment tfc1 LEFT JOIN tb_user tu1 on tu1.user_id = tfc1.user_id
+        ) temp on temp.id = tfc.parent_id
+        LEFT JOIN (
+        select forums_comment_id,count(1) as greats from tb_forums_comment_greats GROUP BY forums_comment_id
+        )greatTemp on greatTemp.forums_comment_id = tfc.id
+        LEFT JOIN (
+        SELECT user_id,forums_comment_id,count(1) as isGreats from tb_forums_comment_greats where user_id = #{userId} GROUP BY user_id,forums_comment_id,forums_id
+        ) greatTemp1 on greatTemp1.forums_comment_id = tfc.id
+        where tfc.parent_id = #{commentId}  ORDER BY create_time DESC
+        <if test="isLimit">
+          LIMIT 2
+        </if>
+    </select>
+    
+    <select id="selectChildCommentListWithLevel" resultType="java.util.Map">
+        select
+        tfc.id as to_comment_id,
+        tfc1.id as from_comment_id,
+        tfc.`comment` as to_comment,
+        tfc1.`comment` as from_comment,
+        tu.user_id as to_user_id,
+        tu.nick_name as to_user_name,
+        tu1.user_id as from_user_id,
+        tu1.nick_name as from_user_name,
+        tu1.user_avatar,
+        tfc1.create_time,
+        IF(greatTemp.greats,greatTemp.greats,0) as totalGreats,
+        IF(greatTemp1.isGreats,greatTemp1.isGreats,0) as isGreat,
+        tfc1.level
+        from tb_forums_comment tfc
+        INNER  JOIN tb_user tu on tfc.user_id = tu.user_id
+        INNER JOIN tb_forums_comment tfc1 on tfc1.parent_id = tfc.id
+        INNER JOIN tb_user tu1 on tfc1.user_id = tu1.user_id
+        LEFT JOIN (
+        select forums_comment_id,count(1) as greats from tb_forums_comment_greats GROUP BY forums_comment_id
+        )greatTemp on greatTemp.forums_comment_id = tfc1.id
+        LEFT JOIN (
+        SELECT user_id,forums_comment_id,count(1) as isGreats from tb_forums_comment_greats where user_id = #{userId} GROUP BY user_id,forums_comment_id,forums_id
+        ) greatTemp1 on greatTemp1.forums_comment_id = tfc.id
+        where tfc.forums_id = #{forumsId} and tfc1.root_id = #{rootCommentId}
+    </select>
+
+</mapper>

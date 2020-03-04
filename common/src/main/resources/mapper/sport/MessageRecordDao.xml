@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.dao.sport.MessageRecordDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.yymt.entity.sport.MessageRecordEntity" id="messageRecordMap">
+        <result property="id" column="id"/>
+        <result property="fromUserId" column="from_user_id"/>
+        <result property="toUserId" column="to_user_id"/>
+        <result property="messageType" column="message_type"/>
+        <result property="messageTab" column="message_tab"/>
+        <result property="messageTabType" column="message_tab_type"/>
+        <result property="messageContent" column="message_content"/>
+        <result property="recordId" column="record_id"/>
+        <result property="isRead" column="is_read"/>
+        <result property="createTime" column="create_time"/>
+        <result property="readTime" column="read_time"/>
+    </resultMap>
+
+    <sql id="Base_Column_List" >
+        tb.id AS id,
+        from_user_id AS fromUserId,
+        message_content AS messageContent,
+        message_tab_type AS messageTabType,
+        record_id AS recordId,
+        tb.create_time AS createTime
+    </sql>
+
+    <!--收到的关注-->
+    <select id="queryReceivedFocusList" resultType="java.util.Map">
+        SELECT <include refid="Base_Column_List" />
+        , tu.user_avatar AS userAvatar,tu.nick_name AS nickName,tu.real_name AS realName
+        ,IF(tuf.follow_id = from_user_id,1,0) as isFollow
+        FROM tb_message_record tb
+        LEFT JOIN tb_user tu ON tu.user_id = tb.from_user_id
+        LEFT JOIN tb_user_follow tuf ON tuf.user_id = tb.to_user_id AND tuf.follow_id = tb.from_user_id
+        WHERE message_tab_type = 6 AND to_user_id = #{userId}
+    </select>
+
+    <!--收到的评价 -->
+    <select id="queryReceivedCommentList" resultType="java.util.Map">
+        SELECT <include refid="Base_Column_List" />
+        , tu.user_avatar AS userAvatar,tu.nick_name AS nickName,tu.real_name AS realName
+        ,tfc.`comment` ,tf.images
+        ,IF(tf.id,tf.id,-1) AS forumsId
+        FROM tb_message_record tb
+        LEFT JOIN tb_user tu ON tu.user_id = tb.from_user_id
+        LEFT JOIN tb_forums_comment tfc ON tfc.id = tb.record_id
+        LEFT JOIN tb_forums tf ON tf.id = tfc.forums_id
+        WHERE message_tab = 2 AND to_user_id = #{userId}
+    </select>
+
+    <!--收到的赞-->
+    <select id="queryReceivedGreatList" resultType="java.util.Map">
+        SELECT <include refid="Base_Column_List" />
+            , tu.user_avatar AS userAvatar,tu.nick_name AS nickName,tu.real_name AS realName
+            ,IF(message_tab_type=2,tc.corporation_images,tf.images) AS images
+        ,IF(message_tab_type=4,IF(tf1.id,tf1.id,-1),IF(message_tab_type=3,IF(tf.id,tf.id,-1),-1)) AS forumsId
+        FROM tb_message_record tb
+        LEFT JOIN tb_user tu ON tu.user_id = tb.from_user_id
+        LEFT JOIN tb_forums tf ON tf.id = tb.record_id
+        LEFT JOIN tb_forums_comment tfc ON tfc.id = tb.record_id
+        LEFT JOIN tb_forums tf1 ON tf1.id = tfc.forums_id
+        LEFT JOIN tb_corporation tc ON tc.id = tb.record_id
+        WHERE message_tab = 1 AND to_user_id = #{userId}
+    </select>
+
+    <select id="queryMsgList" resultType="java.util.Map">
+        SELECT tmr.id AS id,from_user_id AS fromUserId,tmr.to_user_id AS toUserId,message_type AS messageType
+        ,message_tab AS messageTab,message_tab_type AS messageTabType,message_content AS messageContent
+        ,record_id AS recordId,is_read AS isRead,tmr.create_time AS createTime,read_time AS readTime
+        ,IF(tu.user_type=0,tu.nick_name,tu.real_name) AS fromUserName -- 普通用户显示昵称
+        FROM `tb_message_record` tmr
+        LEFT JOIN tb_user tu on tmr.from_user_id = tu.user_id
+        WHERE tmr.to_user_id = #{userId}
+        <if test="messageType != null and messageType != ''">
+            AND tmr.message_type = #{messageType}
+        </if>
+        <if test="messageTab != null and messageTab != ''">
+            AND tmr.message_tab = #{messageTab}
+        </if>
+        <if test="isRead != null">
+            AND tmr.is_read = #{isRead}
+        </if>
+    </select>
+
+    <select id="countMsgList" resultType="java.util.Map">
+          select
+             to_user_id,
+              sum(case when message_type = 1 then 1 else 0 end) as allNum,
+              sum(case when message_type = 1 AND message_tab = 1 then 1 else 0 end) as gratesNum,
+              sum(case when message_type = 1 AND message_tab = 2 then 1 else 0 end) as commentNum,
+              sum(case when message_type = 1 AND message_tab = 3 then 1 else 0 end) as followNum,
+              sum(case when message_type = 2 AND message_tab = 4 then 1 else 0 end) as messageNum
+          from `tb_message_record` as tmr
+        WHERE tmr.to_user_id = #{userId}
+        <if test="messageType != null and messageType != ''">
+            AND tmr.message_type = #{messageType}
+        </if>
+        <if test="messageTab != null and messageTab != ''">
+            AND tmr.message_tab = #{messageTab}
+        </if>
+        <if test="isRead != null">
+            AND tmr.is_read = #{isRead}
+        </if>
+        GROUP BY to_user_id
+    </select>
+    
+    <select id="messageStatus" resultType="java.util.Map">
+      select
+        SUBSTRING_INDEX(GROUP_CONCAT(count),',',1) as greatsCount,
+        SUBSTRING_INDEX(SUBSTRING_INDEX(GROUP_CONCAT(count) ,',',2),',',-1) as commentCount,
+        SUBSTRING_INDEX(GROUP_CONCAT(count) ,',',-1) as followCount
+        from (
+            select COUNT(1) as count from tb_message_record where  to_user_id = #{userId} and message_tab = 1 and is_read = 0 UNION ALL
+            select COUNT(1) from tb_message_record where  to_user_id = #{userId} and message_tab = 2 and is_read = 0 UNION ALL
+            select COUNT(1) from tb_message_record where  to_user_id = #{userId} and message_tab = 3 and is_read = 0
+        ) temp
+    </select>
+
+    <update id="changeMessageStatus">
+        update tb_message_record set is_read = 1 where to_user_id = #{userId} and message_tab = #{messageType}
+    </update>
+
+</mapper>

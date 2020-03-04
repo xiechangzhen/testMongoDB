@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.dao.api.UserDao">
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.yymt.entity.api.UserEntity" id="userMap">
+        <result property="userId" column="user_id"/>
+        <result property="username" column="username"/>
+        <result property="password" column="password"/>
+        <result property="userStatus" column="user_status"/>
+        <result property="nickName" column="nick_name"/>
+        <result property="realName" column="real_name"/>
+        <result property="userAvatar" column="user_avatar"/>
+        <result property="userType" column="user_type"/>
+        <result property="userSex" column="user_sex"/>
+        <result property="userIdNum" column="user_id_num"/>
+        <result property="userBirthday" column="user_birthday"/>
+        <result property="userSignature" column="user_signature"/>
+        <result property="idFrontImage" column="id_front_image"/>
+        <result property="idBackImage" column="id_back_image"/>
+        <result property="loginType" column="login_type"/>
+        <result property="openId" column="open_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="modifyTime" column="modify_time"/>
+        <result property="rcToken" column="rc_token"/>
+        <result property="pushClientId" column="push_client_id"/>
+        <result property="remark" column="remark"/>
+        <result property="contact" column="contact"/>
+        <result property="isHbJourney" column="is_hb_journey"/>
+        <result property="gps" column="gps"/>
+        <result property="address" column="address"/>
+        <result property="detailAddress" column="detail_address"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        user_id, username, user_status, nick_name, real_name, user_avatar,
+        user_type,  user_sex, user_id_num,
+        user_birthday, user_signature, id_front_image, id_back_image, create_time
+    </sql>
+    <sql id="Format_Column_List">
+        tb.user_id AS userId,
+        tb.username AS username,
+        user_status AS userStatus,
+        nick_name AS nickName,
+        real_name AS realName,
+        user_avatar AS userAvatar,
+        user_type AS userType,
+        user_sex AS userSex,
+        user_id_num AS userIdNum,
+        user_birthday AS userBirthday,
+        user_signature AS userSignature,
+        id_front_image AS idFrontImage,
+        id_back_image AS idBackImage,
+        login_type AS loginType,
+        open_id AS openId,
+        tb.create_time AS createTime,
+        modify_time AS modifyTime,
+        rc_token AS rcToken,
+        push_client_id AS pushClientId,
+        tb.remark AS remark
+    </sql>
+    <!--后台普通列表-->
+    <select id="selectCommonUserPage" resultMap="userMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM tb_user
+        <where>
+            user_status in(1,2,3,4,5)
+            <if test="userStatus != null and userStatus != '' ">
+                AND user_status = #{userStatus}
+            </if>
+            <if test="keyword != null and keyword != '' ">
+                AND (username LIKE CONCAT('%',CONCAT(#{keyword}, '%'))
+                or nick_name LIKE CONCAT('%',CONCAT(#{keyword}, '%'))
+                )
+            </if>
+        </where>
+    </select>
+    <!-- 后台用户详情 -->
+    <select id="userDetail" resultType="java.util.Map">
+        SELECT
+        <include refid="Format_Column_List"/>
+        FROM tb_user tb
+        WHERE tb.user_id = #{userId}
+    </select>
+
+
+    <select id="userCounter" resultType="java.util.Map">
+        SELECT
+        substring_index(GROUP_CONCAT(markcount),',',1) as 'followcount',
+        substring_index(substring_index(GROUP_CONCAT(markcount),',',2),',',-1) as 'fanscount',
+        substring_index(GROUP_CONCAT(markcount),',',-1) as 'likecount'
+        from (
+            select count(*) as markcount from tb_user_follow where user_id = #{userId}  union all
+            select count(*) as fanscount from tb_user_follow where follow_id = #{userId}  union all
+			select sum(count) as likecount from (
+				select count(1) as count from tb_hall_greats hg INNER JOIN tb_hall h
+				ON h.id = hg.hall_id where h.hall_status = 1 AND hg.user_id = #{userId} union ALL
+				select count(1) as count  from tb_corporation_greats cg INNER JOIN tb_corporation c
+				ON c.id = cg.corporation_id where c.corporation_status = 1 AND cg.user_id = #{userId} UNION ALL
+				select count(1) as count  from tb_news_greats ng INNER JOIN tb_news n
+				ON n.id = ng.news_id where n.news_status = 2 AND ng.user_id = #{userId} union ALL
+				select count(1) as count  from tb_forums_greats where user_id = #{userId}
+			) temp1
+        ) temp;
+    </select>
+
+
+    <!-- 后台用户信息统计 （采用笛卡尔积的方式列行转换）-->
+    <select id="userInfoStatistics" resultType="java.util.Map">
+        SELECT * FROM(
+                         select count(1) as followNum from tb_user_follow where user_id =#{userId})b0
+            CROSS JOIN (select count(1) as fansNum from tb_user_follow where follow_id =#{userId})b1
+            CROSS JOIN (select count(1) as forumsNum from tb_forums where user_id=#{userId})b2
+            CROSS JOIN (select count(1) as shareNum from tb_user_share where user_id =#{userId})b3
+            CROSS JOIN (select 0 as onlineTime)b4
+            CROSS JOIN (select count(1) as feedbackNum from tb_feed_back WHERE feed_back_user_id=#{userId})b5
+            CROSS JOIN (select count(1) as beRevealNum from tb_reveal WHERE reveal_user_id=#{userId})b6
+    </select>
+
+	<!-- 根据用户openID查询用户信息 -->
+	<select id="queryCountByOpenId" resultType="map">
+    	SELECT a.user_id,COUNT(1) AS count FROM tb_user a WHERE a.open_id= #{open_id}
+    </select>
+	
+</mapper>

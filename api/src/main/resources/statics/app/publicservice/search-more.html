@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>公共服务</title>
+    <link rel="stylesheet" type="text/css" href="../../../css/aui.css"/>
+    <link rel="stylesheet" type="text/css" href="../../../css/common.css" />
+    <style type="text/css">
+    #header{
+        background-color: transparent;border-bottom: 1px solid #eeeeee;height: 48px;
+        margin: auto;
+    }
+    #header .back{
+        position: absolute;top: 16px;left: 16px; bottom: 16px;
+    }
+    #header .title{
+    	font-size: 16px;color: #282828;margin: auto;height: 48px;padding-top: 16px;padding-bottom: 16px;
+    }
+    #sitelist i{
+      display: inline-block; width: 16px; height: 16px;
+      -webkit-background-size: contain !important;
+      background-size: contain !important;
+      margin-right: .5em; vertical-align: text-bottom;
+    }
+    #sitelist .time{
+        background: url(../../../image/publicservice/time-icon.png) no-repeat left center;
+    }
+    #sitelist .project{
+        background: url(../../../image/publicservice/project-icon.png) no-repeat left center;
+    }
+    #sitelist .address{
+        background: url(../../../image/publicservice/landmark-red-iocn.png) no-repeat  center;
+    }
+    </style>
+</head>
+<body>
+  <div id="main">
+    <div id="header">
+
+      <div class="back">
+        <img src="../../../image/publicservice/Return-btn.png" alt="" onclick="api.closeWin()" height="18">
+      </div>
+      <div class="title">
+        <span>更多场馆</span>
+      </div>
+    </div>
+    <div class="site-list">
+      <ul class="aui-list aui-media-list" id="sitelist">
+        <li class="aui-list-item">
+            <div class="aui-media-list-item-inner" onclick="tagetsiteInfo({{=it[i].id}})">
+                <div class="aui-list-item-media">
+                    <img src="../../../image/default.png"  height="84"  >
+                </div>
+                <div class="aui-list-item-inner">
+                    <div class="aui-list-item-text">
+                        <div class="aui-list-item-title">赣州体育馆</div>
+                    </div>
+                    <div class="aui-list-item-text">
+                    <div>
+                        <i class="time"></i><span>营业时间：9:00-10:00</span>
+                    </div>
+                    </div>
+                    <div class="aui-list-item-text">
+                      <div>
+                          <i class="project"></i><span>羽毛球、篮球</span>
+                      </div>
+                    </div>
+                    <div class="aui-list-item-text">
+                      <div>
+                          <i class="address"></i><span>赣州市赞贤路18号</span>
+                      </div>
+                      <div class="aui-list-item-right">2公里</div>
+                    </div>
+                </div>
+            </div>
+        </li>
+        <li class="aui-list-item">
+            <div class="aui-media-list-item-inner" onclick="tagetsiteInfo({{=it[i].id}})">
+                <div class="aui-list-item-media">
+                    <img src="../../../image/default.png"  height="84"  >
+                </div>
+                <div class="aui-list-item-inner">
+                    <div class="aui-list-item-text">
+                        <div class="aui-list-item-title">赣州体育馆</div>
+                    </div>
+                    <div class="aui-list-item-text">
+                    <div>
+                        <i class="time"></i><span>营业时间：9:00-10:00</span>
+                    </div>
+                    </div>
+                    <div class="aui-list-item-text">
+                      <div>
+                          <i class="project"></i><span>羽毛球、篮球</span>
+                      </div>
+                    </div>
+                    <div class="aui-list-item-text">
+                      <div>
+                          <i class="address"></i><span>赣州市赞贤路18号</span>
+                      </div>
+                      <div class="aui-list-item-right">2公里</div>
+                    </div>
+                </div>
+            </div>
+        </li>
+        <li class="aui-list-item">
+            <div class="aui-media-list-item-inner" onclick="tagetsiteInfo({{=it[i].id}})">
+                <div class="aui-list-item-media">
+                    <img src="../../../image/default.png"  height="84"  >
+                </div>
+                <div class="aui-list-item-inner">
+                    <div class="aui-list-item-text">
+                        <div class="aui-list-item-title">赣州体育馆</div>
+                    </div>
+                    <div class="aui-list-item-text">
+                    <div>
+                        <i class="time"></i><span>营业时间：9:00-10:00</span>
+                    </div>
+                    </div>
+                    <div class="aui-list-item-text">
+                      <div>
+                          <i class="project"></i><span>羽毛球、篮球</span>
+                      </div>
+                    </div>
+                    <div class="aui-list-item-text">
+                      <div>
+                          <i class="address"></i><span>赣州市赞贤路18号</span>
+                      </div>
+                      <div class="aui-list-item-right">2公里</div>
+                    </div>
+                </div>
+            </div>
+        </li>
+        <li class="aui-list-item">
+            <div class="aui-media-list-item-inner" onclick="tagetsiteInfo({{=it[i].id}})">
+                <div class="aui-list-item-media">
+                    <img src="../../../image/default.png"  height="84"  >
+                </div>
+                <div class="aui-list-item-inner">
+                    <div class="aui-list-item-text">
+                        <div class="aui-list-item-title">赣州体育馆</div>
+                    </div>
+                    <div class="aui-list-item-text">
+                    <div>
+                        <i class="time"></i><span>营业时间：9:00-10:00</span>
+                    </div>
+                    </div>
+                    <div class="aui-list-item-text">
+                      <div>
+                          <i class="project"></i><span>羽毛球、篮球</span>
+                      </div>
+                    </div>
+                    <div class="aui-list-item-text">
+                      <div>
+                          <i class="address"></i><span>赣州市赞贤路18号</span>
+                      </div>
+                      <div class="aui-list-item-right">2公里</div>
+                    </div>
+                </div>
+            </div>
+        </li>
+        <li class="aui-list-item">
+            <div class="aui-media-list-item-inner" onclick="tagetsiteInfo({{=it[i].id}})">
+                <div class="aui-list-item-media">
+                    <img src="../../../image/default.png"  height="84"  >
+                </div>
+                <div class="aui-list-item-inner">
+                    <div class="aui-list-item-text">
+                        <div class="aui-list-item-title">赣州体育馆</div>
+                    </div>
+                    <div class="aui-list-item-text">
+                    <div>
+                        <i class="time"></i><span>营业时间：9:00-10:00</span>
+                    </div>
+                    </div>
+                    <div class="aui-list-item-text">
+                      <div>
+                          <i class="project"></i><span>羽毛球、篮球</span>
+                      </div>
+                    </div>
+                    <div class="aui-list-item-text">
+                      <div>
+                          <i class="address"></i><span>赣州市赞贤路18号</span>
+                      </div>
+                      <div class="aui-list-item-right">2公里</div>
+                    </div>
+                </div>
+            </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</body>
+</html>
+<script type="text/javascript" id="yytDESScript" src="../../../script/yytdes.js" data="3"></script>
+<script type="text/javascript" src="../../../script/api.js"></script>
+<script type="text/javascript" src="../../../script/zepto.js"></script>
+<script type="text/javascript" src="../../../script/common.js"></script>
+<script type="text/javascript">
+var searchStr;
+var apiheadheight=0;
+apiready = function () {
+    apiheadheight=parseInt(api.getPrefs({
+        sync: true,
+        key: 'headerH'
+    }));
+}
+
+</script>

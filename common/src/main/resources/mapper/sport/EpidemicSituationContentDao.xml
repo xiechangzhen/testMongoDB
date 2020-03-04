@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.dao.sport.EpidemicSituationContentDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.yymt.entity.sport.EpidemicSituationContentEntity" id="epidemicSituationContentMap">
+        <result property="id" column="id"/>
+        <result property="newsTitle" column="news_title"/>
+        <result property="newsContent" column="news_content"/>
+        <result property="newsSummary" column="news_summary"/>
+        <result property="newsSummaryImage" column="news_summary_image"/>
+        <result property="newsNavImage" column="news_nav_image"/>
+        <result property="newsType" column="news_type"/>
+        <result property="newsAttach" column="news_attach"/>
+        <result property="newsTags" column="news_tags"/>
+        <result property="pageView" column="page_view"/>
+        <result property="newsCreateTime" column="news_create_time"/>
+        <result property="isRecommend" column="is_recommend"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+<sql id="Base_Column_List" >
+id AS id,
+news_title AS newsTitle,
+news_content AS newsContent,
+news_summary AS newsSummary,
+news_summary_image AS newsSummaryImage,
+news_nav_image AS newsNavImage,
+news_type AS newsType,
+news_attach AS newsAttach,
+news_tags AS newsTags,
+page_view AS pageView,
+news_create_time AS newsCreateTime,
+is_recommend AS isRecommend,
+remark AS remark,
+</sql>
+</mapper>

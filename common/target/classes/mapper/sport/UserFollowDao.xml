@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.dao.sport.UserFollowDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.yymt.entity.sport.UserFollowEntity" id="userFollowMap">
+        <result property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="followId" column="follow_id"/>
+        <result property="followType" column="follow_type"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <!--关注/粉丝 列表-->
+    <select id="selectUserFollowPage" resultType="java.util.Map">
+        select tuf.*,tu.*
+        <if test="isFollow != 'true'">
+            ,IF(temp.follow_id,1,0) AS isFollow
+        </if>
+        from tb_user_follow tuf INNER JOIN  tb_user tu
+        <choose>
+            <when test="isFollow == 'true'">
+                on  tuf.follow_id = tu.user_id
+                where tuf.follow_id = tu.user_id and  tuf.user_id = #{userId}
+            </when>
+            <otherwise>
+                on tuf.user_id = tu.user_id
+                LEFT JOIN (
+                    SELECT follow_id
+                    FROM tb_user_follow tuf1
+                    where tuf1.user_id =  #{userId}
+                    and tuf1.follow_id in(
+                    select user_id from tb_user_follow where follow_id =  #{userId}
+                )
+                ) temp on temp.follow_id = tuf.user_id
+                where tuf.user_id = tu.user_id and tuf.follow_id = #{userId}
+            </otherwise>
+        </choose>
+    </select>
+
+    <!--查询粉丝的粉丝列表-->
+    <select id="selectFansList" resultType="java.util.Map">
+        select tuf.*,tu.user_avatar,tu.nick_name,
+        IF(temp.follow_id,1,0)as isFollow
+        from tb_user_follow tuf
+        INNER JOIN tb_user tu on tu.user_id = tuf.user_id
+        LEFT JOIN (
+            SELECT follow_id
+            FROM tb_user_follow tuf1
+            where tuf1.user_id =  #{userId}
+            and tuf1.follow_id in(
+                        select user_id from tb_user_follow where follow_id =  #{friendId}
+                )
+        ) temp on temp.follow_id = tuf.user_id
+        where tuf.follow_id = #{friendId}
+    </select>
+
+    <!--查询粉丝的关注列表-->
+    <select id="selectFollowList" resultType="java.util.Map">
+        select tuf.*,tu.user_avatar,tu.nick_name,
+        IF(temp.follow_id,1,0)as isFollow
+        from tb_user_follow tuf
+        INNER JOIN tb_user tu on tu.user_id = tuf.follow_id
+        LEFT JOIN (
+        SELECT follow_id
+        FROM tb_user_follow tuf1
+        where tuf1.user_id =  #{userId}
+        and tuf1.follow_id in(
+			select follow_id from tb_user_follow where user_id =  #{friendId}
+        )
+        ) temp on temp.follow_id = tuf.follow_id
+        where tuf.user_id = #{friendId}
+    </select>
+    
+    <select id="queryFansPushClientId" resultType="java.lang.String">
+        select tu.user_id
+        from tb_user_follow tuf,tb_user tu
+        where tuf.user_id = tu.user_id
+        and tuf.follow_id =  #{userId}
+        and tu.user_status in(1,2,3,4)
+    </select>
+    
+
+    <!--关注/粉丝 列表-->
+    <select id="userFriendsCount" resultType="java.util.Map">
+        SELECT
+        substring_index(GROUP_CONCAT(totalcount),',',1) as 'totalcount',
+        substring_index(substring_index(GROUP_CONCAT(totalcount),',',2),',',-1) as 'cfcount',
+        substring_index(substring_index(GROUP_CONCAT(totalcount),',',-2),',',1) as 'consultantcount',
+        substring_index(GROUP_CONCAT(totalcount),',',-1) as 'expertcount'
+        from (
+        <choose>
+            <when test="isFollow == 'true'">
+                select count(*) as totalcount from tb_user_follow where user_id = #{userId} union all
+                select count(*) as markcount from tb_user_follow tuf,tb_user tu where tu.user_id = tuf.follow_id and tu.user_type = 0 and tuf.user_id = #{userId}  union all
+                select count(*) as fanscount from tb_user_follow tuf,tb_user tu where tu.user_id = tuf.follow_id and tu.user_type = 1 and tuf.user_id = #{userId}  union all
+                select count(*) as fanscount from tb_user_follow tuf,tb_user tu where tu.user_id = tuf.follow_id and tu.user_type = 2 and tuf.user_id = #{userId}
+            </when>
+            <otherwise>
+                select count(*) as totalcount from tb_user_follow where follow_id = #{userId} union all
+                select count(*) as markcount from tb_user_follow tuf,tb_user tu where tu.user_id = tuf.user_id and tu.user_type = 0 and tuf.follow_id = #{userId}  union all
+                select count(*) as fanscount from tb_user_follow tuf,tb_user tu where tu.user_id = tuf.user_id and tu.user_type = 1 and tuf.follow_id = #{userId}  union all
+                select count(*) as fanscount from tb_user_follow tuf,tb_user tu where tu.user_id = tuf.user_id and tu.user_type = 2 and tuf.follow_id = #{userId}
+            </otherwise>
+        </choose>
+        ) temp
+    </select>
+
+    <select id="isFollowOrFans" resultType="java.lang.Integer">
+      select count(1) from tb_user_follow where (follow_id = #{loginUserId} and user_id = #{userId}) or (follow_id = #{userId} and user_id = #{loginUserId})
+    </select>
+</mapper>

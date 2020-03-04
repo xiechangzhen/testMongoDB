@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.dao.sport.GameSignUpDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.yymt.entity.sport.GameSignUpEntity" id="gameSignUpMap">
+        <result property="gameId" column="game_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="signUpTime" column="sign_up_time"/>
+    </resultMap>
+    
+    <select id="selectGameSignUpPage" resultType="java.util.Map">
+      select tu.user_id,nick_name,tu.user_avatar,tu.username,sign_up_time AS signUpTime
+          ,sign_up_time AS signUpTime
+          ,tu.real_name AS realName,tu.user_sex AS userSex,tu.user_id_num AS userIdNum
+      from tb_game_sign_up tgsu
+      LEFT JOIN tb_games tg on tg.id = tgsu.game_id
+      LEFT JOIN tb_user tu on tu.user_id = tgsu.user_id
+      where tgsu.game_id = #{id}
+    </select>
+    
+    <select id="querySignupCount" resultType="java.lang.Integer">
+        select count(1) from tb_game_sign_up where game_id = #{gameId}
+    </select>
+    
+</mapper>

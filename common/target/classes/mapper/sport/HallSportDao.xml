@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.dao.sport.HallSportDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.yymt.entity.sport.HallSportEntity" id="hallSportMap">
+        <result property="id" column="id"/>
+        <result property="hallId" column="hall_id"/>
+        <result property="sportId" column="sport_id"/>
+    </resultMap>
+    <delete id="deleteIds" parameterType="java.util.List">
+        delete from tb_hall_sport
+        where hall_id in
+        <foreach item="item" collection="ids" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+
+</mapper>

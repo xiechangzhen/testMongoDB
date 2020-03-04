@@ -1,0 +1,338 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.dao.sport.NewsDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.yymt.entity.sport.NewsEntity" id="newsMap">
+        <result property="id" column="id"/>
+        <result property="newsTitle" column="news_title"/>
+        <result property="newsContent" column="news_content"/>
+        <result property="newsSummary" column="news_summary"/>
+        <result property="newsSummaryImage" column="news_summary_image"/>
+        <result property="newsNavImage" column="news_nav_image"/>
+        <result property="newsAttach" column="news_attach"/>
+        <result property="newsTags" column="news_tags"/>
+        <result property="newsAuthor" column="news_author"/>
+        <result property="authorType" column="author_type"/>
+        <result property="newsColumn" column="news_column"/>
+        <result property="pageView" column="page_view"/>
+        <result property="newsCreateTime" column="news_create_time"/>
+        <result property="newsAuditor" column="news_auditor"/>
+        <result property="newsAuditTime" column="news_audit_time"/>
+        <result property="newsUpdateTime" column="news_update_time"/>
+        <result property="newsUpdator" column="news_updator"/>
+        <result property="newsStatus" column="news_status"/>
+        <result property="isRecommend" column="is_recommend"/>
+        <result property="remark" column="remark"/>
+        <result property="corporationId" column="corporation_id"/>
+        <result property="greats" column="greats"/>
+        <association property="authorSysUser" javaType="com.yymt.entity.sys.SysUserEntity">
+            <id property="userId" column="author_sys_user_id"/>
+            <result property="username" column="author_sys_username"/>
+        </association>
+        <association property="authorFrontUser" javaType="com.yymt.entity.api.UserEntity">
+            <id property="userId" column="author_front_user_id"/>
+            <result property="username" column="author_front_username"/>
+            <result property="nickName" column="author_front_nick_name"/>
+            <result property="realName" column="author_front_real_name"/>
+        </association>
+    </resultMap>
+
+    <select id="indexListByCategoryAndTakeCount" resultMap="newsMap">
+        SELECT news.id, news.news_title, news.news_summary, news.news_summary_image
+            , news.news_update_time, news.news_create_time, news.news_audit_time, news.news_status
+            ,ngtemp.greats
+        FROM tb_news news
+            LEFT JOIN (
+                SELECT news_id, COUNT(*) AS greats FROM tb_news_greats GROUP BY news_id
+            ) ngtemp ON news.id = ngtemp.news_id
+        WHERE news.news_column = #{columnId} AND news.news_status = 2
+        ORDER BY news.news_update_time DESC
+        LIMIT 0,#{takeCount}
+    </select>
+
+    <select id="marqueePictureNewsList" resultMap="newsMap">
+        SELECT news.id, news.news_title, news.news_summary, news.news_nav_image
+        , news.news_update_time, news.news_create_time, news.news_audit_time, news.news_status
+        FROM tb_news news
+        LEFT JOIN tb_column tc ON news.news_column = tc.id
+        WHERE tc.column_value = 1 AND tc.column_parent_id != 8 AND news.news_status = 2
+            AND news.is_recommend = 1
+        ORDER BY news.news_update_time DESC
+        LIMIT 0,5
+    </select>
+
+    <select id="newsListByCategoryAndPageLimit" resultMap="newsMap">
+        SELECT news.id, news.news_title, news.news_summary, news.news_summary_image, news.news_nav_image
+            , news.news_update_time, news.news_create_time, news.news_audit_time, news.news_status
+            ,ngtemp.greats
+        FROM tb_news news
+        LEFT JOIN (
+            SELECT news_id, COUNT(1) AS greats FROM tb_news_greats GROUP BY news_id
+        ) ngtemp ON news.id = ngtemp.news_id
+        WHERE news.news_column = #{columnId} AND news.news_status = 2
+        ORDER BY news.news_update_time DESC
+        LIMIT #{offSet},#{limit}
+    </select>
+
+    <select id="newsListCountByCategory" resultType="int">
+        SELECT COUNT(1)
+        FROM tb_news
+        WHERE news_column = #{columnId} AND news_status = 2
+    </select>
+
+    <select id="getNewsDetailById" resultMap="newsMap">
+        SELECT news.id, news.news_title, news.news_content, news.news_nav_image, news.author_type, news.news_author, news.corporation_id
+        , news.news_update_time, news.news_create_time, news.news_audit_time, news.page_view, news.news_status
+        , ngtemp.greats, news.corporation_id, news.news_attach
+        , su.user_id AS author_sys_user_id, su.username AS author_sys_username
+        , tu.user_id AS author_front_user_id, tu.username AS author_front_username
+        , tu.nick_name AS author_front_nick_name, tu.real_name AS author_front_real_name,news.remark
+        FROM tb_news news
+        LEFT JOIN (
+                SELECT news_id, COUNT(*) AS greats FROM tb_news_greats GROUP BY news_id
+            ) ngtemp ON news.id = ngtemp.news_id
+        LEFT JOIN sys_user su ON news.news_author = su.user_id
+        LEFT JOIN tb_user tu ON news.news_author = tu.user_id
+        WHERE news.id = #{id} /* AND news.news_status = 2 */
+    </select>
+
+    <select id="getNewsIsGivenGreats" resultType="boolean">
+        SELECT IF(COUNT(1), TRUE, FALSE) FROM tb_news_greats WHERE news_id = #{newsId} AND user_id = #{userId}
+    </select>
+
+    <select id="getNewsListByIds" resultMap="newsMap">
+        SELECT news.id, news.news_title, news.news_summary, news.news_summary_image, news.news_nav_image
+        , news.news_update_time, news.news_create_time, news.news_audit_time, news.news_column, news.news_status
+        , ngtemp.greats
+        FROM tb_news news
+        LEFT JOIN (
+        SELECT news_id, COUNT(1) AS greats FROM tb_news_greats GROUP BY news_id
+        ) ngtemp ON news.id = ngtemp.news_id
+        WHERE news.news_status = 2 AND news.id IN
+        <foreach item="item" index="index" collection="ids"
+                 open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="newsDetail" resultType="java.util.Map">
+        select
+        news.id,
+        news_title AS newsTitle,
+        news_content AS newsContent,
+        news_nav_image AS newsNavImage,
+        news_tags AS newsTags,
+        news_author AS newsAuthor,
+        author_type AS authorType,
+        news_column AS newsColumn,
+        page_view AS pv,
+        news_create_time AS newsCreateTime,
+        news_auditor AS newsAuditor,
+        news_audit_time AS newsAuditor,
+        news_update_time AS newsUpdateTime,
+        news_updator AS newsUpdator,
+        news_status AS newsStatus,
+        news.remark,
+        news.news_attach,
+        share,
+        IF(allgreat.greats,allgreat.greats,0) as totalGreat,
+        IF(selfgreat.isGreat,selfgreat.isGreat,0) as isGreat,
+        if(author_type=1,su1.username,tu.nick_name) AS nickName,
+        tu.real_name,
+        su.username AS userName
+        from tb_news news
+        LEFT JOIN ( select share_id, count(*) as share from tb_user_share where share_id = #{id} and share_type = 0) allshare  on news.id = allshare.share_id  -- 查询新闻分享总数
+        LEFT JOIN ( select news_id, count(*) as greats from tb_news_greats where news_id = #{id}) allgreat  on news.id = allgreat.news_id  -- 查询新闻点赞总数
+        LEFT JOIN ( select news_id, count(*) as isGreat from tb_news_greats where user_id = #{userId} and news_id = #{id} ) selfgreat on news.id = selfgreat.news_id -- 查询自己是否点赞
+        LEFT JOIN tb_user tu on news_author = tu.user_id
+        LEFT JOIN sys_user su on news_auditor = su.user_id
+        Left JOIN sys_user su1 on news_author = su1.user_id
+        where news.id = #{id}
+    </select>
+
+    <!--APP-->
+    <select id="selectNewsPage" resultType="java.util.Map">
+        select tc1.id AS parentColumn,tc1.column_name AS parentColumnName,tc.column_name AS newsColumnName
+        ,tc.column_value AS newsColumnValue,news.id,news_title AS newsTitle,news_content AS newsContent,news_nav_image
+        AS newsNavImage,news_tags AS newsTags
+        ,news_author AS newsAuthor,author_type AS authorType,news_column AS newsColumn,page_view AS pv,news_create_time
+        AS newsCreateTime
+        ,news_auditor AS newsAuditor,news_audit_time AS newsAuditorTime,news_update_time AS newsUpdateTime
+        ,news_updator AS newsUpdator,news_status AS newsStatus,news.news_summary AS
+        newsSummary,ngtemp.greats,IF(nmtemp.isMark,nmtemp.isMark,0) as mark
+        , if(author_type=1,su1.username,tu.real_name) AS nickName,su.username AS userName
+        from tb_news news
+        LEFT JOIN (
+        select news_id, count(*) as greats from tb_news_greats GROUP BY news_id
+        ) ngtemp ON news.id = ngtemp.news_id
+        LEFT JOIN (
+        select mark_id as nid,count(*) as isMark from tb_user_mark where mark_type = 0
+        ) nmtemp ON news.id = nmtemp.nid
+        LEFT JOIN tb_user tu on news_author = tu.user_id
+        LEFT JOIN sys_user su on news_auditor = su.user_id
+        Left JOIN sys_user su1 on news_author = su1.user_id
+        LEFT JOIN tb_column tc ON tc.id = news.news_column
+        LEFT JOIN tb_column tc1 ON tc1.id = tc.column_parent_id
+        <where>
+            <choose>
+                <when test="isMy">
+                    AND news.news_author = #{userId}
+                    <if test="newsStatus != null and newsStatus != ''">
+                        AND news.news_status = #{newsStatus}
+                    </if>
+                </when>
+                <otherwise>
+                    AND news.news_status = 2
+                </otherwise>
+            </choose>
+            <if test="corporationId != null and corporationId != ''">
+                AND news.corporation_id = #{corporationId}
+            </if>
+            <if test="newsColumn != null and newsColumn != ''">
+                AND news.news_column = #{newsColumn}
+            </if>
+            <choose>
+                <otherwise>
+                    ORDER BY news.news_create_time DESC
+                </otherwise>
+            </choose>
+        </where>
+    </select>
+    <!--APP-单独查询公告、资讯、活动-->
+    <select id="selectNoticePage" resultType="java.util.Map">
+        select tc1.id AS parentColumn,tc1.column_name AS parentColumnName,tc.column_name AS newsColumnName
+        ,tc.column_value AS newsColumnValue,news.id,news_title AS newsTitle,news_content AS newsContent,news_nav_image
+        AS newsNavImage,news_tags AS newsTags
+        ,news_author AS newsAuthor,author_type AS authorType,news_column AS newsColumn,page_view AS pv,news_create_time
+        AS newsCreateTime
+        ,news_auditor AS newsAuditor,news_audit_time AS newsAuditorTime,news_update_time AS newsUpdateTime
+        ,news_updator AS newsUpdator,news_status AS newsStatus,news.news_summary AS newsSummary
+        , if(author_type=1,su1.username,tu.nick_name) AS nickName,su.username AS userName
+        from tb_news news
+        LEFT JOIN tb_user tu on news_author = tu.user_id
+        LEFT JOIN sys_user su on news_auditor = su.user_id
+        Left JOIN sys_user su1 on news_author = su1.user_id
+        LEFT JOIN tb_column tc ON tc.id = news.news_column
+        LEFT JOIN tb_column tc1 ON tc1.id = tc.column_parent_id
+        <where>
+            news_status = 2
+            <if test="newsColumnValue != null and newsColumnValue != ''">
+                AND tc.column_value = #{newsColumnValue}
+            </if>
+        </where>
+    </select>
+
+
+    <!-- 后台新闻资讯列表 -->
+    <select id="queryNewsPage" resultType="java.util.Map">
+        SELECT * FROM(
+        SELECT su.dept_id, tn.id,tn.news_title AS newsTitle
+        ,tn.news_author,IF(tn.author_type=1,su.username,tu.real_name) AS author
+        ,tn.news_auditor,su1.username AS auditor
+        ,news_nav_image AS newsNavImage
+        ,tn.news_create_time AS newsCreateTime
+        ,tn.news_update_time AS newsModifyTime
+        ,tn.news_audit_time AS newsAuditTime
+        ,tn.author_type,tn.news_status AS newsStatus
+        ,tc.column_name AS childColumnName
+        ,tc1.column_name AS parentColumnName
+        ,tc1.column_value AS parentColumnValue
+        ,tc.id as columnId
+        FROM tb_news tn
+        LEFT JOIN tb_user tu ON tn.news_author = tu.user_id
+        LEFT JOIN sys_user su ON tn.news_author = su.user_id
+        LEFT JOIN sys_user su1 ON tn.news_auditor = su1.user_id
+        LEFT JOIN tb_column tc ON tn.news_column = tc.id
+        LEFT JOIN tb_column tc1 ON tc1.id = tc.column_parent_id
+        <where>
+            tc.column_is_show = 1
+            <if test="queryDate != null and queryDate != ''">
+                AND DATE_FORMAT(tn.news_update_time,'%Y-%m-%d') = #{queryDate}
+            </if>
+            <if test="selectByParentColumn != null and selectByParentColumn != ''">
+                AND tc1.id = #{selectByParentColumn}
+            </if>
+            <if test="groupType != null and groupType != ''">
+                AND tc.column_group = #{groupType}
+            </if>
+            <if test="billboard == 'true'">
+                AND tn.is_recommend = 1
+            </if>
+        </where>
+        ) AS tmp
+        <where>
+
+            <choose>
+                <when test="type != null and type != ''">
+                    and columnId = #{type}
+                </when>
+            </choose>
+            <if test="newsStatus != null and newsStatus != '' ">
+                AND newsStatus = #{newsStatus}
+            </if>
+            <if test="keyword != null and keyword != '' ">
+                AND (newsTitle LIKE CONCAT('%',CONCAT(#{keyword}, '%'))
+                or parentColumnName LIKE CONCAT('%',CONCAT(#{keyword}, '%'))
+                or childColumnName LIKE CONCAT('%',CONCAT(#{keyword}, '%'))
+                )
+            </if>
+            <if test="sql_filter != null and sql_filter != '' ">
+                and ${sql_filter}
+            </if>
+        </where>
+    </select>
+    <!-- 后台统计待审核新闻资讯 -->
+    <select id="countAuditNews" parameterType="java.util.Map" resultType="java.lang.Integer">
+        SELECT count(1)
+        FROM tb_news tn
+        LEFT JOIN tb_column tc ON tn.news_column = tc.id
+        LEFT JOIN tb_column tc1 ON tc1.id = tc.column_parent_id
+        LEFT JOIN sys_user su ON tn.news_author = su.user_id
+        <where>
+            tn.news_status = 1
+            <if test="queryDate != null and queryDate != ''">
+                AND DATE_FORMAT(tn.news_update_time,'%Y-%m-%d') = #{queryDate}
+            </if>
+            <if test="selectByParentColumn != null and selectByParentColumn != ''">
+                AND tc1.id = #{selectByParentColumn}
+            </if>
+            <if test="isRecommend != null">
+                AND tn.is_recommend = 1
+            </if>
+            <if test="keyword != null and keyword != '' ">
+                AND (tn.news_title LIKE CONCAT('%',CONCAT(#{keyword}, '%'))
+                or tc1.column_name LIKE CONCAT('%',CONCAT(#{keyword}, '%'))
+                or tc.column_name LIKE CONCAT('%',CONCAT(#{keyword}, '%'))
+                )
+            </if>
+            <if test="sql_filter != null and sql_filter != '' ">
+                and ${sql_filter}
+            </if>
+        </where>
+    </select>
+
+    <!-- 后台新闻资讯详情 -->
+    <select id="newsDetailBack" resultType="java.util.Map">
+        select news.id,news_title AS newsTitle,news_content AS newsContent,news_nav_image AS newsNavImage,news_tags AS newsTags
+            ,news_author AS newsAuthor,author_type AS authorType,news_column AS newsColumn,page_view AS pv,news_create_time AS newsCreateTime
+            ,news_auditor AS newsAuditor,news_audit_time AS newsAuditorTime,news_update_time AS newsUpdateTime
+            ,news_updator AS newsUpdator,news_status AS newsStatus,is_recommend AS isRecommend,news.news_attach AS newsAttach,news.remark
+            ,if(author_type=1,su1.username,tu.real_name) AS authorName,su.username AS auditUserName
+            ,tc1.id AS parentColumn,tc1.column_name AS parentColumnName,tc.column_name AS newsColumnName
+            ,tc.column_value AS columnValue
+        from tb_news news
+            LEFT JOIN tb_user tu on news_author = tu.user_id
+            LEFT JOIN sys_user su on news_auditor = su.user_id
+            Left JOIN sys_user su1 on news_author = su1.user_id
+            LEFT JOIN tb_column tc ON tc.id = news.news_column
+            LEFT JOIN tb_column tc1 ON tc1.id = tc.column_parent_id
+        where news.id = #{id}
+    </select>
+
+
+    <select id="selectLikeNews" resultType="java.util.Map">
+
+    </select>
+</mapper>

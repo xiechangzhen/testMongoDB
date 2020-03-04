@@ -1,0 +1,419 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.dao.sport.GamesDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.yymt.entity.sport.GamesEntity" id="gamesMap">
+        <result property="id" column="id"/>
+        <result property="gameTitle" column="game_title"/>
+        <result property="gameContent" column="game_content"/>
+        <result property="gameSummary" column="game_summary"/>
+        <result property="gameNavImage" column="game_nav_image"/>
+        <result property="gameType" column="game_type"/>
+        <result property="gameStatus" column="game_status"/>
+        <result property="activityStartTime" column="activity_start_time"/>
+        <result property="activityEndTime" column="activity_end_time"/>
+        <result property="signUpWay" column="sign_up_way"/>
+        <result property="gameAuthor" column="game_author"/>
+        <result property="authorType" column="author_type"/>
+        <result property="gameColumn" column="game_column"/>
+        <result property="corporationId" column="corporation_id"/>
+        <result property="pageView" column="page_view"/>
+        <result property="gameCreateTime" column="game_create_time"/>
+        <result property="gameAuditor" column="game_auditor"/>
+        <result property="gameAuditTime" column="game_audit_time"/>
+        <result property="gameUpdateTime" column="game_update_time"/>
+        <result property="gameUpdator" column="game_updator"/>
+        <result property="gameIsRecommend" column="game_is_recommend"/>
+        <result property="gameSupportContact" column="game_support_contact"/>
+        <result property="gameSupportContactName" column="game_support_contact_name"/>
+        <result property="gameNeedSupport" column="game_need_support"/>
+        <result property="gameIsOpen" column="game_is_open"/>
+        <result property="gamePeopleLimit" column="game_people_limit"/>
+        <result property="gameFiles" column="game_files"/>
+        <result property="gameProvinceCode" column="game_province_code"/>
+        <result property="gameCityCode" column="game_city_code"/>
+        <result property="gameAreaCode" column="game_area_code"/>
+        <result property="gameDetailAddress" column="game_detail_address"/>
+        <result property="gameAgeLimitMin" column="game_age_limit_min"/>
+        <result property="gameAgeLimitMax" column="game_age_limit_max"/>
+        <result property="gameFullAddress" column="game_full_address"/>
+        <result property="remark" column="remark"/>
+        <result property="gameAttach" column="game_attach"/>
+        <result property="greats" column="greats"/>
+        <result property="isPeopleOver" column="isPeopleOver"/>
+    </resultMap>
+
+    <!--查询列表所需字段-->
+    <sql id="Base_Column_List">
+        tb.id AS id,
+        game_title AS gameTitle,
+        game_nav_image AS gameNavImage,
+        game_status AS gameStatus,
+        game_column AS gameColumn,
+        author_type AS authorType,
+        game_author AS gameAuthor,
+        game_create_time AS gameCreateTime,
+        game_update_time AS gameModifyTime
+    </sql>
+    <!--查询详情所需字段-->
+    <sql id="Base_Column_Detail">
+        tb.id AS id,
+        game_title AS gameTitle,
+        game_content AS gameContent,
+        game_summary AS gameSummary,
+        game_nav_image AS gameNavImage,
+        game_type AS gameType,
+        game_status AS gameStatus,
+        activity_start_time AS activityStartTime,
+        activity_end_time AS activityEndTime,
+        sign_up_way AS signUpWay,
+        game_author AS gameAuthor,
+        author_type AS authorType,
+        game_column AS gameColumn,
+        corporation_id AS corporationId,
+        page_view AS pageView,
+        game_create_time AS gameCreateTime,
+        game_auditor AS gameAuditor,
+        game_audit_time AS gameAuditTime,
+        game_update_time AS gameUpdateTime,
+        game_updator AS gameUpdator,
+        game_is_recommend AS gameIsRecommend,
+        game_support_contact AS gameSupportContact,
+        game_support_contact_name AS gameSupportContactName,
+        game_need_support AS gameNeedSupport,
+        game_is_open AS gameIsOpen,
+        game_people_limit AS gamePeopleLimit,
+        game_files AS gameFiles,
+        game_province_code AS gameProvinceCode,
+        game_city_code AS gameCityCode,
+        game_area_code AS gameAreaCode,
+        game_detail_address AS gameDetailAddress,
+        game_age_limit_min AS gameAgeLimitMin,
+        game_age_limit_max AS gameAgeLimitMax,
+        game_full_address AS gameFullAddress,
+        game_attach AS gameAttach,
+        tb.remark AS remark
+    </sql>
+
+    <!--后台赛事列表-->
+    <select id="queryGamesPage" resultType="java.util.Map">
+        SELECT * FROM (
+        SELECT
+        <include refid="Base_Column_List"/>
+        ,tc.column_name AS childColumnName
+        ,tc1.column_name AS parentColumnName
+        ,tc1.id as parentColumnId,su.dept_id
+        FROM tb_games tb
+        LEFT JOIN tb_column tc ON tb.game_column = tc.id
+        LEFT JOIN tb_column tc1 ON tc1.id = tc.column_parent_id
+        LEFT JOIN sys_user su ON tb.game_author = su.user_id
+        )tmp
+        <where>
+            <if test="gameStatus != null and gameStatus != '' ">
+                AND gameStatus = #{gameStatus}
+            </if>
+            <if test="queryDate != null and queryDate != ''">
+                AND DATE_FORMAT(gameModifyTime,'%Y-%m-%d') = #{queryDate}
+            </if>
+            <if test="selectByParentColumn != null and selectByParentColumn != ''">
+                AND parentColumnId = #{selectByParentColumn}
+            </if>
+            <if test="keyword != null and keyword != '' ">
+                AND (gameTitle LIKE CONCAT('%',CONCAT(#{keyword}, '%'))
+                or parentColumnName LIKE CONCAT('%',CONCAT(#{keyword}, '%'))
+                or childColumnName LIKE CONCAT('%',CONCAT(#{keyword}, '%'))
+                )
+            </if>
+            <if test="sql_filter != null and sql_filter != '' ">
+                and ${sql_filter}
+            </if>
+        </where>
+    </select>
+    <!--后台计算待审核赛事数量-->
+    <select id="countAuditGames" parameterType="java.util.Map" resultType="java.lang.Integer">
+        SELECT count(1)
+        FROM tb_games tb
+        LEFT JOIN tb_column tc ON tb.game_column = tc.id
+        LEFT JOIN tb_column tc1 ON tc1.id = tc.column_parent_id
+        LEFT JOIN sys_user su ON tb.game_author = su.user_id
+        <where>
+            tb.game_status = 1
+            <if test="queryDate != null and queryDate != ''">
+                AND DATE_FORMAT(tb.game_update_time,'%Y-%m-%d') = #{queryDate}
+            </if>
+            <if test="selectByParentColumn != null and selectByParentColumn != ''">
+                AND tc1.id = #{selectByParentColumn}
+            </if>
+            <if test="keyword != null and keyword != '' ">
+                AND (tb.game_title LIKE CONCAT('%',CONCAT(#{keyword}, '%'))
+                or tc1.column_name LIKE CONCAT('%',CONCAT(#{keyword}, '%'))
+                or tc.column_name LIKE CONCAT('%',CONCAT(#{keyword}, '%'))
+                )
+            </if>
+            <if test="sql_filter != null and sql_filter != '' ">
+                and ${sql_filter}
+            </if>
+        </where>
+    </select>
+
+    <!--后台赛事详情-->
+    <select id="gameDetailBack" resultType="java.util.Map">
+        SELECT
+        <include refid="Base_Column_Detail"/>
+        ,ts.sport_name AS sportName
+        ,td.name AS gameAreaName
+        ,if(tb.author_type=1,su.username,tu.username) AS addAccount
+        ,su1.username AS auditUserName
+        FROM tb_games tb
+        LEFT JOIN tb_sports ts ON tb.game_type = ts.id
+        LEFT JOIN tb_district td ON tb.game_area_code = td.code
+        LEFT JOIN tb_user tu on game_author = tu.user_id
+        LEFT JOIN sys_user su on game_author = su.user_id
+        LEFT JOIN sys_user su1 on game_auditor = su1.user_id
+        WHERE tb.id = #{gameId}
+    </select>
+
+    <select id="selectGamesPage" resultType="java.util.Map">
+        select
+        tc1.id AS parentColumn,
+        tc1.column_name AS parentColumnName,
+        tc.column_name AS gameColumnName,
+        games.id,
+        game_title AS gamesTitle,
+        game_content AS gamesContent,
+        game_nav_image AS gamesNavImage,
+        sign_up_way AS signUpWay,
+        game_author AS gamesAuthor,
+        author_type AS authorType,
+        game_column AS gamesColumn,
+        IF((games.game_people_limit = 0 OR IF(gtemp.total_Count,gtemp.total_Count,0)&lt;games.game_people_limit),
+        0,1)as isPeopleOver,
+        IF(games.game_is_open=0,0,
+            IF(games.activity_end_time &gt;= NOW()
+            AND (games.game_people_limit = 0 OR IF(gtemp.total_Count,gtemp.total_Count,0)&lt;games.game_people_limit),
+            0,1)
+        ) as isFinished,
+        games.activity_start_time,
+        games.activity_end_time,
+        page_view AS pv,
+        game_create_time AS gamesCreateTime,
+        game_auditor AS gamesAuditor,
+        game_audit_time AS gamesAuditorTime,
+        game_update_time AS gamesUpdateTime,
+        game_updator AS gamesUpdator,
+        game_status AS gamesStatus,
+        game_summary AS gamesSummary,
+        IF(nmtemp.isMark,nmtemp.isMark,0) as mark,
+        IF(author_type=1,su1.username,tu.real_name) AS nickName,
+        game_need_support as gameNeedSupport,
+        su.username AS userName,
+        DATE_FORMAT(NOW(),'%Y-%m-%d %H:%i:%s') as serverTime
+        from tb_games games
+        LEFT JOIN(
+        select game_id,COUNT(*) as total_Count from tb_game_sign_up GROUP BY game_id
+        ) gtemp on gtemp.game_id = games.id
+        LEFT JOIN (
+        select mark_id as nid,count(*) as isMark from tb_user_mark where mark_type = 0
+        ) nmtemp ON games.id = nmtemp.nid
+        LEFT JOIN tb_user tu on game_author = tu.user_id
+        LEFT JOIN sys_user su on game_auditor = su.user_id
+        Left JOIN sys_user su1 on game_author = su1.user_id
+        LEFT JOIN tb_column tc ON tc.id = games.game_column
+        LEFT JOIN tb_column tc1 ON tc1.id = tc.column_parent_id
+        <where>
+            <choose>
+                <when test="corporationId != null and corporationId != ''">
+                    AND games.corporation_id = #{corporationId}
+                </when>
+                <otherwise>
+                    (games.corporation_id is NULL or games.corporation_id = '')
+                </otherwise>
+            </choose>
+            <choose>
+                <when test="gameStatus != null and gameStatus != ''">
+                    AND games.game_status = #{gameStatus}
+                </when>
+                <otherwise>
+                    AND games.game_status = 2
+                </otherwise>
+            </choose>
+            <if test="columnId != null and columnId != ''">
+                AND games.game_column = #{columnId}
+            </if>
+        </where>
+        <choose>
+            <when test="gameFlag == 1">
+                HAVING isFinished = 0 and games.activity_start_time &lt; NOW() and isPeopleOver = 0
+            </when>
+            <when test="gameFlag == 2">
+                HAVING isFinished = 1 or isPeopleOver = 1
+            </when>
+        </choose>
+        ORDER BY games.game_create_time DESC
+    </select>
+
+
+    <select id="selectGamesListPage" resultType="java.util.Map">
+        select
+        tc1.id AS parentColumn,
+        tc1.column_name AS parentColumnName,
+        tc.column_name AS gameColumnName,
+        games.id,
+        game_title AS gamesTitle,
+        game_content AS gamesContent,
+        game_nav_image AS gamesNavImage,
+        sign_up_way AS signUpWay,
+        game_author AS gamesAuthor,
+        author_type AS authorType,
+        game_column AS gamesColumn,
+        IF((games.game_people_limit = 0 OR IF(gtemp.total_Count,gtemp.total_Count,0)&lt;games.game_people_limit),
+        0,1)as isPeopleOver ,
+        IF(games.game_is_open=0,0,
+            IF(games.activity_end_time &gt;= NOW()
+            AND (games.game_people_limit = 0 OR IF(gtemp.total_Count,gtemp.total_Count,0)&lt;games.game_people_limit),
+            0,1)
+        ) as isFinished,
+        games.activity_start_time,
+        games.activity_end_time,
+        page_view AS pv,
+        game_create_time AS gamesCreateTime,
+        game_auditor AS gamesAuditor,
+        game_audit_time AS gamesAuditorTime,
+        game_update_time AS gamesUpdateTime,
+        game_updator AS gamesUpdator,
+        game_status AS gamesStatus,
+        game_summary AS gamesSummary,
+        IF(nmtemp.isMark,nmtemp.isMark,0) as mark,
+        IF(author_type=1,su1.username,tu.real_name) AS nickName,
+        game_need_support as gameNeedSupport,
+        su.username AS userName,
+        DATE_FORMAT(NOW(),'%Y-%m-%d %H:%i:%s') as serverTime
+        from tb_games games
+        LEFT JOIN(
+        select game_id,COUNT(*) as total_Count from tb_game_sign_up GROUP BY game_id
+        ) gtemp on gtemp.game_id = games.id
+        LEFT JOIN (
+        select mark_id as nid,count(*) as isMark from tb_user_mark where mark_type = 0
+        ) nmtemp ON games.id = nmtemp.nid
+        LEFT JOIN tb_user tu on game_author = tu.user_id
+        LEFT JOIN sys_user su on game_auditor = su.user_id
+        Left JOIN sys_user su1 on game_author = su1.user_id
+        LEFT JOIN tb_column tc ON tc.id = games.game_column
+        LEFT JOIN tb_column tc1 ON tc1.id = tc.column_parent_id
+        <where>
+            <choose>
+                <when test="corporationId != null and corporationId != ''">
+                    AND games.corporation_id = #{corporationId}
+                </when>
+                <otherwise>
+                    (games.corporation_id is NULL or games.corporation_id = '')
+                </otherwise>
+            </choose>
+            <choose>
+                <when test="gameStatus != null and gameStatus != ''">
+                    AND games.game_status = #{gameStatus}
+                </when>
+            </choose>
+            <if test="columnId != null and columnId != ''">
+                AND games.game_column = #{columnId}
+            </if>
+        </where>
+        <if test="isFinished != null">
+            HAVING isFinished = #{isFinished}
+        </if>
+        ORDER BY games.game_create_time DESC
+    </select>
+
+    <select id="getGameIsSignUp" resultType="boolean">
+        SELECT IF(COUNT(1), TRUE, FALSE) FROM tb_game_sign_up WHERE game_id = #{gameId} AND user_id = #{userId}
+    </select>
+
+    <select id="gameDetail" resultType="java.util.Map">
+        select
+        ts.sport_name AS sportName,
+        td.`name` AS gameAreaName,
+        games.game_area_code as gameAreaCode,
+        games.game_type as gameType,
+        games.corporation_id as corporationId,
+        tc1.id AS parentColumn,
+        tc1.column_name AS parentColumnName,
+        tc.column_name AS gameColumnName,
+        games.id,
+        game_title AS gamesTitle,
+        game_content AS gamesContent,
+        game_nav_image AS gamesNavImage,
+        sign_up_way AS signUpWay,
+        game_author AS gamesAuthor,
+        author_type AS authorType,
+        game_column AS gamesColumn,
+        IF((games.game_people_limit = 0 OR IF(gtemp.total_Count,gtemp.total_Count,0)&lt;games.game_people_limit),
+            0,1) as isPeopleOver ,
+        IF(games.game_is_open=0,0,
+            IF(games.activity_end_time &gt;= NOW()
+            AND (games.game_people_limit = 0 OR IF(gtemp.total_Count,gtemp.total_Count,0)&lt;games.game_people_limit),
+            0,1)
+        ) as isFinished,
+        games.activity_start_time,
+        games.activity_end_time,
+		games.game_age_limit_min,
+		games.game_age_limit_max,
+		games.game_people_limit,
+		games.game_is_open,
+        page_view AS pv,
+        game_create_time AS gamesCreateTime,
+        game_auditor AS gamesAuditor,
+        game_audit_time AS gamesAuditorTime,
+        game_update_time AS gamesUpdateTime,
+        games.game_support_contact as gameSupportContact,
+	    games.game_support_contact_name as gameSupportContactName,
+        game_updator AS gamesUpdator,
+        game_status AS gamesStatus,
+        game_summary AS gamesSummary,
+        game_attach AS gameAttach,
+        IF(author_type=1,su1.username,tu.nick_name) AS nickName,
+		IF(gspTemp.isSignUp,gspTemp.isSignUp,0) as isSignUp,
+        game_need_support as gameNeedSupport,
+        su.username AS userName,
+        games.remark,
+        DATE_FORMAT(NOW(),'%Y-%m-%d %H:%i:%s') as serverTime
+        from tb_games games
+        LEFT JOIN(
+        select game_id,COUNT(*) as total_Count from tb_game_sign_up GROUP BY game_id
+        ) gtemp on gtemp.game_id = games.id
+        LEFT JOIN (
+			SELECT game_id,count(*) isSignUp FROM tb_game_sign_up where game_id = #{gameId} and user_id = #{userId}
+		) gspTemp on gspTemp.game_id = games.id
+        LEFT JOIN tb_user tu on game_author = tu.user_id
+        LEFT JOIN sys_user su on game_auditor = su.user_id
+        Left JOIN sys_user su1 on game_author = su1.user_id
+        LEFT JOIN tb_column tc ON tc.id = games.game_column
+        LEFT JOIN tb_column tc1 ON tc1.id = tc.column_parent_id
+        LEFT JOIN tb_district td ON games.game_area_code = td.code
+        LEFT JOIN tb_sports ts ON games.game_type = ts.id
+        where games.id = #{gameId}
+    </select>
+
+    <select id="getGamesListByIds" resultMap="gamesMap">
+        SELECT games.id, games.game_title, games.game_summary, games.game_nav_image, games.game_status
+        , games.activity_start_time, games.activity_end_time, games.game_is_open, games.game_need_support
+        , games.game_update_time, games.game_create_time, games.game_audit_time, games.game_column
+        , games.game_people_limit
+        , ggtemp.greats
+        , IF((games.game_people_limit = 0 OR gstemp.peopleSignUpCount &lt; games.game_people_limit)
+        , FALSE, TRUE ) AS isPeopleOver
+        FROM tb_games games
+        LEFT JOIN (
+        SELECT game_id, COUNT(1) AS greats FROM tb_games_greats GROUP BY game_id
+        ) ggtemp ON games.id = ggtemp.game_id
+        LEFT JOIN (
+        SELECT game_id, COUNT(1) AS peopleSignUpCount FROM tb_game_sign_up GROUP BY game_id
+        ) gstemp ON games.id = gstemp.game_id
+        WHERE games.game_status = 2 AND games.id IN
+        <foreach item="item" index="index" collection="ids"
+                 open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+</mapper>

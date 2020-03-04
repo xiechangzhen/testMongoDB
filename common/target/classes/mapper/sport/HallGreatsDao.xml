@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.dao.sport.HallGreatsDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.yymt.entity.sport.HallGreatsEntity" id="hallGreatsMap">
+        <result property="hallId" column="hall_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <select id="queryGreatCountByHallId" resultType="java.lang.Integer">
+       select count(1) as count from tb_hall_greats where hall_id = #{id}
+    </select>
+
+    <select id="like" resultType="java.util.Map">
+        select *
+        from tb_hall_greats thg
+        INNER JOIN (
+        SELECT
+        th.id,hall_name,hall_address,hall_longitude,hall_latitude,
+        DATE_FORMAT(hall_open_time_am,'%H:%i') as hall_open_time_am,
+        DATE_FORMAT(hall_close_time_am,'%H:%i') as hall_close_time_am,
+        DATE_FORMAT(hall_open_time_pm,'%H:%i') as hall_open_time_pm,
+        DATE_FORMAT(hall_close_time_pm,'%H:%i') as hall_close_time_pm,
+        hall_contact,hall_leader,hall_site,
+        hall_introduction,hall_bus,hall_status,hall_type,page_view as
+        pv,hall_panorama_site,hall_open_week,hall_area,hall_images,
+        truncate(6370996.81 * ACOS(
+        COS(hall_latitude * PI() / 180) * COS(#{latitude} * PI() / 180) * COS(
+        hall_longitude * PI() / 180 - #{longitude} * PI() / 180
+        ) + SIN(hall_latitude * PI() / 180) * SIN(#{latitude} * PI() / 180)
+        ),2) AS distance,temp.sportsname,temp.sprotsarray
+        FROM
+        tb_hall th
+        LEFT JOIN (
+        SELECT hall_id,
+        GROUP_CONCAT("'", ths.sport_id, "'") AS sprotsarray,
+        GROUP_CONCAT(ts.sport_name) AS sportsname
+        from tb_hall_sport ths
+        LEFT JOIN tb_sports ts on ths.sport_id = ts.id
+        GROUP BY hall_id
+        ) temp on temp.hall_id = th.id
+        ) halltemp on halltemp.id = thg.hall_id
+        LEFT JOIN(
+            SELECT hall_id,count(1) as count from tb_hall_greats thg1
+            GROUP BY hall_id and user_id
+        )temp on temp.hall_id = thg.hall_id
+        where halltemp.hall_status = 1
+        <choose>
+            <when test="isFriend">
+                AND thg.user_id = #{friendId}
+            </when>
+            <otherwise>
+                AND thg.user_id = #{userId}
+            </otherwise>
+        </choose>
+    </select>
+
+    <delete id="deleteIds" parameterType="java.util.List">
+        delete from tb_hall_greats
+        where hall_id in
+        <foreach item="item" collection="ids" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+</mapper>

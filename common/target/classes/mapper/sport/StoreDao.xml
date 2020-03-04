@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.dao.sport.StoreDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.yymt.entity.sport.StoreEntity" id="storeMap">
+        <result property="id" column="id"/>
+        <result property="sellerId" column="seller_id"/>
+        <result property="storeName" column="store_name"/>
+        <result property="storeLogo" column="store_logo"/>
+        <result property="storeAddress" column="store_address"/>
+        <result property="longitude" column="longitude"/>
+        <result property="latitude" column="latitude"/>
+        <result property="storeIntroduce" column="store_introduce"/>
+        <result property="storeStatus" column="store_status"/>
+        <result property="auditUserId" column="audit_user_id"/>
+        <result property="auditTime" column="audit_time"/>
+        <result property="createTime" column="create_time"/>
+        <result property="remark" column="remark"/>
+        <result property="pageView" column="page_view"/>
+    </resultMap>
+    <!--app查询店铺列表-->
+    <select id="listStore" resultType="java.util.Map">
+        select
+        id,
+        seller_id as sellerId,
+        store_name as storeName,
+        store_logo as storeLogo,
+        store_address as storeAddress,
+        longitude,
+        latitude,
+        remark,
+        store_introduce as storeIntroduce,
+        store_status as storeStatus,
+        create_time as createTime,
+        page_view as pageView
+        from tb_store
+        where seller_id = #{sellerId}
+        <if test="storeStatus != null and storeStatus != '' ">
+            and store_status = #{storeStatus}
+        </if>
+    </select>
+
+    <!--app查询场馆附近的店铺-->
+    <select id="nearHallStore" resultType="java.util.Map">
+        select * from (
+           select
+            id,
+            seller_id as sellerId,
+            store_name as storeName,
+            store_logo as storeLogo,
+            store_address as storeAddress,
+            longitude,
+            latitude,
+            remark,
+            store_introduce as storeIntroduce,
+            store_status as storeStatus,
+            create_time as createTime,
+            page_view as pageView,
+            truncate(6370996.81 * ACOS(
+            COS(#{hallLatitude} * PI() / 180) * COS(latitude * PI() / 180) * COS(
+            #{hallLongitude} * PI() / 180 - longitude * PI() / 180
+            ) + SIN(#{hallLatitude} * PI() / 180) * SIN(latitude * PI() / 180)
+            )/1000,2) AS distance
+            from tb_store
+        )tmp
+        where storeStatus = 1 and distance <![CDATA[ <= ]]> 5
+        order by distance
+    </select>
+
+    <!--后台查询店铺列表-->
+    <select id="listStoreAdmin" resultType="java.util.Map">
+        select ts.id,
+        ts.store_name as storeName,
+        ts.store_address as storeAddress,
+        ts.create_time as createTime,
+        IF(tr.revealNum,tr.revealNum,0) AS revealNum,
+        ts.store_status as storeStatus,
+        tu.real_name as realName
+        from tb_store ts left join tb_user tu on ts.seller_id = tu.user_id
+        LEFT JOIN (
+            select
+            reveal_content_id,count(1) AS revealNum
+            from tb_reveal where reveal_type=2 and reveal_status != 2 GROUP BY reveal_content_id
+        ) AS tr ON ts.id = tr.reveal_content_id
+        where store_status <![CDATA[ >= ]]> 0
+        <if test="revealNum != null and revealNum != '' ">
+            and revealNum > 0
+        </if>
+        <if test="keyword != null and keyword != '' ">
+            and (ts.store_name like concat('%',#{keyword},'%')
+                or tu.real_name like concat('%',#{keyword},'%')
+                or ts.store_address like concat('%',#{keyword},'%')
+            )
+        </if>
+        <if test="createTime != null and createTime != ''">
+            and ts.create_time like concat('%',#{createTime},'%')
+        </if>
+        <if test="storeStatus != null and storeStatus != '' ">
+            and store_status = #{storeStatus}
+        </if>
+    </select>
+
+    <!--后台查询待审核的数量-->
+    <select id="count" resultType="java.lang.Integer">
+        select count(*) from tb_store ts left join tb_user tu on ts.seller_id = tu.user_id
+        where ts.store_status = 0
+        <if test="keyword != null">
+            and (ts.store_name like concat('%',#{keyword},'%')
+            or tu.real_name like concat('%',#{keyword},'%')
+            or ts.store_address like concat('%',#{keyword},'%')
+            )
+        </if>
+        <if test="createTime != null and createTime != ''">
+            and ts.create_time like concat('%',#{createTime},'%')
+        </if>
+    </select>
+
+    <!--后台查询被举报的数量-->
+    <select id="reportCount" resultType="java.lang.Integer">
+        select count(1)
+        from tb_store ts left join tb_user tu on ts.seller_id = tu.user_id
+        LEFT JOIN (
+        select
+        reveal_content_id,count(1) AS revealNum
+        from tb_reveal where reveal_type=2 and reveal_status != 2 GROUP BY reveal_content_id
+        ) AS tr ON ts.id = tr.reveal_content_id
+        where revealNum > 0
+        <if test="keyword != null and keyword != '' ">
+            and (ts.store_name like concat('%',#{keyword},'%')
+            or tu.real_name like concat('%',#{keyword},'%')
+            or ts.store_address like concat('%',#{keyword},'%')
+            )
+        </if>
+        <if test="createTime != null and createTime != ''">
+            and ts.create_time like concat('%',#{createTime},'%')
+        </if>
+    </select>
+
+    <!--后台根据id查询对象-->
+    <select id="selectByIdAdmin" resultType="java.util.Map">
+         select ts.id,
+        ts.store_name as storeName,
+        ts.store_address as storeAddress,
+        ts.store_logo as storeLogo,
+        ts.create_time as createTime,
+        ts.store_status as storeStatus,
+
+        ts.remark as remark,
+        ts.store_introduce as storeIntroduce,
+        su.username as auditUser,
+        ts.audit_time as auditTime,
+        ts.page_view as pageView,
+        tu.user_id as userId,
+        tu.real_name as realName
+        from tb_store ts left join sys_user su on ts.audit_user_id = su.user_id
+        left join tb_user tu on ts.seller_id = tu.user_id
+        where ts.id = #{id}
+    </select>
+
+</mapper>

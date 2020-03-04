@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.dao.sport.ForumsDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.yymt.entity.sport.ForumsEntity" id="forumsMap">
+        <result property="id" column="id"/>
+        <result property="content" column="content"/>
+        <result property="images" column="images"/>
+        <result property="userId" column="user_id"/>
+        <result property="forumsStatus" column="forums_status"/>
+        <result property="forumsType" column="forums_type"/>
+        <result property="createTime" column="create_time"/>
+        <result property="pageView" column="page_view"/>
+        <result property="auditType" column="audit_type"/>
+        <result property="auditUserId" column="audit_user_id"/>
+        <result property="handleTime" column="handle_time"/>
+        <result property="isRecommend" column="is_recommend"/>
+        <result property="remark" column="remark"/>
+        <result property="greats" column="greats"/>
+        <association property="authorFrontUser" javaType="com.yymt.entity.api.UserEntity">
+            <id property="userId" column="author_front_user_id"/>
+            <result property="username" column="author_front_username"/>
+            <result property="nickName" column="author_front_nick_name"/>
+            <result property="realName" column="author_front_real_name"/>
+            <result property="userAvatar" column="author_front_avatar"/>
+        </association>
+    </resultMap>
+
+
+    <sql id="Base_Column_List" >
+        tb.id AS id,
+        content AS content,
+        images AS images,
+        tb.user_id AS userId,
+        forums_type AS forumsType,
+        tb.create_time AS createTime,
+        page_view AS pageView,
+        audit_type AS auditType,
+        audit_user_id AS auditUserId,
+        handle_time AS handleTime,
+        is_recommend AS isRecommend,
+        tb.remark AS remark
+    </sql>
+
+    <!--后台获取社区详情-->
+    <select id="selectForumsDetailBack" resultType="java.util.Map">
+       SELECT <include refid="Base_Column_List" />
+            ,tu.nick_name AS nickName,tu.real_name AS realName, tu.user_avatar AS userAvatar
+            ,IF(tmp1.greatsNum,tmp1.greatsNum,0) AS greatsNum
+            ,IF(tmp3.shareNum,tmp3.shareNum,0) AS shareNum
+            ,IF(tr.revealNum,tr.revealNum,0) AS revealNum
+            ,tb.forums_status AS forumsStatus
+        FROM `tb_forums` tb
+        LEFT JOIN tb_user tu ON tu.user_id = tb.user_id
+        LEFT JOIN (
+        SELECT forums_id,COUNT(1) AS greatsNum FROM tb_forums_greats
+        GROUP BY forums_id
+        )tmp1 ON tmp1.forums_id = tb.id
+        LEFT JOIN (
+        SELECT share_id,COUNT(1) AS shareNum FROM tb_user_share WHERE share_type=7
+        GROUP BY share_id
+        )tmp3 ON tmp3.share_id = tb.id
+        LEFT JOIN (
+           select reveal_content_id,count(1) AS revealNum from tb_reveal where reveal_type=1 GROUP BY reveal_content_id
+        ) AS tr ON tb.id = tr.reveal_content_id
+        WHERE tb.id = #{id}
+    </select>
+
+    <!--后台获取社区列表-->
+    <select id="selectForumsListBack" resultType="java.util.Map">
+        SELECT * FROM (
+            SELECT <include refid="Base_Column_List" />
+            ,tu.nick_name AS nickName,tu.real_name AS realName
+            ,IF(tfc.commentNum,tfc.commentNum,0) AS commentNum
+            ,IF(tr.revealNum,tr.revealNum,0) AS revealNum
+            ,tb.forums_status AS forumsStatus
+            FROM `tb_forums` tb
+            LEFT JOIN tb_user tu ON tu.user_id = tb.user_id
+            LEFT JOIN (SELECT forums_id,count(1) AS commentNum
+                        FROM tb_forums_comment
+                        where parent_id =0
+                        GROUP BY forums_id) AS tfc ON tfc.forums_id = tb.id
+            LEFT JOIN (
+                select reveal_content_id,count(1) AS revealNum
+                from tb_reveal where reveal_type=1 and reveal_status=0 GROUP BY reveal_content_id
+            ) AS tr ON tb.id = tr.reveal_content_id
+        )tmp
+        <where>
+            forumsStatus > 0
+            <if test="revealing">
+                AND revealNum>0
+            </if>
+            <if test="forumsStatus != null">
+                AND forumsStatus = #{forumsStatus}
+            </if>
+            <if test="isRecommend != null">
+                AND isRecommend = #{isRecommend}
+            </if>
+            <if test="queryDate != null and queryDate != ''">
+                AND DATE_FORMAT(createTime,'%Y-%m-%d') = #{queryDate}
+            </if>
+            <if test="keyword != null and keyword != '' ">
+                AND (content LIKE CONCAT('%',CONCAT(#{keyword}, '%'))
+                )
+            </if>
+        </where>
+    </select>
+    <!--后台统计举报中的社区-->
+    <select id="countRevealingForums" resultType="java.lang.Integer">
+        SELECT count(1) FROM (
+            SELECT <include refid="Base_Column_List" />
+            ,tu.nick_name AS nickName,tu.real_name AS realName
+            ,IF(tfc.commentNum,tfc.commentNum,0) AS commentNum
+            ,tu1.nick_name AS lastReplyNickName,tu1.real_name AS lastReplyRealName
+            ,IF(tr.revealNum,tr.revealNum,0) AS revealNum
+            ,tb.forums_status AS forumsStatus
+            ,tr.lastRevealTime
+            FROM `tb_forums` tb
+            LEFT JOIN tb_user tu ON tu.user_id = tb.user_id
+            LEFT JOIN (SELECT SUBSTRING_INDEX(
+                        GROUP_CONCAT(user_id ORDER BY user_id DESC),
+                        ',',
+                        1
+                        ) AS lastReplyId,
+                        forums_id,count(1) AS commentNum
+                        FROM tb_forums_comment
+                        where parent_id =0
+                        GROUP BY forums_id) AS tfc ON tfc.forums_id = tb.id
+            LEFT JOIN tb_user tu1 ON tu1.user_id = tfc.lastReplyId
+            LEFT JOIN (
+                select SUBSTRING_INDEX(
+                GROUP_CONCAT(create_time ORDER BY create_time DESC),
+                ',',
+                1
+                ) AS lastRevealTime,reveal_content_id,count(1) AS revealNum
+                from tb_reveal where reveal_type=1 GROUP BY reveal_content_id
+            ) AS tr ON tb.id = tr.reveal_content_id
+        )tmp
+        <where>
+            forumsStatus > 0
+            AND revealNum>0 AND (handleTime IS NULL OR lastRevealTime>handleTime)
+            <if test="queryDate != null and queryDate != ''">
+                AND DATE_FORMAT(createTime,'%Y-%m-%d') = #{queryDate}
+            </if>
+            <if test="keyword != null and keyword != '' ">
+                AND (content LIKE CONCAT('%',CONCAT(#{keyword}, '%'))
+                )
+            </if>
+        </where>
+    </select>
+
+    <!--APP获取社区列表-->
+    <select id="selectForumsList" resultType="java.util.Map">
+        SELECT <include refid="Base_Column_List" />
+        , tu.user_avatar AS userAvatar,tu.nick_name AS nickName,tu.real_name AS realName
+        ,IF(tmp1.greatsNum,tmp1.greatsNum,0) AS greatsNum
+        ,IF(tmp2.commentNum,tmp2.commentNum,0) AS commentNum
+        ,IF(tmp3.shareNum,tmp3.shareNum,0) AS shareNum
+        ,IF(tmp4.user_id,1,0) AS isGreats
+        FROM `tb_forums` tb
+        LEFT JOIN tb_user tu ON tu.user_id = tb.user_id
+        LEFT JOIN (
+            SELECT forums_id,COUNT(1) AS greatsNum FROM tb_forums_greats
+            GROUP BY forums_id
+            )tmp1 ON tmp1.forums_id = tb.id
+        LEFT JOIN (
+            SELECT forums_id,COUNT(1) AS commentNum FROM tb_forums_comment WHERE parent_id=0
+            GROUP BY forums_id
+            )tmp2 ON tmp2.forums_id = tb.id
+        LEFT JOIN (
+            SELECT share_id,COUNT(1) AS shareNum FROM tb_user_share WHERE share_type=7
+            GROUP BY share_id
+            )tmp3 ON tmp3.share_id = tb.id
+        LEFT JOIN (
+            SELECT forums_id,user_id FROM tb_forums_greats
+            <where>
+                <if test="loginUserId != null and loginUserId != '' ">
+                    AND user_id = #{loginUserId}
+                </if>
+            </where>
+            GROUP BY forums_id
+            )tmp4 ON tmp4.forums_id = tb.id
+        <where>
+            <if test="follows != null" >
+                AND tb.user_id in
+                <foreach item="follow" collection="follows" open="(" separator="," close=")">
+                    #{follow}
+                </foreach>
+            </if>
+            <if test="isRecommend != null">
+                AND tb.is_recommend = #{isRecommend}
+            </if>
+            <if test="forumsType != null">
+                AND tb.forums_type = #{forumsType}
+            </if>
+            <if test="forumsId != null">
+                AND tb.id = #{forumsId}
+            </if>
+            <if test="userId != null">
+                AND tb.user_id = #{userId}
+            </if>
+        </where>
+    </select>
+
+    <!-- APP获取社区详情 -->
+    <select id="selectForumsDetail" resultType="java.util.Map">
+        SELECT <include refid="Base_Column_List" />
+        , tu.user_avatar AS userAvatar,tu.nick_name AS nickName,tu.real_name AS realName
+        ,IF(tmp1.greatsNum,tmp1.greatsNum,0) AS greatsNum
+        ,IF(tmp2.commentNum,tmp2.commentNum,0) AS commentNum
+        ,IF(tmp3.shareNum,tmp3.shareNum,0) AS shareNum
+        ,IF(tmp4.user_id,1,0) AS isGreats
+        ,IF(tmp5.follow_id,1,0) AS isFollow
+        FROM `tb_forums` tb
+        LEFT JOIN tb_user tu ON tu.user_id = tb.user_id
+        LEFT JOIN (
+            SELECT forums_id,COUNT(1) AS greatsNum FROM tb_forums_greats
+            GROUP BY forums_id
+            )tmp1 ON tmp1.forums_id = tb.id
+        LEFT JOIN (
+            SELECT forums_id,COUNT(1) AS commentNum FROM tb_forums_comment WHERE parent_id=0
+            GROUP BY forums_id
+            )tmp2 ON tmp2.forums_id = tb.id
+        LEFT JOIN (
+            SELECT share_id,COUNT(1) AS shareNum FROM tb_user_share WHERE share_type=7
+            GROUP BY share_id
+            )tmp3 ON tmp3.share_id = tb.id
+        LEFT JOIN (
+            SELECT forums_id,user_id FROM tb_forums_greats
+            <where>
+                <if test="loginUserId != null and loginUserId != '' ">
+                    AND user_id = #{loginUserId}
+                </if>
+            </where>
+            GROUP BY forums_id
+            )tmp4 ON tmp4.forums_id = tb.id
+        LEFT JOIN (
+            SELECT follow_id,user_id FROM tb_user_follow
+            <where>
+                <if test="loginUserId != null and loginUserId != '' ">
+                    AND user_id = #{loginUserId}
+                </if>
+                <if test="followId != null and followId != '' ">
+                    AND follow_id = #{followId}
+                </if>
+            </where>
+            )tmp5 ON tmp5.follow_id = tb.user_Id
+        <where>
+            <if test="forumsId != null">
+                AND tb.id = #{forumsId}
+            </if>
+        </where>
+    </select>
+
+    <!--批量删除社区动态及其评论和点赞-->
+    <delete id="deleteForumsAndCommentsAndGreatsBatch">
+        delete from tb_forums where id in
+        <foreach item="forumsId" collection="array" open="(" separator="," close=")">
+            #{forumsId}
+        </foreach>
+        ;
+        delete from tb_forums_comment where forums_id in
+        <foreach item="forumsId" collection="array" open="(" separator="," close=")">
+            #{forumsId}
+        </foreach>
+        ;
+        delete from tb_forums_comment_greats where forums_id in
+        <foreach item="forumsId" collection="array" open="(" separator="," close=")">
+            #{forumsId}
+        </foreach>
+        ;
+        delete from tb_forums_greats where forums_id in
+        <foreach item="forumsId" collection="array" open="(" separator="," close=")">
+            #{forumsId}
+        </foreach>
+    </delete>
+
+    <select id="getPostListByIds" resultMap="forumsMap">
+        SELECT post.id, post.content, post.images, post.user_id
+        , post.forums_type, post.create_time, post.page_view, post.remark
+        ,fgtemp.greats
+        , tu.user_id AS author_front_user_id, tu.username AS author_front_username
+        , tu.nick_name AS author_front_nick_name, tu.real_name AS author_front_real_name
+        , tu.user_avatar AS author_front_avatar
+        FROM tb_forums post
+        LEFT JOIN (
+            SELECT forums_id, COUNT(1) AS greats FROM tb_forums_greats GROUP BY forums_id
+        ) fgtemp ON post.id = fgtemp.forums_id
+        LEFT JOIN tb_user tu ON post.user_id = tu.user_id
+        WHERE post.id IN
+        <foreach item="item" index="index" collection="ids"
+                 open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+</mapper>

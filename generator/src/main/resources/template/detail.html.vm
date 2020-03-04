@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>${comments}</title>
+	#set($header='<#include "/header.html">')
+	$header
+    <link rel="stylesheet" href="${request.contextPath}/statics/css/detail.css">
+    <link rel="stylesheet" href="${request.contextPath}/statics/plugins/magnify/jquery.magnify.css">
+</head>
+<body>
+<div id="detail" v-cloak>
+    <div>
+        <div class="content-box" style="margin-bottom:18px">
+            #foreach($column in $columns)
+                #if($column.columnName != $pk.columnName)
+                    <div class="row-div">
+                        <div class="col-name">${column.comments}</div>
+                        <div class="col-text" v-text="${classname}.${column.attrname}"></div>
+                    </div>
+                #end
+            #end
+            <div class="row-div"  style="margin-top:55px;">
+                <td class="col-name">&nbsp;</td>
+                <div class="col-text">
+                    <input type="button" class="yyt-btn yyt-btn-lg" onclick="goBackPage();" value="返回"/>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="${request.contextPath}/statics/plugins/magnify/jquery.magnify.js"></script>
+<script>
+    var vmDetail = new Vue({
+        el:'#detail',
+        data:{
+        ${classname}Id: -1,
+        ${classname}: {}
+    },
+    created: function () {
+        this.init();
+    },
+    init:function () {
+        var ${classname}Id = T.p('id');
+        this.${classname}Id = ${classname}Id;
+        if(!isBlank(${classname}Id)){
+            this.getInfo();
+        }else {
+            parent.layer.msg("数据不存在");
+        }
+    },
+    methods: {
+        getInfo: function(${pk.attrname}){
+            $.get(baseURL + "${moduleName}/${pathName}/info/"+${pk.attrname}, function(r){
+                vmDetail.${classname} = r.${classname};
+            });
+        }
+    }
+    });
+</script>
+</body>
+</html>

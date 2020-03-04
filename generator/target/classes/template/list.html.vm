@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>${comments}</title>
+	#set($header='<#include "/header.html">')
+	#set($list='<#if shiro.hasPermission("'+${moduleName}+':'+${pathName}+':list")>')
+	#set($save='<#if shiro.hasPermission("'+${moduleName}+':'+${pathName}+':save")>')
+	#set($update='<#if shiro.hasPermission("'+${moduleName}+':'+${pathName}+':update")>')
+	#set($delete='<#if shiro.hasPermission("'+${moduleName}+':'+${pathName}+':delete")>')
+	#set($end='</#if>')
+	$header
+</head>
+<body>
+<div id="rrapp" v-cloak>
+    <div v-show="showList">
+        <div class="grid-btn">
+			$save
+            <a class="yyt-btn yyt-btn-normal" @click="add"><i class="fa fa-plus"></i>&nbsp;新增</a>
+			$end
+            $delete
+            <a class="yyt-btn yyt-btn-normal" @click="del"><i class="fa fa-trash-o"></i>&nbsp;批量删除</a>
+            $end
+			$list
+            <a id="exportExcel" class="yyt-btn yyt-btn-normal" @click="exportData"><i class="icon icon-uniE011"></i>&nbsp;导出</a>
+			$end
+            <div class="pull-right" style="cursor: pointer;">
+                <a class="yyt-btn yyt-btn-normal" @click="query"><i class="fa fa-search"></i>&nbsp;查询</a>
+            </div>
+            <div class="pull-right" style="cursor: pointer;margin-left:8px;">
+                <input type="text" title="请输入关键词进行搜索" v-model="queryPara.keyword" class="form-control" placeholder="请输入关键词"/>
+            </div>
+            <div class="pull-right" style="cursor: pointer;margin-right:8px;">
+                <div style="position:relative;">
+                    <input type="text" id="queryDate" v-model="queryPara.queryDate"  class="form-control" style="background-color:#fff;cursor: pointer;" placeholder="请选择日期" readonly/>
+                    <i class="fa fa-calendar calendar"></i>
+                </div>
+            </div>
+        </div>
+        <div class="query-ul" id="AuditStatusSelection">
+            <!-- 状态（0-待审核,1-审核通过,2-未通过） -->
+            <ul>
+                <li name="all" class="topcur">全部</li>
+                <li name="1" class="topbar">待审核<label class="badges"></label></li>
+                <li name="2" class="topbar">已通过</li>
+                <li name="3" class="topbar">未通过</li>
+            </ul>
+        </div>
+        <table id="jqGrid"></table>
+        <div id="jqGridPager"></div>
+        <div id="noData" class="no-data">
+            <img src="../../statics/images/no-data.png">
+            <p style="font-size: 16px;margin-top: 10px;color: #6e6e6e;">找不到相关数据信息</p>
+        </div>
+    </div>
+
+</div>
+
+<script src="${request.contextPath}/statics/js/modules/${moduleName}/${pathName}.js?_${.now?long}"></script>
+</body>
+</html>

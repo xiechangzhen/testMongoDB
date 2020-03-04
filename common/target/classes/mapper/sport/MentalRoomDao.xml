@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.dao.sport.MentalRoomDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.yymt.entity.sport.MentalRoomEntity" id="mentalRoomMap">
+        <result property="id" column="id"/>
+        <result property="roomName" column="room_name"/>
+        <result property="roomLeadingOfficial" column="room_leading_official"/>
+        <result property="address" column="address"/>
+        <result property="areacode" column="areaCode"/>
+        <result property="phone" column="phone"/>
+        <result property="functionIntroduce" column="function_introduce"/>
+        <result property="organization" column="organization"/>
+        <result property="teachingGroup" column="teaching_group"/>
+        <result property="workflow" column="workflow"/>
+        <result property="longitude" column="longitude"/>
+        <result property="latitude" column="latitude"/>
+        <result property="images" column="images"/>
+        <result property="addTime" column="add_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <select id="queryMentalList" resultType="java.util.Map">
+        select tmr.*, if(tu.count is NULL,0,tu.count) as expert_count
+        from tb_mental_room tmr
+        LEFT JOIN (select count(1) as count,mental_room_id from tb_user where user_type  != 0 and user_status = 3  GROUP BY mental_room_id) tu
+        on tmr.id = tu.mental_room_id
+        GROUP BY tmr.id
+        <if test="keyword != null and keyword != '' ">
+            HAVING
+            room_name like CONCAT('%',CONCAT(#{keyword},'%'))
+            or phone like CONCAT('%',CONCAT(#{keyword}, '%'))
+            or address like CONCAT('%',CONCAT(#{keyword},'%'))
+        </if>
+        <!--select tmr.*, count(mental_room_id) as expert_count
+      from tb_mental_room tmr
+      LEFT JOIN tb_user tu
+      on tmr.id = tu.mental_room_id
+      GROUP BY tmr.id
+      <if test="keyword != null and keyword != '' ">
+           HAVING
+           room_name like CONCAT('%',CONCAT(#{keyword},'%'))
+           or phone like CONCAT('%',CONCAT(#{keyword}, '%'))
+           or address like CONCAT('%',CONCAT(#{keyword},'%'))
+      </if>-->
+    </select>
+</mapper>

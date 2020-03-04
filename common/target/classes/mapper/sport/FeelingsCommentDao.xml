@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.dao.sport.FeelingsCommentDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.yymt.entity.sport.FeelingsCommentEntity" id="feelingsCommentMap">
+        <result property="id" column="id"/>
+        <result property="feelingsId" column="feelings_id"/>
+        <result property="commentContent" column="comment_content"/>
+        <result property="commentCreatetime" column="comment_createtime"/>
+        <result property="fromUserId" column="from_user_id"/>
+        <result property="parentId" column="parent_id"/>
+    </resultMap>
+
+
+    <select id="selectMyPage" resultType="java.util.Map">
+        <!--查询指定心情评论（包含点赞数，是否点赞）-->
+        select temp1.*,count(tfcg1.id) as great_count,tfc2.comment_content as parent_comment,tu2.nick_name as parent_nick_name,tu2.real_name as parent_real_name,tu2.user_type as parent_user_type from
+        (
+        select
+        temp.id as id,
+        temp.comment_content,
+        temp.comment_createtime,
+        temp.from_user_id,
+        temp.parent_id,
+        temp.feelings_id,
+        temp.nick_name,
+        temp.user_avatar,
+        temp.user_type,
+        temp.real_name,
+        IF(tfcg.feelings_comment_id,'true','false') as is_great
+        from
+        (
+        select id ,comment_content,comment_createtime,from_user_id,feelings_id,parent_id,tu.nick_name,tu.user_avatar,tu.user_type,tu.real_name
+        from tb_feelings_comment  tfc,tb_user  tu
+        where tfc.from_user_id= tu.user_id
+        )  temp
+        LEFT JOIN tb_feelings_comment_greats  tfcg
+        on temp.id= feelings_comment_id and tfcg.user_id = #{userId}
+        where temp.feelings_id = #{feelingsId}
+        GROUP BY temp.id
+        ) temp1
+        LEFT JOIN tb_feelings_comment_greats tfcg1 on temp1.id = tfcg1.feelings_comment_id
+        LEFT JOIN tb_feelings_comment tfc2 on temp1.parent_id = tfc2.id
+        LEFT JOIN tb_user tu2 on tfc2.from_user_id = tu2.user_id
+        GROUP BY temp1.id
+    </select>
+
+
+    <!--后台心情的评论列表-->
+    <select id="commentList" resultType="java.util.Map">
+        SELECT tfc.id AS id,comment_content AS commentContent
+            ,comment_createtime AS commentCreateTime
+            ,tu.nick_name,user_avatar
+            ,tu.real_name,tu.user_type
+        FROM tb_feelings_comment tfc
+            LEFT JOIN tb_user tu ON tfc.from_user_id = tu.user_id
+            LEFT JOIN tb_feelings tf ON tfc.feelings_id = tf.id
+        WHERE  tfc.parent_id IS NULL AND tf.id = #{feelingsId}
+        ORDER BY tfc.id DESC
+    </select>
+
+</mapper>

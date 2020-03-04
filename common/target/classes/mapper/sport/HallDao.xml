@@ -1,0 +1,305 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.dao.sport.HallDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.yymt.entity.sport.HallEntity" id="hallMap">
+        <result property="id" column="id"/>
+        <result property="hallName" column="hall_name"/>
+        <result property="hallAddress" column="hall_address"/>
+        <result property="hallLongitude" column="hall_longitude"/>
+        <result property="hallLatitude" column="hall_latitude"/>
+        <result property="hallOpenTimeAm" column="hall_open_time_am"/>
+        <result property="hallCloseTimeAm" column="hall_close_time_am"/>
+        <result property="hallOpenTimePm" column="hall_open_time_pm"/>
+        <result property="hallCloseTimePm" column="hall_close_time_pm"/>
+        <result property="hallContact" column="hall_contact"/>
+        <result property="hallLeader" column="hall_leader"/>
+        <result property="hallSite" column="hall_site"/>
+        <result property="hallIntroduction" column="hall_introduction"/>
+        <result property="hallBus" column="hall_bus"/>
+        <result property="hallStatus" column="hall_status"/>
+        <result property="hallType" column="hall_type"/>
+        <result property="pageView" column="page_view"/>
+        <result property="hallPanoramaSite" column="hall_panorama_site"/>
+        <result property="hallOpenWeek" column="hall_open_week"/>
+        <result property="hallArea" column="hall_area"/>
+        <result property="hallImages" column="hall_images"/>
+        <result property="remark" column="remark"/>
+        <result property="greats" column="greats"/>
+        <result property="buildTime" column="build_time"/>
+        <result property="hallIsOpen" column="hall_is_open"/>
+        <collection property="sports" ofType="SportsEntity">
+            <id property="id" column="sport_id"/>
+            <result property="sportName" column="sport_name"/>
+        </collection>
+    </resultMap>
+
+    <sql id="base_coloum">
+        id,hall_name,hall_address,hall_longitude,hall_latitude,
+        hall_open_time_am,
+        hall_close_time_am,
+        hall_open_time_pm,
+        hall_close_time_pm,
+        hall_contact,hall_leader,hall_site,
+        hall_introduction,hall_bus,hall_status,hall_type,hall_panorama_site,hall_open_week,hall_area,hall_images,
+    </sql>
+
+
+    <select id="listHallForBackgroud" resultType="java.util.Map">
+        select th.*,
+        IF(temp.count,temp.count,0) as count
+        FROM tb_hall th
+        LEFT JOIN(
+        select count(1) as count,hall_id from tb_hall_greats GROUP BY hall_id
+        )temp on th.id = temp.hall_id
+        <where>
+            <if test="hallStatus != null and hallStatus != '' ">
+                th.hall_status = #{hallStatus}
+            </if>
+            <if test="keyword != null and keyword != '' ">
+                AND (th.hall_name LIKE CONCAT('%',CONCAT(#{keyword}, '%'))
+                or th.hall_leader like CONCAT('%',CONCAT(#{keyword}, '%')))
+            </if>
+            <if test="buildTime != null and buildTime != '' ">
+                AND th.build_time LIKE CONCAT('%',CONCAT(#{buildTime}, '%'))
+            </if>
+            <if test="sql_filter != null and sql_filter != '' ">
+                and ${sql_filter}
+            </if>
+        </where>
+    </select>
+
+
+    <select id="listHall" resultType="java.util.Map">
+        SELECT
+        th.id,hall_name,hall_address,hall_longitude,hall_latitude,
+        DATE_FORMAT(hall_open_time_am,'%H:%i') as hall_open_time_am,
+        DATE_FORMAT(hall_close_time_am,'%H:%i') as hall_close_time_am,
+        DATE_FORMAT(hall_open_time_pm,'%H:%i') as hall_open_time_pm,
+        DATE_FORMAT(hall_close_time_pm,'%H:%i') as hall_close_time_pm,
+        hall_contact,hall_leader,hall_site,
+        th.hall_is_open as isOpen,
+        hall_introduction,hall_bus,hall_status,hall_type,page_view as
+        pv,hall_panorama_site,hall_open_week,hall_area,hall_images,
+        truncate(6370996.81 * ACOS(
+        COS(hall_latitude * PI() / 180) * COS(#{latitude} * PI() / 180) * COS(
+        hall_longitude * PI() / 180 - #{longitude} * PI() / 180
+        ) + SIN(hall_latitude * PI() / 180) * SIN(#{latitude} * PI() / 180)
+        ),2) AS distance,GROUP_CONCAT("'",ths.sport_id,"'") as sprotsarray,
+        GROUP_CONCAT(ts.sport_name) AS sportsname
+        from tb_hall th
+        LEFT JOIN tb_hall_sport ths on th.id = ths.hall_id
+        LEFT JOIN tb_sports ts on ths.sport_id = ts.id
+        <where>
+            (hall_status = 1 or hall_status = 3)
+            <if test="area != null">
+              and  th.hall_area = #{area}
+            </if>
+            <if test="keyword != null and area != null">
+                and hall_name like CONCAT('%',CONCAT(#{keyword}, '%'))
+            </if>
+            <if test="keyword != null">
+              and  hall_name like CONCAT('%',CONCAT(#{keyword}, '%'))
+            </if>
+        </where>
+        GROUP BY th.id
+        <if test="item != null">
+            HAVING LOCATE(CONCAT("'",#{item},"'"),sprotsarray) > 0
+        </if>
+        <if test=" item != null and distance != null">
+            and distance &lt;= #{distance}
+        </if>
+        <if test="item == null and distance != null">
+            HAVING distance &lt;= #{distance}
+        </if>
+    </select>
+
+
+    <select id="hallDetail" resultType="java.util.Map">
+        SELECT
+        th.id,hall_name,hall_address,hall_longitude,hall_latitude,
+        DATE_FORMAT(hall_open_time_am,'%H:%i') as hall_open_time_am,
+        DATE_FORMAT(hall_close_time_am,'%H:%i') as hall_close_time_am,
+        DATE_FORMAT(hall_open_time_pm,'%H:%i') as hall_open_time_pm,
+        DATE_FORMAT(hall_close_time_pm,'%H:%i') as hall_close_time_pm,
+        hall_contact,hall_leader,hall_site,
+        hall_introduction,hall_bus,hall_status,hall_type,hall_panorama_site,hall_open_week,hall_area,hall_images,GROUP_CONCAT("'",ths.sport_id,"'") as sprotsarray,
+        GROUP_CONCAT(ts.sport_name) AS sportsname,page_view as pv,
+        IF(self.isgreats,self.isgreats,0) as isGreats,
+        temp.totalGreats as totalGreats
+        from tb_hall th
+        LEFT JOIN tb_hall_sport ths on th.id = ths.hall_id
+        LEFT JOIN tb_sports ts on ths.sport_id = ts.id
+        LEFT JOIN (
+	        select hall_id,count(1) as isgreats from tb_hall_greats where hall_id = #{hallId} and  user_id = #{userId}
+        ) self on self.hall_id = th.id
+        LEFT JOIN (
+			select hall_id,count(1) as totalGreats from tb_hall_greats where hall_id = #{hallId}
+		) temp on temp.hall_id = th.id
+        where th.id =  #{hallId}
+    </select>
+    
+    <select id="hallDetailForBackground" resultType="java.util.Map">
+        SELECT
+            th.id,
+            th.remark,
+            hall_name AS hallName,
+            th.build_time as buildTime,
+            th.hall_is_open as hallIsOpen,
+            hall_address AS hallAddress,
+            hall_longitude as longitude,
+            hall_latitude as latitude,
+            th.create_time as createTime,
+            hall_contact as hallContact,
+            hall_leader as hallLeader,
+            hall_site as hallSite,
+            hall_introduction as hallIntroduction,
+            hall_bus AS hallBus,
+            hall_status as hallStatus,
+            hall_type as hallType,
+            hall_panorama_site as hallPanorama,
+            hall_open_week as hallOpenWeek,
+            hall_area as hallArea,
+            hall_images as hallImages,
+            GROUP_CONCAT("'",ths.sport_id,"'") as sprotsarray,
+            GROUP_CONCAT(ths.sport_id) as sportsId,
+            GROUP_CONCAT(ts.sport_name) AS sportsname,page_view as pv,
+            su.username as auditorName,
+            su1.username as authorName,
+            th.audit_time as auditTime,
+            sd.name as organizationName
+            from tb_hall th
+            LEFT JOIN tb_hall_sport ths on th.id = ths.hall_id
+            LEFT JOIN tb_sports ts on ths.sport_id = ts.id
+            LEFT JOIN sys_user su on th.auditor = su.user_id
+            LEFT JOIN sys_user su1 on th.author = su1.user_id
+            left join sys_dept sd on sd.dept_id = su1.dept_id
+        where th.id =  #{id}
+    </select>
+
+    <select id="getHallsListByIds" resultMap="hallMap">
+        SELECT hall.id, hall.hall_name, hall.hall_address, hall.hall_images, hall.hall_status
+        , hall.hall_open_time_am, hall.hall_close_time_am, hall.hall_open_time_pm, hall.hall_close_time_pm
+        , hall.hall_open_week, hall.hall_longitude, hall.hall_latitude, hall.page_view
+        , hall.hall_is_open
+        , hgtemp.greats
+        , sport.id AS sport_id, sport.sport_name AS sport_name
+        FROM tb_hall hall
+        LEFT JOIN (
+            SELECT hall_id, COUNT(1) AS greats FROM tb_hall_greats GROUP BY hall_id
+        ) hgtemp ON hall.id = hgtemp.hall_id
+        LEFT JOIN tb_hall_sport hs ON hall.id = hs.hall_id
+        LEFT JOIN tb_sports sport ON hs.sport_id = sport.id
+        WHERE hall.hall_status = 1 AND hall.id IN
+        <foreach item="item" index="index" collection="ids"
+                 open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+    <select id="auditCount" resultType="java.lang.Integer">
+        select count(*)
+        FROM tb_hall th
+        LEFT JOIN(
+        select count(1) as count,hall_id from tb_hall_greats GROUP BY hall_id
+        )temp on th.id = temp.hall_id
+        <where>
+            th.hall_status = 0
+            <if test="keyword != null and keyword != '' ">
+                AND (th.hall_name LIKE CONCAT('%',CONCAT(#{keyword}, '%'))
+                or th.hall_leader like CONCAT('%',CONCAT(#{keyword}, '%')))
+            </if>
+            <if test="buildTime != null and buildTime != '' ">
+                AND th.build_time LIKE CONCAT('%',CONCAT(#{buildTime}, '%'))
+            </if>
+            <if test="sql_filter != null and sql_filter != '' ">
+                and ${sql_filter}
+            </if>
+        </where>
+    </select>
+
+    <!--查询未入驻某场馆的账号-->
+    <select id="getUnbindUserByHallId" resultType="java.util.Map">
+        SELECT
+            tu.user_id AS userId,
+            tu.username,
+            tu.nick_name AS nickName,
+            tu.real_name AS realName
+        FROM tb_user tu
+        WHERE tu.user_status IN (1, 3)
+              AND tu.real_name IS NOT NULL
+              AND tu.user_id NOT IN(SELECT user_id FROM tb_hall_user WHERE hall_id = #{hallId})
+    </select>
+    <!--查询入驻某场馆的账号-->
+    <select id="getBindUserByHallId" resultType="java.util.Map">
+        SELECT
+            tu.user_id AS userId,
+            tu.username,
+            tu.nick_name AS nickName,
+            tu.real_name AS realName
+        FROM tb_user tu
+        WHERE tu.user_status IN (1, 3)
+              AND tu.real_name IS NOT NULL
+              AND tu.user_id IN(SELECT user_id FROM tb_hall_user WHERE hall_id = #{hallId})
+    </select>
+    <!--根据场馆id删除所有入驻该场馆的用户-->
+    <delete id="deleteByHlllId">
+        delete from tb_hall_user where hall_id = #{hallId};
+         update tb_hall_serve set serve_status = 3
+         where hall_id = #{hallId} and serve_status = 1
+    </delete>
+    <!--根据场馆id查询该场馆所有用户的id-->
+    <select id="selectListUserId" resultType="java.lang.Integer">
+        select user_id as userId from tb_hall_user group by user_id
+    </select>
+    <!--查询出场馆管理员的所有用户-->
+    <select id="selectListUserPosition" resultType="java.lang.Integer">
+        select user_id as userId from tb_user_position where user_position = 2
+    </select>
+
+    <select id="getBindUserByHallIdPage" resultType="java.util.Map">
+         SELECT
+            tu.user_id AS userId,
+            tu.username,
+            tu.nick_name AS nickName,
+            tu.real_name AS realName
+        FROM tb_user tu
+        WHERE tu.user_status IN (1, 3)
+              AND tu.real_name IS NOT NULL
+              AND tu.user_id IN(SELECT user_id FROM tb_hall_user WHERE hall_id = #{hallId})
+    </select>
+
+    <delete id="deleteHall">
+        delete from tb_hall where id in
+        <foreach item="ids" collection="ids" open="(" separator="," close=")">
+            #{ids}
+        </foreach>
+        ;
+        delete from tb_hall_price where hall_id in
+        <foreach item="ids" collection="ids" open="(" separator="," close=")">
+            #{ids}
+        </foreach>
+        ;
+        delete from tb_hall_sport where hall_id in
+        <foreach item="ids" collection="ids" open="(" separator="," close=")">
+            #{ids}
+        </foreach>
+        ;
+        delete from tb_hall_greats where hall_id in
+        <foreach item="ids" collection="ids" open="(" separator="," close=")">
+            #{ids}
+        </foreach>
+        ;
+        delete from tb_hall_serve where hall_id in
+        <foreach item="ids" collection="ids" open="(" separator="," close=")">
+            #{ids}
+        </foreach>
+        ;
+        delete from tb_hall_user where hall_id in
+        <foreach item="ids" collection="ids" open="(" separator="," close=")">
+            #{ids}
+        </foreach>
+        ;
+    </delete>
+</mapper>

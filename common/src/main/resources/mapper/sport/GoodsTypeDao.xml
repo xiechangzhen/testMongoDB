@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.dao.sport.GoodsTypeDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.yymt.entity.sport.GoodsTypeEntity" id="goodsTypeMap">
+        <result property="id" column="id"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="goodsTypeName" column="goods_type_name"/>
+        <result property="goodsImages" column="goods_images"/>
+        <result property="orderNum" column="order_num"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <select id="listGoodsType" resultType="java.util.Map">
+        select
+        id,
+        goods_type_name as name,
+        goods_images as goodsImage
+        from tb_goods_type
+    </select>
+
+</mapper>

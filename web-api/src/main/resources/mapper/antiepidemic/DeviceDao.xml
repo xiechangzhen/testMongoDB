@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.modules.common.dao.antiepidemic.DeviceDao">
+
+    <!--根据deviceId获取remoteIP-->
+    <select id="selRemoteIPByDevId" parameterType="map" resultType="string">
+        select RemoteIP from Device where DevID = #{devId}
+    </select>
+
+    <!--根据小区名获取卡点id-->
+    <select id="selRemoteIPsByOrgName" parameterType="map" resultType="string">
+        select RemoteIP from DeviceOrganization devorg
+        left join Device dev on devorg.DeviceId = dev.DevID
+        left join Organization org on devorg.OrganizationId = org.Id
+				where org.Name like '%' + #{orgName} + '%'
+    </select>
+
+    <!--根据deviceId获取remoteIP-->
+    <select id="selDeviceIPsByRemoteIP" parameterType="string" resultType="com.yymt.modules.common.entity.antiepidemic.DeviceEntity">
+        select [DevID],[Desc] from Device where RemoteIP = #{remoteIP}
+    </select>
+
+</mapper>

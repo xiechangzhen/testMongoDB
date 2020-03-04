@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.dao.sport.EpidemicSituationDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.yymt.entity.sport.EpidemicSituationEntity" id="epidemicSituationMap">
+        <result property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="personType" column="person_type"/>
+        <result property="isHbJourney" column="is_hb_journey"/>
+        <result property="symptomList" column="symptom_list"/>
+        <result property="temperature" column="temperature"/>
+        <result property="contact" column="contact"/>
+        <result property="address" column="address"/>
+        <result property="extraAddress" column="extra_address"/>
+        <result property="gps" column="gps"/>
+        <result property="description" column="description"/>
+        <result property="createtime" column="createTime"/>
+        <result property="remark" column="remark"/>
+        <result property="userid" column="userId"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id AS id,
+        name AS name,
+        temperature AS temperature,
+        person_type AS personType,
+        is_hb_journey AS isHbJourney,
+        symptom_list AS symptomList,
+        contact AS contact,
+        address AS address,
+        extra_address AS extraAddress,
+        gps AS gps,
+        description AS description,
+        createTime AS createtime,
+        remark AS remark,
+        userId AS userid,
+    </sql>
+
+
+</mapper>

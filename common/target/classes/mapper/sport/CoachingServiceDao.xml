@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.dao.sport.CoachingServiceDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.yymt.entity.sport.CoachingServiceEntity" id="coachingServiceMap">
+        <result property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="serviceName" column="service_name"/>
+        <result property="serviceSport" column="service_sport"/>
+        <result property="serviceAddress" column="service_address"/>
+        <result property="longitude" column="longitude"/>
+        <result property="latitude" column="latitude"/>
+        <result property="beginTime" column="begin_time"/>
+        <result property="endTime" column="end_time"/>
+        <result property="servicePrice" column="service_price"/>
+        <result property="serviceDescription" column="service_description"/>
+        <result property="serviceStatus" column="service_status"/>
+        <result property="auditUserId" column="audit_user_id"/>
+        <result property="auditTime" column="audit_time"/>
+        <result property="remark" column="remark"/>
+        <result property="createTime" column="create_time"/>
+        <result property="modifyTime" column="modify_time"/>
+        <result property="pageView" column="page_view"/>
+        <result property="serviceSportName" column="serviceSportName"/>
+        <result property="revealCount" column="revealCount"/>
+        <association property="coacher" javaType="com.yymt.entity.api.UserEntity">
+            <id property="userId" column="coacherUserId"/>
+            <result property="username" column="coacherUsername"/>
+            <result property="userSex" column="coacherUserSex"/>
+            <result property="realName" column="coacherRealName"/>
+            <result property="contact" column="coacherContact"/>
+            <result property="coachIdentificationInfo" column="coachIdentificationInfo"/>
+        </association>
+        <association property="auditorSysUser" javaType="com.yymt.entity.sys.SysUserEntity">
+            <id property="userId" column="auditorSysUserId"/>
+            <result property="username" column="auditorSysUsername"/>
+            <result property="deptName" column="auditorSysDeptName"/>
+        </association>
+    </resultMap>
+
+    <select id="listCoachingService" resultMap="coachingServiceMap">
+        SELECT `id`,
+        `user_id`,
+        `service_name`,
+        `service_sport`,
+        `service_address`,
+        `longitude`,
+        `latitude`,
+        `begin_time`,
+        `end_time`,
+        `service_price`,
+        `service_description`,
+        `service_status`,
+        `audit_user_id`,
+        `audit_time`,
+        `remark`,
+        `create_time`,
+        `modify_time`,
+        `page_view`
+        FROM `tb_coaching_service` cs
+        <where>
+            <if test="userId != null and userId != ''">
+                AND cs.user_id = #{userId}
+            </if>
+            <if test="serviceStatus != null and serviceStatus != ''">
+                AND cs.service_status = #{serviceStatus}
+            </if>
+            <if test="sql_filter != null and sql_filter != '' ">
+                AND ${sql_filter}
+            </if>
+        </where>
+    </select>
+
+    <select id="queryCoachingServiceById" resultMap="coachingServiceMap">
+        SELECT cs.`id`,
+        cs.`user_id`,
+        cs.`service_name`,
+        cs.`service_sport`,
+        cs.`service_address`,
+        cs.`longitude`,
+        cs.`latitude`,
+        cs.`begin_time`,
+        cs.`end_time`,
+        cs.`service_price`,
+        cs.`service_description`,
+        cs.`service_status`,
+        cs.`audit_user_id`,
+        cs.`audit_time`,
+        cs.`remark`,
+        cs.`create_time`,
+        cs.`modify_time`,
+        cs.`page_view`,
+        s.sport_name as serviceSportName,
+        u.user_id AS coacherUserId,
+        u.username AS coacherUsername,
+        u.user_sex AS coacherUserSex,
+        u.real_name AS coacherRealName,
+        u.contact AS coacherContact,
+        u.coach_identification_info AS coachIdentificationInfo,
+        su2.user_id AS auditorSysUserId, su2.username AS auditorSysUsername
+        FROM `tb_coaching_service` cs LEFT JOIN tb_sports s on cs.service_sport = s.id
+        LEFT JOIN tb_user u ON cs.user_id = u.user_id
+        LEFT JOIN sys_user su2 ON cs.audit_user_id = su2.user_id
+        WHERE cs.id = #{serviceId}
+    </select>
+
+    <select id="queryCoachingServiceListPage" resultMap="coachingServiceMap">
+        SELECT cs.`id`,
+        cs.`user_id`,
+        cs.`service_name`,
+        cs.`service_address`,
+        cs.`service_status`,
+        cs.`create_time`,
+        cs.`modify_time`,
+        u.user_id AS coacherUserId,
+        u.username AS coacherUsername,
+        u.real_name AS coacherRealName,
+        u.user_sex AS coacherUserSex,
+        u.coach_identification_info AS coachIdentificationInfo,
+        rv.revealCount AS revealCount
+        FROM `tb_coaching_service` cs LEFT JOIN tb_user u ON cs.user_id = u.user_id
+        LEFT JOIN (SELECT COUNT(1) AS revealCount, reveal_content_id FROM tb_reveal
+        WHERE reveal_type = 5 AND reveal_status != 2 GROUP BY reveal_content_id
+        ) rv ON cs.id = rv.reveal_content_id
+        <where>
+            <if test="coachingServiceStatus != null and coachingServiceStatus != ''">
+                <choose>
+                    <when test="coachingServiceStatus == 'reveal'">
+                        AND rv.revealCount > 0
+                    </when>
+                    <otherwise>
+                        AND cs.service_status = #{coachingServiceStatus}
+                    </otherwise>
+                </choose>
+            </if>
+            <if test="createTime != null and createTime != '' ">
+                AND cs.create_time LIKE CONCAT('%', #{createTime}, '%')
+            </if>
+            <if test="sql_filter != null and sql_filter != '' ">
+                AND ${sql_filter}
+            </if>
+            <if test="keyword != null and keyword != ''">
+                AND (
+                cs.service_name LIKE CONCAT('%',#{keyword},'%')
+                OR cs.service_address LIKE CONCAT('%',#{keyword},'%')
+                OR u.real_name LIKE CONCAT('%',#{keyword},'%')
+                OR u.coach_identification_info LIKE CONCAT('%',#{keyword},'%')
+                )
+            </if>
+        </where>
+    </select>
+
+    <select id="coachingServiceAuditCount" resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM `tb_coaching_service` cs LEFT JOIN tb_user u ON cs.user_id = u.user_id
+        <where>
+            cs.service_status = 0
+            <if test="createTime != null and createTime != '' ">
+                AND cs.create_time LIKE CONCAT('%', #{createTime}, '%')
+            </if>
+            <if test="sql_filter != null and sql_filter != '' ">
+                AND ${sql_filter}
+            </if>
+            <if test="keyword != null and keyword != ''">
+                AND (
+                cs.service_name LIKE CONCAT('%',#{keyword},'%')
+                OR cs.service_address LIKE CONCAT('%',#{keyword},'%')
+                OR u.real_name LIKE CONCAT('%',#{keyword},'%')
+                OR u.coach_identification_info LIKE CONCAT('%',#{keyword},'%')
+                )
+            </if>
+        </where>
+    </select>
+
+    <select id="coachingServiceRevealCount" resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM `tb_coaching_service` cs LEFT JOIN tb_user u ON cs.user_id = u.user_id
+        LEFT JOIN (SELECT COUNT(1) AS revealCount, reveal_content_id FROM tb_reveal
+        WHERE reveal_type = 5 AND reveal_status != 2 GROUP BY reveal_content_id
+        ) rv ON cs.id = rv.reveal_content_id
+        <where>
+            rv.revealCount > 0
+            <if test="createTime != null and createTime != '' ">
+                AND cs.create_time LIKE CONCAT('%', #{createTime}, '%')
+            </if>
+            <if test="sql_filter != null and sql_filter != '' ">
+                AND ${sql_filter}
+            </if>
+            <if test="keyword != null and keyword != ''">
+                AND (
+                cs.service_name LIKE CONCAT('%',#{keyword},'%')
+                OR cs.service_address LIKE CONCAT('%',#{keyword},'%')
+                OR u.real_name LIKE CONCAT('%',#{keyword},'%')
+                OR u.coach_identification_info LIKE CONCAT('%',#{keyword},'%')
+                )
+            </if>
+        </where>
+    </select>
+
+    <select id="getCoachingServiceListByIds" resultMap="coachingServiceMap">
+        SELECT cs.id, cs.service_name, cs.service_price,
+        cs.create_time, cs.modify_time, cs.page_view
+        FROM tb_coaching_service cs
+        WHERE cs.service_status = 1 AND cs.id IN
+        <foreach item="item" index="index" collection="ids"
+                 open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+</mapper>

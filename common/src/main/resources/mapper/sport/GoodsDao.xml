@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.dao.sport.GoodsDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.yymt.entity.sport.GoodsEntity" id="goodsMap">
+        <result property="id" column="id"/>
+        <result property="goodsName" column="goods_name"/>
+        <result property="goodsPrice" column="goods_price"/>
+        <result property="categoryId" column="category_id"/>
+        <result property="goodsImage" column="goods_image"/>
+        <result property="goodsStatus" column="goods_status"/>
+        <result property="goodsDetails" column="goods_details"/>
+        <result property="createUserId" column="create_user_id"/>
+        <result property="shopId" column="shop_id"/>
+        <result property="auditUserId" column="audit_user_id"/>
+        <result property="auditTime" column="audit_time"/>
+        <result property="remark" column="remark"/>
+        <result property="createTime" column="create_time"/>
+        <result property="modifyTime" column="modify_time"/>
+        <result property="pageView" column="page_view"/>
+    </resultMap>
+
+    <select id="listGoodsByStoreId" resultType="java.util.Map">
+        select
+        tg.id,
+        tg.goods_name as goodsName,
+        tg.goods_price as goodsPrice,
+        tg.category_id as categoreId,
+        tg.goods_image as goodsImage,
+        tu.username as phone,
+        tg.goods_details as goodsDetail
+        from tb_goods tg left join tb_store ts on ts.id = tg.shop_id
+        left join tb_user tu on tu.user_id = ts.seller_id
+        where shop_id = #{shopId } and goods_status = 1
+    </select>
+
+    <!--app通过店铺id删除店铺里面的所有商品-->
+    <delete id="deleteByStoreId">
+        delete from tb_goods where shop_id = #{storeId}
+    </delete>
+
+    <!--后台查询商品列表-->
+    <select id="listGoodsAdmin" resultType="java.util.Map">
+        select
+        tg.id,
+        tg.goods_name as goodsName,
+        tu.real_name as realName,
+        ts.store_name as storeName,
+        tg.create_time as createTime,
+        IF(tr.revealNum,tr.revealNum,0) AS revealNum,
+        tg.goods_status as goodsStatus
+        from tb_goods tg left join tb_store ts on tg.shop_id = ts.id
+        left join tb_user tu on tu.user_id = ts.seller_id
+        LEFT JOIN (
+            select
+            reveal_content_id,count(1) AS revealNum
+            from tb_reveal where reveal_type=3 and reveal_status != 2  GROUP BY reveal_content_id
+        ) AS tr ON tg.id = tr.reveal_content_id
+        where tg.goods_status <![CDATA[ >= ]]> 0
+        <if test="revealNum != null and revealNum != ''">
+            and revealNum > 0
+        </if>
+        <if test="goodsStatus != null and goodsStatus != '' ">
+            and tg.goods_status = #{goodsStatus}
+        </if>
+        <if test="keyword != null and keyword != '' ">
+            and (tg.goods_name like concat('%',#{keyword},'%')
+                or tu.real_name like concat('%',#{keyword},'%')
+                or ts.store_name like concat('%',#{keyword},'%')
+            )
+        </if>
+        <if test="createTime != null and createTime != '' ">
+            and tg.create_time like concat('%',#{createTime},'%')
+        </if>
+    </select>
+
+    <select id="reportCount" resultType="java.lang.Integer">
+        select
+        count(1)
+        from tb_goods tg left join tb_store ts on tg.shop_id = ts.id
+        left join tb_user tu on tu.user_id = ts.seller_id
+        LEFT JOIN (
+        select
+        reveal_content_id,count(1) AS revealNum
+        from tb_reveal where reveal_type=3 and reveal_status != 2 GROUP BY reveal_content_id
+        ) AS tr ON tg.id = tr.reveal_content_id
+        where revealNum > 0
+        <if test="keyword != null and keyword != '' ">
+            and (tg.goods_name like concat('%',#{keyword},'%')
+            or tu.real_name like concat('%',#{keyword},'%')
+            or ts.store_name like concat('%',#{keyword},'%')
+            )
+        </if>
+        <if test="createTime != null and createTime != '' ">
+            and tg.create_time like concat('%',#{createTime},'%')
+        </if>
+    </select>
+
+    <!--后台根据id查询商品信息-->
+    <select id="selectGoodsById" resultType="java.util.Map">
+        select
+        tg.id,
+        tg.goods_name as goodsName,
+        tg.goods_image as goodsImage,
+        tg.goods_price as goodsPrice,
+        tu.real_name as realName,
+        tg.goods_details as goodsDetails,
+        ts.store_name as storeName,
+        ts.store_logo as storeLogo,
+        ts.store_address as storeAddress,
+        ts.longitude,
+        ts.latitude,
+        ts.store_introduce as storeIntroduce,
+        ts.id as storeId,
+        ts.seller_id as sellerId,
+        tu.username as phone,
+        tg.page_view as pageView,
+        tg.create_time as createTime
+        from tb_goods tg left join tb_store ts on tg.shop_id = ts.id
+        left join tb_user tu on tu.user_id = ts.seller_id
+        where tg.id = #{id}
+    </select>
+
+    <!--app查询上新的所有商品-->
+    <select id="listGoods" resultType="java.util.Map">
+        select
+        tg.id,
+        tg.goods_name as goodsName,
+        tg.goods_image as goodsImage,
+        tg.goods_price as goodsPrice,
+        tg.goods_details as goodsDetails,
+        tg.page_view as pageView,
+        ts.store_name as storeName,
+        ts.store_address as storeAddress,
+        ts.store_logo as storeLogo,
+        ts.store_introduce as storeIntroduce,
+        ts.longitude as longitude,
+        ts.latitude as latitude,
+        ts.id as storeId,
+        tu.user_id as userId,
+        tu.username as phone
+        from tb_goods tg left join tb_store ts on tg.shop_id = ts.id
+        left join tb_user tu on tu.user_id = ts.seller_id
+        where 1=1
+        <if test="categoryId != null and categoryId != '' ">
+            and tg.category_id = #{categoryId}
+        </if>
+    </select>
+
+    <select id="getGoodsListByIds" resultMap="goodsMap">
+        SELECT g.id, g.goods_name, g.goods_price, g.goods_image, g.shop_id,
+        g.create_time, g.modify_time, g.page_view
+        FROM tb_goods g
+        WHERE g.goods_status = 1 AND g.id IN
+        <foreach item="item" index="index" collection="ids"
+                 open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+</mapper>

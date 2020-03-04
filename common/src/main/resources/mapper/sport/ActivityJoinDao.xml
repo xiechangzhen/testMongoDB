@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.dao.sport.ActivityJoinDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.yymt.entity.sport.ActivityJoinEntity" id="activityJoinMap">
+        <result property="id" column="id"/>
+        <result property="joinUserId" column="join_user_id"/>
+        <result property="activityId" column="activity_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <select id="selectJoinUserPage" resultType="java.util.Map">
+        select taj.*,tu.nick_name,tu.real_name,tu.mobile,tu.user_sex,tu.user_address,tu.user_type
+        from tb_activity_join taj,tb_user tu
+        where taj.join_user_id = tu.user_id
+        and activity_id = #{activityId}
+    </select>
+    
+    <select id="getTotal" resultType="java.util.Map">
+        select count(*) as totalcount from tb_activity_join where activity_id = #{activityId}
+    </select>
+    <!--SELECT
+        SUBSTR(GROUP_CONCAT(totalcount),1,1) as 'totalcount',
+        SUBSTR(GROUP_CONCAT(totalcount),3,1) as 'isJoin'
+        FROM (
+        select count(*) as totalcount from tb_activity_join where activity_id = #{activityId} union ALL
+        select count(*) as isJoin from tb_activity_join where activity_id = #{activityId} and join_user_id = #{userId}
+        ) temp-->
+</mapper>

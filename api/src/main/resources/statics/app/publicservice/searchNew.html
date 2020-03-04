@@ -1,0 +1,302 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>公共服务搜索</title>
+    <link rel="stylesheet" type="text/css" href="../../../css/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../../css/style.css" />
+    <link rel="stylesheet" type="text/css" href="../../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../home/css/home.css" />
+    <style>
+        body,
+        html {
+            background-color: #ffffff;
+        }
+
+        .cancel {
+            font-size: 16px;
+            line-height: 48px;
+            color: #fff;
+        }
+
+        .font01 {
+            font-size: 10px;
+            font-family: '微软雅黑';
+            color: #666666;
+        }
+
+        .font02 {
+            font-size: 12px;
+            font-family: '微软雅黑';
+            color: #989898;
+        }
+
+        .font03 {
+            font-size: 12px;
+            font-family: '微软雅黑';
+            color: #666666;
+            background-color: #f2f2f2;
+            border-radius: 20px;
+            padding: 4px 11px;
+            float: left;
+            margin-right: 20px;
+            margin-bottom: 12px;
+        }
+
+        .category {
+            height: 36px;
+            border-bottom: 0.5px solid #c9c9c9;
+            font-size: 14px;
+            color: #282828;
+            line-height: 36px;
+            padding-left: 16px;
+        }
+    </style>
+</head>
+
+<body>
+    <div  class="flex-wrap flex-vertical">
+        <header id="header" style="position:relative;width:100%;background-color:#409aff">
+            <table id="searchBar" cellspacing="0" cellpadding="0" align="center" style="width:100%; height:48px;">
+                <tr>
+                    <td width="16px;">&nbsp;</td>
+                    <td width="16px">
+                        <img src="../../../image/arr-l.png" style="height:16px;width:16px;" onclick="back();">
+                    </td>
+                    <td width="16px;">&nbsp;</td>
+                    <td>
+                        <table cellspacing="0" cellpadding="0" align="center" height="29px;" style="width:100%;background-color:#FFFFFF; border-radius:20px;">
+                            <tr>
+                                <td width="3%">&nbsp;</td>
+                                <td width="12px"><img src="../../../image/publicservice/search-icon.png" style="margin-top:3px;" /></td>
+                                <td width="3%">&nbsp;</td>
+                                <td>
+                                    <form id="searchForm" action="javascript:submitInputContent();">
+                                        <input type="text" id="searchKeys" style="width:90%; font-size:12px; height:29px;" placeholder="请输入搜索内容" />
+                                    </form>
+                                </td>
+                                <td width="5%" id="deleteBtn" style="display:none;"><img src="../../../image/delete.png" style="margin-top:3px;" /></td>
+                                <td width="3%">&nbsp;</td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td width="16px;">&nbsp;</td>
+                    <td width="10%" align="center"><span class="cancel" onclick="submitInputContent();">搜索</span></td>
+                    <td width="16px;">&nbsp;</td>
+                </tr>
+            </table>
+        </header>
+        <div id="main" class="flex-wrap flex-vertical flex-con" style="background:#fff;flex:1;-ms-flex:1;overflow-y:auto;">
+            <div style="width:100%; margin-left:20px; margin-top:16px;display:" id="serchRecordTitle">
+                <span style="width:100%;margin-bottom:16px;color:#656565;font-size:14px;">历史搜索</span>
+                <div id="searchRecordList">
+
+                </div>
+              <!--  <span class="font03" onclick="getSearchValue(this.id)">蓝球</span>
+                <span class="font03" onclick="getSearchValue(this.id)">运动</span>
+                <span class="font03" onclick="getSearchValue(this.id)">赣州青少年运动会</span>
+                <span class="font03" onclick="getSearchValue(this.id)">马拉松赛事</span>-->
+            </div>
+            <div style="width:95%; margin:0 auto; margin-top:26px; text-align:center;display:" id="clearRecord" onclick="clearHistory();" class="font02">
+                删除记录
+                <img src="../../../image/Deleterecord.png" style="width:9px;margin-left:12px;">
+            </div>
+        </div>
+    </div>
+</body>
+<script type="text/javascript" src="../../../script/api.js"></script>
+<script type="text/javascript" src="../../../script/jquery-3.3.1.min.js"></script>
+<script type="text/javascript" src="../../../script/aui-toast.js"></script>
+<script type="text/javascript">
+    var searchRecordList = [];
+    var toast = new auiToast();
+    apiready = function() {
+        $api.fixStatusBar($api.dom('#header'));
+
+        var searchRecordListString = api.getPrefs({
+            sync: true,
+            key: 'searchStr' + api.getPrefs({
+                sync: true,
+                key: 'userId'
+            })
+        });
+        if (searchRecordListString)
+            searchRecordList = JSON.parse(searchRecordListString);
+        console.log(searchRecordList);
+        initPage();
+
+        api.addEventListener({
+            name: 'viewappear'
+        }, function(ret, err) {
+            $("#searchKeys").focus();
+            var UIInput = api.require('UIInput');
+            UIInput.popupKeyboard({
+                id: 0
+            });
+        });
+
+    };
+
+    $("#searchKeys").bind("input propertychange", function() {
+        if ($.trim($(this).val()) == "") {
+            $("#deleteBtn").hide();
+        } else {
+            $("#deleteBtn").show();
+        }
+    });
+
+    $("#searchKeys").bind("click", function() {
+      if ($.trim($(this).val()) == "") {
+          $("#deleteBtn").hide();
+      } else {
+          $("#deleteBtn").show();
+      }
+        api.closeFrame({
+            name: 'search-result',
+            animation: {
+                type: "push",
+                subType: "from_top",
+                duration: 300
+            }
+        });
+      //重新加载历史记录
+      $("#searchRecordList").empty();
+      initPage();
+    });
+
+    $("#deleteBtn").bind("click", function() {
+        $("#searchKeys").val("");
+        $("#deleteBtn").hide();
+    });
+
+    function initPage() {
+        if (searchRecordList.length > 0) {
+            $("#clearRecord").css("display", "");
+            $("#serchRecordTitle").css("display", "");
+            for (i = 0; i < searchRecordList.length; i++) {
+                var innerHtml = "";
+                var item = searchRecordList[i];
+                innerHtml = ' <span class="font03" id="' + i + '" data_value="' + item + '" onclick="getSearchValue(this.id)">' + item + '</span>';
+                $("#searchRecordList").append(innerHtml);
+            }
+        } else {
+            $("#searchRecordList").empty();
+            $("#clearRecord").css("display", "none");
+            $("#serchRecordTitle").css("display", "none");
+        }
+    }
+    function clearHistory(){
+      //弹出清除提示框
+      api.openFrame({
+          name: 'dialogwithcallback',
+          url: '../../controls/dialogwithcallback.html',
+          rect: {
+              x: 0,
+              y: 0,
+              w: 'auto',
+              h: 'auto'
+          },
+          pageParam: {
+              text: "确定要删除历史搜索记录吗？",
+              leftText: "取消",
+              rightText: "确定",
+              previousName: "publicservicesearch",
+              previousType: "window",
+              rightMethodName: "clearRecord()",
+          },
+          bounces: false
+      });
+    }
+    //清除历史搜索记录
+    function clearRecord() {
+        searchRecordList = [];
+        api.setPrefs({
+            key: 'searchStr' + api.getPrefs({
+                sync: true,
+                key: 'userId'
+            }),
+            value: '[]'
+        });
+        initPage();
+    }
+    //点击搜索记录搜索
+    function getSearchValue(id) {
+        var value = $("#" + id).attr("data_value");
+        console.log(value);
+        $("#searchKeys").val(value); //设置输入框的值
+        submitInputContent();
+    }
+    window.onkeydown = function(event) {
+        if (event.keyCode == 13) {
+            submitInputContent();
+        }
+    }
+
+    function submitInputContent() {
+        // $("#searchKeys").focus();
+        var searchKeys = $.trim($("#searchKeys").val());
+        console.log(searchKeys);
+        if (searchKeys == "") {
+            toast.fail({
+                title: "请输入搜索关键字"
+            });
+            return;
+        }
+        if (searchRecordList.indexOf(searchKeys.trim()) == -1) {
+            searchRecordList.push(searchKeys);
+        }
+      //  $api.setStorage('homePageSearch', JSON.stringify(searchRecordList));
+        api.setPrefs({
+            key: 'searchStr' + api.getPrefs({
+                sync: true,
+                key: 'userId'
+            }),
+            value: JSON.stringify(searchRecordList)
+        });
+
+        $("#searchKeys").blur();
+        var UIInput = api.require('UIInput'); //收起键盘
+        UIInput.closeKeyboard({
+            id: 0
+        });
+
+        api.openFrame({
+            name: 'search-result',
+            url: './search-result.html',
+            pageParam: {
+                searchStr: $("#searchKeys").val(),
+                headheight: $("#main").offset().top
+            },
+            rect: {
+                x: 0,
+                y:$("#main").offset().top,
+                w: api.winWidth,
+                h: 'auto'
+            },
+            animation: {
+                type: "push",
+                subType: "from_bottom",
+                duration: 300
+            }
+        });
+    }
+
+    function back() {
+        /*api.closeFrame({
+            name: 'searchResult'
+        });*/
+        api.closeWin({
+            name: 'publicservicesearch',
+            animation: {
+                type: "push",
+                subType: "from_left",
+                duration: 300
+            }
+        });
+    }
+</script>
+
+</html>

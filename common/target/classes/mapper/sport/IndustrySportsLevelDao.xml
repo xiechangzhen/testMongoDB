@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.dao.sport.IndustrySportsLevelDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.yymt.entity.sport.IndustrySportsLevelEntity" id="industrySportsLevelMap">
+        <result property="personType" column="person_type"/>
+        <result property="industryPersonId" column="industry_person_id"/>
+        <result property="sportId" column="sport_id"/>
+        <result property="levelId" column="level_id"/>
+    </resultMap>
+
+
+</mapper>

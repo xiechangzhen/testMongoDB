@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>公共服务</title>
+    <link rel="stylesheet" type="text/css" href="../../../css/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../../css/common.css" />
+
+    <style type="text/css">
+        .site-title {
+            padding-left: 16px;
+            padding-top: 12px;
+            padding-bottom: 12px;
+            color: #282828;
+            font-size: 14px;
+        }
+
+        #sitelist i {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            -webkit-background-size: contain !important;
+            background-size: contain !important;
+            margin-right: .5em;
+            vertical-align: text-bottom;
+        }
+
+        #sitelist .time {
+            background: url(../../../image/publicservice/time-icon.png) no-repeat left center;
+        }
+
+        #sitelist .project {
+            background: url(../../../image/publicservice/project-icon.png) no-repeat left center;
+        }
+
+        #sitelist .address {
+            background: url(../../../image/publicservice/landmark-red-iocn.png) no-repeat center;
+        }
+
+        .site-more {
+            padding-left: 17px;
+            padding-top: 12px;
+            height: 36px;
+            color: #656565;
+            font-size: 12px;
+        }
+
+        .site-more img {
+            float: right;
+            margin-right: 16px;
+        }
+
+        .line {
+            height: 8px;
+            background: #eeeeee;
+        }
+
+        #communitylist i {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            -webkit-background-size: contain !important;
+            background-size: contain !important;
+            margin-right: .5em;
+            vertical-align: text-bottom;
+        }
+
+        #communitylist .post {
+            background: url(../../../image/publicservice/post-icon.png) no-repeat left center;
+        }
+
+        #communitylist .tel {
+            background: url(../../../image/publicservice/Tel-icon.png) no-repeat left center;
+        }
+
+        #communitylist .address {
+            background: url(../../../image/publicservice/landmark-red-iocn.png) no-repeat center;
+        }
+
+        #personlist i {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            -webkit-background-size: contain !important;
+            background-size: contain !important;
+            margin-right: .5em;
+            vertical-align: text-bottom;
+        }
+
+        #personlist .man {
+            background: url(../../../image/publicservice/man-icon.png) no-repeat left center;
+            margin-left: 10px;
+        }
+
+        #personlist .woman {
+            background: url(../../../image/publicservice/woman-icon.png) no-repeat left center;
+            margin-left: 10px;
+        }
+
+        #personlist .tel {
+            background: url(../../../image/publicservice/Tel-icon.png) no-repeat left center;
+        }
+
+        #personlist .class {
+            background: url(../../../image/publicservice/project-icon.png) no-repeat left center;
+        }
+
+        #personlist .level {
+            margin: auto;
+            list-style: none;
+            width: 100%;
+        }
+
+        #personlist .level li {
+            float: left;
+            display: inline;
+            padding-right: 8px;
+        }
+
+        #personlist .judge {
+            padding: 1px 5px;
+            border: 1px solid #ff3b30;
+            color: #ff3b30;
+            font-size: 12px;
+            border-radius: 3px;
+        }
+
+        #personlist .player {
+            padding: 1px 5px;
+            border: 1px solid #409aff;
+            color: #409aff;
+            font-size: 12px;
+            border-radius: 3px;
+        }
+
+        #personlist .trainer {
+            padding: 1px 5px;
+            border: 1px solid #ff923a;
+            color: #ff923a;
+            font-size: 12px;
+            border-radius: 3px;
+        }
+        #personlist .instructor  {
+            padding: 1px 5px;
+            border: 1px solid #2aa604;
+            color: #2aa604;
+            font-size: 12px;
+            border-radius: 3px;
+        }
+
+
+        .button {
+            background-color: #409aff;
+            border: none;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 12px;
+            margin-left: 10px;
+            cursor: pointer;
+            height: 29px;
+            width: 80px;
+        }
+
+        #guidelist {
+            padding-left: 16px;
+            padding-right: 16px;
+            width: 100%;
+        }
+
+        #guidelist .t1 {
+            padding-top: 25.5px;
+            font-size: 18px;
+            color: #232323;
+        }
+
+        #guidelist .t2 {
+            width: 80px;
+            height: 80px;
+            border-bottom: 16px;
+            border-bottom: 1px solid #eeeeee;
+        }
+
+        #guidelist .t3 {
+            font-size: 12px;
+            color: #666666;
+            border-bottom: 1px solid #eeeeee;
+        }
+
+        .bt_org {
+            background-color: #409aff;
+            border: none;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            cursor: pointer;
+            height: 29px;
+            /*  width: 150px;*/
+            border-radius: 0px 29px 29px 0px;
+        }
+
+        .bt_info {
+            background-color: #ffffff;
+            border: 1px solid #409aff;
+            color: #409aff;
+            text-align: center;
+            vertical-align: middle;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            cursor: pointer;
+            height: 29px;
+            width: 60px;
+            border-radius: 5px;
+        }
+
+        #orglist table {
+            width: 100%;
+        }
+
+        #orglist .org {
+            padding-top: 12px;
+        }
+
+        #orglist .t1 {
+            width: 39.5px;
+            padding-left: 18px;
+            vertical-align: top;
+            padding-bottom: 16px;
+        }
+
+        #orglist img {
+            margin-top: 3px;
+        }
+
+        #orglist .t2 {
+            padding-left: 16px;
+            vertical-align: top;
+            padding-bottom: 16px;
+        }
+
+        #orglist .t3 {
+            font-size: 12px;
+            color: #666666;
+            vertical-align: top;
+        }
+
+        #orglist .t4 {
+            vertical-align: bottom;
+            padding-bottom: 6px;
+            width: 80px;
+            padding-left: 10px;
+        }
+
+        #orglist .line {
+            margin: auto;
+            height: 1px;
+            background-color: #eeeeee;
+            width: 90%;
+            margin-top: 6px;
+        }
+
+        .hintPic {
+            display: block;
+            width: 90px;
+            margin: 0 auto;
+            margin-bottom: 24px;
+        }
+
+        .hint01 {
+            font-size: 14px;
+            color: #282828;
+            font-family: '微软雅黑';
+            margin: 0 auto;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="main">
+        <div id="site-div" style="display:none">
+            <div class="site-title">
+                场馆
+            </div>
+            <div class="site-list">
+                <ul class="aui-list aui-media-list" id="sitelist">
+                </ul>
+                <script id="site-template" type="text/x-dot-template">
+                    {{ for(var i = 0, len = it.length; i
+                    < len; i++) { }} <li class="aui-list-item">
+                        <div class="aui-media-list-item-inner" onclick="tagetsiteInfo({{=it[i].id}})">
+                            <div class="aui-list-item-media">
+                                <img src="{{=it[i].hallImages==null?'../../../image/default.png':it[i].hallImages.split(',')[0]}}" height="84">
+                            </div>
+                            <div class="aui-list-item-inner">
+                                <div class="aui-list-item-text">
+                                    <div class="aui-list-item-title">{{=it[i].hallName}}</div>
+                                </div>
+                                <div class="aui-list-item-text">
+                                    <div>
+                                        <i class="time"></i>
+                                        <span>
+                        {{=it[i].hallOpenWeek}}
+                        </span>
+                                    </div>
+                                </div>
+                                <div class="aui-list-item-text">
+                                    <div>
+                                        <i class="project"></i><span>
+                          {{=GetSportName(it[i].sports)}}
+                          </span>
+                                    </div>
+                                </div>
+                                <div class="aui-list-item-text">
+                                    <div>
+                                        <i class="address"></i><span>{{=it[i].hallAddress}}</span>
+                                    </div>
+                                    <div class="aui-list-item-right"></div>
+                                </div>
+                            </div>
+                        </div>
+                        </li>
+                        {{ } }}
+                </script>
+            </div>
+            <div class="site-more" id="site-more">
+                查看更多场馆
+                <img src="../../../image/More-btn.png" winth="12" height="9" alt="" onclick="SearchMore()">
+            </div>
+            <div class="divideDiv" style="border-bottom:8px solid #f2f2f2;">
+            </div>
+        </div>
+        <div id="community-div" style="display:none">
+            <div class="site-title">
+                社团
+            </div>
+            <div class="site-list">
+                <ul class="aui-list aui-media-list" id="communitylist">
+                </ul>
+                <script id="community-template" type="text/x-dot-template">
+                    {{ for(var i = 0, len = it.length; i
+                    < len; i++) { }} <li class="aui-list-item">
+                        <div class="aui-media-list-item-inner" onclick="tagetInfo({{=it[i].id}})">
+                            <div class="aui-list-item-media">
+                                <img src="{{=it[i].corporationImages==null?'../../../image/default.png':it[i].corporationImages.split(',')[0]}}" height="84">
+                            </div>
+                            <div class="aui-list-item-inner">
+                                <div class="aui-list-item-text">
+                                    <div class="aui-list-item-title">{{=it[i].corporationName}}</div>
+                                    <div class="aui-list-item-right"></div>
+                                </div>
+                                <div class="aui-list-item-text">
+                                    <div>
+                                        <i class="post"></i>
+                                        <span>{{=it[i].leaderPositionName}}：{{=it[i].corporationLeader}}</span>
+                                    </div>
+                                </div>
+                                <div class="aui-list-item-text">
+                                    <div>
+                                        <i class="tel"></i><span>电话：{{=it[i].corporationContact}}</span>
+                                    </div>
+                                </div>
+                                <div class="aui-list-item-text">
+                                    <div>
+                                        <i class="address"></i><span>{{=it[i].corporationAddress}}</span>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                        </li>
+                        {{ } }}
+                </script>
+            </div>
+            <div class="site-more" id="community-more">
+                查看更多社团
+                <img src="../../../image/More-btn.png" winth="12" height="9" alt="" onclick="SearchMore()">
+            </div>
+            <div class="divideDiv" style="border-bottom:8px solid #f2f2f2;">
+            </div>
+        </div>
+        <!--<div class="line"></div>-->
+        <div id="person-div" style="display:none">
+            <div class="site-title">
+                人员
+            </div>
+            <div class="site-list">
+                <ul class="aui-list aui-media-list" id="personlist">
+                </ul>
+                <script id="person-template" type="text/x-dot-template">
+                    {{ for(var i = 0, len = it.length; i
+                    < len; i++) { }} <li class="aui-list-item">
+                        <div class="aui-media-list-item-inner">
+                            <div class="aui-list-item-media" style="height:100%;padding-top:15px">
+                                <img src="{{=it[i].photo==null||it[i].photo=='null'?'../../../image/default.png':it[i].photo}}" onerror="Javascript:this.src='../../../image/default.png'" height="84">
+                            </div>
+                            <div class="aui-list-item-inner">
+                                <div class="aui-list-item-text">
+                                    <div class="aui-list-item-title">
+                                        {{=it[i].realName}}
+                                        <i class="{{=it[i].sex==0?'woman':'man'}}"></i>
+                                    </div>
+                                    <div class="aui-list-item-right"></div>
+                                </div>
+                                <div class="aui-list-item-text">
+                                    <div>
+                                        <i class="tel"></i><span>  {{=it[i].contact==null?"":it[i].contact}}</span>
+                                    </div>
+                                </div>
+                                <!--
+                    <div class="aui-list-item-text">
+                        <div>
+                          <i class="class"></i><span> {{=it[i].sport_name==null?"":it[i].sport_name}}</span>
+                        </div>
+                    </div>
+                    -->
+                                <div class="aui-list-item-text">
+                                    <ul class="level">
+                                        {{=levelTypeLevelStr(it[i].sportLevelString)}}
+                                    </ul>
+
+                                </div>
+
+                            </div>
+                        </div>
+                        </li>
+                        {{ } }}
+                </script>
+            </div>
+            <div class="site-more" id="person-more">
+                查看更多人员
+                <img src="../../../image/More-btn.png" winth="12" height="9" alt="" onclick="SearchMore()">
+            </div>
+            <div class="divideDiv" style="border-bottom:8px solid #f2f2f2;">
+            </div>
+        </div>
+        <!--<div class="line"></div>-->
+        <div id="guide-div" style="display:none">
+            <div class="site-title" style="border-bottom:1px solid #eeeeee;">
+                指南
+            </div>
+            <div class="site-list">
+                <table id="guidelist">
+                </table>
+                <script id="guide-template" type="text/x-dot-template">
+                    {{ for(var i = 0, len = it.length; i  < len; i++) { }} <tr>
+                        <td class="t1">{{=it[i].name}}</td>
+                        <td class="t2" rowspan="2">
+                            <button type="button" name="button" class="button" onclick="checkdownload('{{=it[i].name}}','{{=it[i].name}}','{{=it[i].file}}')">下载</button>
+                        </td>
+                        </tr>
+                        <tr>
+                            <td class="t3">{{=getDateFormation(it[i].createTime)}}</td>
+                        </tr>
+                        {{ } }}
+                </script>
+            </div>
+            <div class="site-more" id="guide-more">
+                查看更多指南
+                <img src="../../../image/More-btn.png" winth="12" height="9" alt="" onclick="SearchMore()">
+            </div>
+            <div class="divideDiv" style="border-bottom:8px solid #f2f2f2;">
+            </div>
+        </div>
+        <!--<div class="line"></div>-->
+        <div id="org-div" style="display:none">
+            <div class="site-title">
+                机构
+            </div>
+            <div id="orglist">
+
+            </div>
+            <script id="org-template" type="text/x-dot-template">
+                {{ for(var i = 0, len = it.length; i< len; i++) { }} <div class="org">
+                    <button type="button" name="button" class="bt_org">{{=it[i].orgName}}</button>
+                    <table>
+                        <tr>
+                            <td class="t1"><img src="../../../image/publicservice/landmark-red-iocn.png" width="9.5" height="12" alt=""></td>
+                            <td class="t3">地址：{{=it[i].address}}</td>
+                            <td class="t4" rowspan="2">
+                                <button type="button" name="button" class="bt_info" onclick="tagetorgInfo({{=it[i].id}})">详情</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="t2"><img src="../../../image/publicservice/function-icon.png" width="13" height="12" alt=""></td>
+                            <td class="t3">职责：{{=it[i].duty}}</td>
+                        </tr>
+                    </table>
+                    <div class="line"></div>
+        </div>
+        {{ } }}
+        </script>
+        <div class="site-more" id="org-more">
+            查看更多机构
+            <img src="../../../image/More-btn.png" winth="12" height="9" alt="" onclick="SearchMore()">
+        </div>
+        <div class="divideDiv" style="border-bottom:8px solid #f2f2f2;">
+        </div>
+    </div>
+    <div id="emptyContentDiv" style="padding-top:40px;display:none;">
+        <img src="../../community/images/emptyContent.png" class="hintPic" style="width:110px;" />
+        <div class="hint01">没有找到你要找的东西</div>
+    </div>
+    </div>
+    <br><br>
+</body>
+
+</html>
+<script type="text/javascript" id="yytDESScript" src="../../../script/yytdes.js" data="3"></script>
+<script type="text/javascript" src="../../../script/api.js"></script>
+<script type="text/javascript" src="../../../script/doT.min.js"></script>
+<script type="text/javascript" src="../../../script/zepto.js"></script>
+<script type="text/javascript" src="../../../script/common.js"></script>
+<script type="text/javascript">
+    var searchStr = "";
+    var headheight = 0;
+    var emptyFrameFlag = false;
+    apiready = function() {
+        searchStr = api.pageParam.searchStr;
+        headheight = api.pageParam.headheight;
+        InitData(searchStr);
+    }
+
+    function SearchMore() {
+        api.openWin({
+            name: 'search-more',
+            url: './search-more.html',
+            pageParam: {
+                name: 'test'
+            }
+        });
+
+    }
+
+    function openEmptyFrame() {
+        api.openFrame({
+            name: 'search-empty',
+            url: './search-empty.html',
+            rect: {
+                x: 0,
+                y: headheight,
+                w: 'auto',
+                h: 'auto'
+            },
+            pageParam: {
+                name: 'test'
+            },
+            bounces: true,
+            bgColor: 'rgba(0,0,0,0)',
+            vScrollBarEnabled: true,
+            hScrollBarEnabled: true
+        });
+        emptyFrameFlag = true;
+    }
+
+    function closeEmptyFrame() {
+        api.closeFrame({
+            name: 'search-empty'
+        });
+        emptyFrameFlag = false;
+    }
+
+    function hidediv() {
+        $("#site-div").hide();
+        $("#community-div").hide();
+        $("#guide-div").hide();
+        $("#org-div").hide();
+    }
+
+    function InitData(searchStr) {
+        ajaxRequest(encodeURI('search/publicService/' + searchStr), 'POST', {
+            "keyword": ''
+        }, function(ret, err) {
+            console.log(JSON.stringify(ret));
+            if (ret.code == 0) {
+                // console.log(JSON.stringify(ret));
+                if (emptyFrameFlag) {
+                    closeEmptyFrame();
+                }
+                hidediv();
+                var resultdata = JSON.parse(decryptByDESModeEBC(ret.data));
+                console.log("publicServicesearch:" + JSON.stringify(resultdata));
+                var corporations = resultdata.corporation.list;
+                var organizations = resultdata.organization.list;
+                var halls = resultdata.hall.list;
+                var guides = resultdata.guide.list;
+                var persons = resultdata.industry_person.list;
+                var IsEmpty = true;
+                if (corporations.length > 0) {
+                    IsEmpty = false;
+                    var communitylist = $api.byId('communitylist');
+                    var tpl = $api.byId('community-template').text;
+                    var tmpText = doT.template(tpl);
+                    communitylist.innerHTML = communitylist.innerHTML + tmpText(corporations);
+                    $("#community-div").show();
+                    if (corporations.length <= 500) {
+                        $("#community-more").hide();
+                    }
+                }
+                if (organizations.length > 0) {
+                    IsEmpty = false;
+                    var orglist = $api.byId('orglist');
+                    var tpl = $api.byId('org-template').text;
+                    var tmpText = doT.template(tpl);
+                    orglist.innerHTML = orglist.innerHTML + tmpText(organizations);
+                    $("#org-div").show();
+                    if (organizations.length <= 500) {
+                        $("#org-more").hide();
+                    }
+                }
+                if (halls.length > 0) {
+                    IsEmpty = false;
+                    var sitelist = $api.byId('sitelist');
+                    var tpl = $api.byId('site-template').text;
+                    var tmpText = doT.template(tpl);
+                    sitelist.innerHTML = sitelist.innerHTML + tmpText(halls);
+                    $("#site-div").show();
+                    if (halls.length <= 500) {
+                        $("#site-more").hide();
+                    }
+                }
+                if (guides.length > 0) {
+                    IsEmpty = false;
+                    var guidelist = $api.byId('guidelist');
+                    var tpl = $api.byId('guide-template').text;
+                    var tmpText = doT.template(tpl);
+                    guidelist.innerHTML = guidelist.innerHTML + tmpText(guides);
+                    $("#guide-div").show();
+                    if (guides.length <= 500) {
+                        $("#guide-more").hide();
+                    }
+                }
+                if (persons.length > 0) {
+                    IsEmpty = false;
+                    var personlist = $api.byId('personlist');
+                    var tpl = $api.byId('person-template').text;
+                    var tmpText = doT.template(tpl);
+                    personlist.innerHTML = personlist.innerHTML + tmpText(persons);
+                    $("#person-div").show();
+                    if (guides.length <= 500) {
+                        $("#person-more").hide();
+                    }
+
+                }
+                if (IsEmpty) {
+
+                    $api.css($api.byId('emptyContentDiv'), 'display:block');
+                }
+
+            } else {
+                if (ret.code == 1000) {
+                    logout(1); //token失效
+                } else {
+                    openEmptyFrame();
+                }
+            }
+            api.hideProgress();
+        });
+    }
+
+    function GetshortDateStr(DateStr) {
+        var d = new Date(DateStr);
+        //return d.pattern("HH:mm");
+        var hours = d.getHours();
+        var minutes = d.getMinutes();
+        return (hours % 12 == 0 ? 12 : hours % 12) + ":" + (minutes < 10 ? "0" + minutes : minutes);
+    }
+
+    function GetSportName(sports) {
+        if (sports == null) {
+            return "";
+        }
+        var sportname = "";
+        for (var i = 0; i < sports.length; i++) {
+            sportname += sports[i].sportName + ",";
+        }
+        return sportname.substring(0, sportname.length - 1)
+    }
+
+    function GetSiteTime(open_am, close_am, open_pm, close_pm) {
+        var result = "";
+        if (open_am != null && open_am != "null" && close_am != null && close_am != "null") {
+            open_am = GetshortDateStr(open_am);
+            close_am = GetshortDateStr(close_am);
+            result += "上午" + open_am + "-" + close_am;
+        }
+        if (open_pm != null && open_pm != "null" && close_pm != null && close_pm != "null") {
+            open_pm = GetshortDateStr(open_pm);
+            close_pm = GetshortDateStr(close_pm);
+            result += ",下午" + open_pm + "-" + close_pm;
+        }
+        return result;
+    }
+
+    function tagetsiteInfo(id) {
+        api.openWin({
+            name: 'sportSiteInfo',
+            url: '../sportsite/sportSiteInfo.html',
+            pageParam: {
+                id: id
+            }
+        });
+    }
+
+    function tagetInfo(id) {
+        api.openWin({
+            name: 'communityInfo-win',
+            url: '../community/communityInfo-win.html',
+            pageParam: {
+                id: id
+            }
+        });
+    }
+
+    function tagetorgInfo(id) {
+        api.openWin({
+            name: 'orginfo',
+            url: '../org/orginfo.html',
+            pageParam: {
+                id: id
+            }
+        });
+
+    }
+
+    function checkdownload(title, description, contentUrl) {
+        var token = api.getPrefs({
+            sync: true,
+            key: 'token'
+        });
+        if (token === null || token === "" || token == "{}" || token === "undefined" || token === undefined) {
+            logout(0);//弹出登录提示框
+            return;
+        }
+        api.openWin({
+            name: 'downloadList',
+            url: '../../controls/list.html',
+            pageParam: {
+                url: contentUrl,
+                fileName: title
+            }
+        });
+        //sharedownload(title, description, contentUrl);
+    }
+
+    function levelTypeCss(levelType) {
+        if (levelType.indexOf("运动员") >= 0) {
+            return "player";
+        }
+        if (levelType.indexOf("教练员") >= 0) {
+            return "trainer";
+        }
+        if (levelType.indexOf("裁判员") >= 0) {
+            return "judge";
+        }
+       if (levelType.indexOf("社会指导员") >= 0) {
+            return "instructor";
+        }//2018-12-03add人员新增社会指导员
+        return ""
+    }
+
+    function levelTypeLevelStr(levelTypeLevelStr) {
+        if (levelTypeLevelStr == null || levelTypeLevelStr == "") {
+            return "";
+        }
+        var html = "";
+        var levelarray = levelTypeLevelStr.split(',');
+        for (var i = 0; i < levelarray.length; i++) {
+            var typecss = levelTypeCss(levelarray[i]);
+            html += "<li><span class='" + typecss + "' >" + levelarray[i] + "</span></li>";
+        }
+        return html;
+    }
+</script>

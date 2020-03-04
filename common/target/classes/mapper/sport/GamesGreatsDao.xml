@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.dao.sport.GamesGreatsDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.yymt.entity.sport.GamesGreatsEntity" id="gamesGreatsMap">
+        <result property="gameId" column="game_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <select id="queryGreatCountByGameId" resultType="java.lang.Integer">
+        select count(1) as count from tb_games_greats where game_id = #{id}
+    </select>
+</mapper>

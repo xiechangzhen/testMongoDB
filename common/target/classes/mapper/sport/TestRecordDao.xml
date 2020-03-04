@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.dao.sport.TestRecordDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.yymt.entity.sport.TestRecordEntity" id="testRecordMap">
+        <result property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="testId" column="test_id"/>
+        <result property="testResult" column="test_result"/>
+        <result property="testResultDetail" column="test_result_detail"/>
+        <result property="testAdvice" column="test_advice"/>
+        <result property="recommendExpert" column="recommend_expert"/>
+        <result property="isFinish" column="is_finish"/>
+        <result property="testTime" column="test_time"/>
+    </resultMap>
+    
+    <select id="selectTestPage" resultType="java.util.Map">
+        select *
+        from tb_test_record ttr,tb_test tt
+        where ttr.test_id = tt.id
+        and ttr.user_id = #{userId}
+        <if test="isFinish != null and isFinish != ''">
+            and ttr.is_finish = #{isFinish}
+        </if>
+        ORDER BY ttr.test_time desc
+    </select>
+
+    <!-- 测试记录详情 -->
+    <select id="selectTestRecordDetail" resultType="java.util.Map">
+        select ttr.id AS id,
+               user_id AS userId,
+               test_id AS testId,
+               test_result AS testResult,
+               test_result_detail AS testResultDetail,
+               test_advice AS testAdvice,
+               recommend_expert AS recommendExpert,
+               is_finish AS isFinish,
+               test_time AS testTime
+            ,tt.test_image AS testImage
+        from tb_test_record ttr,tb_test tt
+        where ttr.test_id = tt.id
+        AND ttr.id = #{id}
+    </select>
+
+
+</mapper>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.dao.sport.RevealDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.yymt.entity.sport.RevealEntity" id="revealMap">
+        <result property="id" column="id"/>
+        <result property="revealUserId" column="reveal_user_id"/>
+        <result property="revealType" column="reveal_type"/>
+        <result property="revealContentId" column="reveal_content_id"/>
+        <result property="revealCategory" column="reveal_category"/>
+        <result property="revealStatus" column="reveal_status"/>
+        <result property="revealContent" column="reveal_content"/>
+        <result property="revealImages" column="reveal_images"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <sql id="Base_Column_List" >
+        tb.id AS id,
+        reveal_user_id AS revealUserId,
+        reveal_type AS revealType,
+        reveal_content_id AS revealContentId,
+        reveal_category AS revealCategory,
+        reveal_status AS revealStatus,
+        reveal_content AS revealContent,
+        reveal_images AS revealImages,
+        tb.create_time AS createTime
+    </sql>
+
+    <select id="queryRevealPage" resultType="java.util.Map">
+        SELECT <include refid="Base_Column_List" />
+        ,tu.user_avatar AS userAvatar,tu.nick_name AS nickName,tu.real_name AS realName
+        ,td.value AS revealCategoryName
+        FROM tb_reveal tb
+        LEFT JOIN tb_user tu ON tb.reveal_user_id = tu.user_id
+        LEFT JOIN sys_dict td ON td.type = #{type} AND tb.reveal_category = td.code
+        <where>
+            <if test="reveal_type != null and reveal_type != ''">
+                AND tb.reveal_type = #{reveal_type}
+            </if>
+            <if test="reveal_content_id != null and reveal_content_id != ''">
+                AND tb.reveal_content_id= #{reveal_content_id}
+            </if>
+        </where>
+    </select>
+</mapper>

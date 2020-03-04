@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.dao.sport.TestDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.yymt.entity.sport.TestEntity" id="testMap">
+        <result property="id" column="id"/>
+        <result property="testPage" column="test_page"/>
+        <result property="testTitle" column="test_title"/>
+        <result property="testType" column="test_type"/>
+        <result property="testTitleDetail" column="test_title_detail"/>
+        <result property="testQuestionsCount" column="test_questions_count"/>
+        <result property="joinTestCount" column="join_test_count"/>
+        <result property="testImage" column="test_image"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+
+</mapper>

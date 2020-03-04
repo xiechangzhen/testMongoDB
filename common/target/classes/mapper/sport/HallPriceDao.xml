@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.dao.sport.HallPriceDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.yymt.entity.sport.HallPriceEntity" id="hallPriceMap">
+        <result property="id" column="id"/>
+        <result property="sportId" column="sport_id"/>
+        <result property="price" column="price"/>
+        <result property="provideEquipment" column="provide_equipment"/>
+        <result property="hallId" column="hall_id"/>
+    </resultMap>
+
+    <select id="listHallPrice" resultType="java.util.Map">
+        select ts.id, ts.sport_name,thp.price,thp.provide_equipment from tb_hall_price thp
+        LEFT JOIN tb_hall th   on  th.id = thp.hall_id
+        LEFT JOIN tb_sports ts on  ts.id = thp.sport_id
+        where thp.hall_id = #{id}
+    </select>
+    <delete id="deleteIds" parameterType="java.util.List">
+        delete from tb_hall_price
+        where hall_id in
+        <foreach item="item" collection="ids" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+</mapper>

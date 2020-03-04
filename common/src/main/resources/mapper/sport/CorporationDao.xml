@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.dao.sport.CorporationDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.yymt.entity.sport.CorporationEntity" id="corporationMap">
+        <result property="id" column="id"/>
+        <result property="corporationName" column="corporation_name"/>
+        <result property="corporationType" column="corporation_type"/>
+        <result property="corporationFoundingTime" column="corporation_founding_time"/>
+        <result property="corporationLeaderPostion" column="corporation_leader_postion"/>
+        <result property="corporationLeader" column="corporation_leader"/>
+        <result property="corporationContact" column="corporation_contact"/>
+        <result property="corporationIntroduce" column="corporation_introduce"/>
+        <result property="corparationArea" column="corparation_area"/>
+        <result property="corporationAddress" column="corporation_address"/>
+        <result property="personalVipCount" column="personal_vip_count"/>
+        <result property="personalGroupCount" column="personal_group_count"/>
+        <result property="corporationStatus" column="corporation_status"/>
+        <result property="auditor" column="auditor"/>
+        <result property="auditTime" column="audit_time"/>
+        <result property="longitude" column="longitude"/>
+        <result property="latitude" column="latitude"/>
+        <result property="pageView" column="page_view"/>
+        <result property="author" column="author"/>
+        <result property="createTime" column="create_time"/>
+        <result property="corporationImages" column="corporation_images"/>
+        <result property="remark" column="remark"/>
+        <result property="greats" column="greats"/>
+        <result property="leaderPositionName" column="leaderPositionName"/>
+
+        <result property="actualGroupCount" column="actual_group_count"/>
+    </resultMap>
+
+    <sql id="base_coloum">
+        id,corporation_name,corporation_founding_time,corporation_leader_postion,corporation_leader,corporation_contact,corporation_introduce,corparation_area,
+        corporation_address,personal_vip_count,longitude,latitude,corporation_images,remark,corporation_status,corporation_type,actual_group_count
+    </sql>
+
+    <select id="listCorporation" resultType="java.util.Map">
+        SELECT * FROM(
+        SELECT
+        tc.id,corporation_name,DATE_FORMAT(corporation_founding_time,'%Y-%m-%d') AS corporation_founding_time,
+        corporation_leader_postion,corporation_leader,corporation_contact,corporation_introduce,corparation_area,
+        corporation_address,personal_vip_count,longitude,latitude,corporation_images,tc.remark,corporation_status
+        ,GROUP_CONCAT('[',tcs.sport_id,']') as sprotsarray
+        ,GROUP_CONCAT(ts.sport_name) AS sportsname
+        ,tc.page_view as pv,
+        tcp.position_name as positionName,truncate(6370996.81 * ACOS(
+        COS(latitude * PI() / 180) * COS(#{latitude} * PI() / 180) * COS(
+        longitude * PI() / 180 - #{longitude} * PI() / 180
+        ) + SIN(latitude * PI() / 180) * SIN(#{latitude} * PI() / 180)
+        ),2) as distance
+        from tb_corporation tc
+        LEFT JOIN tb_corporation_position tcp on tcp.id = tc.corporation_leader_postion
+        LEFT JOIN tb_corporation_sports tcs on tc.id = tcs.corporation_id
+        LEFT JOIN tb_sports ts on tcs.sport_id = ts.id
+        GROUP BY tc.id
+        )tmp
+        <where>
+            corporation_status = 1
+            <if test="area != null">
+                and corparation_area = #{area}
+            </if>
+            <if test="keyword != null">
+                and corporation_name like CONCAT('%',CONCAT(#{keyword}, '%'))
+            </if>
+            <if test="item != null">
+                and sprotsarray like CONCAT('[',CONCAT(#{item}, ']'))
+            </if>
+        </where>
+    </select>
+
+    <select id="corporationDetail" resultType="java.util.Map">
+        SELECT
+        tc.id,corporation_name,DATE_FORMAT(corporation_founding_time,'%Y-%m-%d') AS corporation_founding_time,corporation_leader_postion,corporation_leader,corporation_contact,corporation_introduce,corparation_area,
+        corporation_address,personal_vip_count,longitude,latitude,corporation_images,tc.remark,GROUP_CONCAT("'",tcs.sport_id,"'") as sprotsarray,
+        GROUP_CONCAT(ts.sport_name) AS sportsname,
+        IF(greatstemp.greats,greatstemp.greats,0) as totalGreat,
+        IF(selfgreat.isGreat,selfgreat.isGreat,0) as isGreat,
+        tc.page_view as pv,
+        tcp.position_name as positionName
+        from tb_corporation tc
+        LEFT JOIN tb_corporation_sports tcs on tc.id = tcs.corporation_id
+        LEFT JOIN tb_sports ts on tcs.sport_id = ts.id
+        LEFT JOIN tb_corporation_position tcp on tcp.id = tc.corporation_leader_postion
+        LEFT JOIN (
+          select corporation_id, count(*) as greats from tb_corporation_greats GROUP BY corporation_id
+        ) greatstemp on tc.id = greatstemp.corporation_id
+        LEFT JOIN (
+          select corporation_id, count(*) as isGreat from tb_corporation_greats where user_id = #{userId} and corporation_id = #{id}
+        ) selfgreat on tc.id = selfgreat.corporation_id
+        where tc.id = #{id}
+    </select>
+
+    <select id="corporationDetailForBackground" resultType="java.util.Map">
+        SELECT
+        tc.id,corporation_name as corporationName,
+				DATE_FORMAT(corporation_founding_time,'%Y-%m-%d') AS corporationFoundingTime,
+				corporation_leader_postion AS corporationLeaderPostion,
+				corporation_leader AS corporationLeader,
+				corporation_contact AS corporationContact,
+				corporation_introduce AS corporationIntroduce,
+				corparation_area AS corparationArea,
+                corporation_address AS corporationAddress,
+				personal_vip_count AS personalVipCount,
+				personal_group_count AS personalGroupCount,
+				longitude,latitude,
+				corporation_images AS corporationImages,
+				tc.remark,
+				tc.corporation_type AS corporationType,
+				su.username as auditorName,
+				su1.username as authorName,
+				tc.create_time as createTime,
+				tc.audit_time as auditTime,
+				tc.actual_group_count as actualGroupCount,
+				tc.corporation_status as corporationStatus,
+				GROUP_CONCAT(tcs.sport_id) as sportsId,
+                GROUP_CONCAT(ts.sport_name) AS sportsname,
+                sd.name as deptName
+                from tb_corporation tc
+                LEFT JOIN tb_corporation_sports tcs on tc.id = tcs.corporation_id
+                LEFT JOIN tb_sports ts on tcs.sport_id = ts.id
+				LEFT JOIN sys_user su on tc.auditor = su.user_id
+				LEFT JOIN sys_user su1 on tc.author = su1.user_id
+                LEFT JOIN sys_dept sd on sd.dept_id = su1.dept_id
+			where tc.id = #{id}
+    </select>
+
+    <!--后台列表-->
+    <select id="listCorporationBackgroud" resultType="java.util.Map">
+        SELECT
+        tc.*,
+        IF(temp.count,temp.count,0) as count
+        FROM tb_corporation tc
+        LEFT JOIN(
+        select count(1) as count,corporation_id from tb_corporation_greats GROUP BY corporation_id
+        )temp on tc.id = temp.corporation_id
+        <where>
+            <if test="corporationStatus != null and corporationStatus != '' ">
+                corporation_status = #{corporationStatus}
+            </if>
+            <if test="keyword != null and keyword != '' ">
+                AND (corporation_name LIKE CONCAT('%',CONCAT(#{keyword}, '%'))
+                or corporation_leader LIKE CONCAT('%',CONCAT(#{keyword}, '%'))
+                )
+            </if>
+            <if test="queryDate != null and queryDate != '' ">
+                AND DATE_FORMAT(corporation_founding_time,'%Y-%m-%d') = #{queryDate}
+            </if>
+            <if test="sql_filter != null and sql_filter != '' ">
+                and ${sql_filter}
+            </if>
+        </where>
+    </select>
+    <!--待审核的数量-->
+    <select id="auditCount" resultType="java.lang.Integer">
+        select count(1) from tb_corporation
+        <where>
+            corporation_status = 0
+            <if test="keyword != null and keyword != '' ">
+                AND (corporation_name LIKE CONCAT('%',CONCAT(#{keyword}, '%'))
+                or corporation_leader LIKE CONCAT('%',CONCAT(#{keyword}, '%'))
+                )
+            </if>
+            <if test="queryDate != null and queryDate != '' ">
+                AND DATE_FORMAT(corporation_founding_time,'%Y-%m-%d') = #{queryDate}
+            </if>
+            <if test="sql_filter != null and sql_filter != '' ">
+                and ${sql_filter}
+            </if>
+        </where>
+    </select>
+
+    <select id="getCorporationListByIds" resultMap="corporationMap">
+        SELECT corporation.id, corporation.corporation_name, corporation.corporation_type,
+        corporation.corporation_leader
+        , corporation.corporation_leader_postion, corporation.corporation_contact, corporation.corporation_address
+        , corporation.longitude, corporation.latitude, corporation.corporation_status
+        , corporation.corporation_images
+        , cgtemp.greats
+        , cp.position_name as leaderPositionName
+        FROM tb_corporation corporation
+        LEFT JOIN (
+        SELECT corporation_id, COUNT(1) AS greats FROM tb_corporation_greats GROUP BY corporation_id
+        ) cgtemp ON corporation.id = cgtemp.corporation_id
+        LEFT JOIN tb_corporation_position cp
+        ON corporation.corporation_leader_postion = cp.id
+        WHERE corporation.corporation_status = 1 AND corporation.id IN
+        <foreach item="item" index="index" collection="ids"
+                 open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <delete id="deleteCorporationAndReleatedDataBatchs">
+        delete from tb_corporation where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        ;
+        delete from tb_news where corporation_id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        ;
+        delete from tb_games where corporation_id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        ;
+        delete from tb_corporation_group_member where corporation_id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        ;
+        delete from tb_corporation_sports where corporation_id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        ;
+    </delete>
+    
+</mapper>

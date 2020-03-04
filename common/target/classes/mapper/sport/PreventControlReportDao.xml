@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.dao.sport.PreventControlReportDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.yymt.entity.sport.PreventControlReportEntity" id="preventControlReportMap">
+        <result property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="userName" column="user_name"/>
+        <result property="phoneNumber" column="phone_number"/>
+        <result property="identityCard" column="identity_card"/>
+        <result property="trafficWay" column="traffic_way"/>
+        <result property="trafficInfo" column="traffic_info"/>
+        <result property="whereFrom" column="where_from"/>
+        <result property="whereGo" column="where_go"/>
+    </resultMap>
+
+    <!-- 人员来源地分析（各省份） -->
+    <select id="queryProvinceCountList" resultType="map">
+		SELECT t1.province AS `name`,COUNT(t1.provinceCode) AS `value` FROM
+		(
+		SELECT d.`code` AS provinceCode,d.`name` AS province,b.`name` AS area 
+		FROM tb_prevent_control_report a 
+		LEFT JOIN tb_place b ON a.where_from_code = b.`code`
+		LEFT JOIN tb_place c ON b.parent_code = c.`code`
+		LEFT JOIN tb_place d ON c.parent_code = d.`code`
+		WHERE a.where_from_code &gt; 0 AND a.where_from_code &lt; 900000 AND c.`code` &lt;&gt; 360700
+		) t1
+		GROUP BY t1.provinceCode ORDER BY COUNT(t1.provinceCode) DESC,t1.provinceCode ASC
+    </select>
+    
+    <!-- 外来人员来源城市top10 -->
+    <select id="queryCityCountTop10List" resultType="map">
+	    
+ 		SELECT c.`name`,COUNT(c.`code`) AS `value` 
+		FROM tb_prevent_control_report a 
+		LEFT JOIN tb_place b ON a.where_from_code = b.`code`
+		LEFT JOIN tb_place c ON b.parent_code = c.`code` 
+		WHERE a.where_from_code &lt; 900000 AND c.`code` &lt;&gt; 360700
+		GROUP BY c.`code` ORDER BY COUNT(c.`code`) DESC LIMIT 10
+    </select>
+    
+    <!-- 查询防控报备总数-->
+    <select id="queryCount" resultType="long">
+		SELECT COUNT(1) FROM tb_prevent_control_report a WHERE a.where_from_code &lt; 900000 
+    </select>
+    
+    <!-- 外来人员交通方式统计 -->
+    <select id="queryTrafficWayCount" resultType="map">
+		SELECT  t1.traffic_way AS `name`,COUNT(t2.traffic_way) AS `value` FROM (
+		SELECT 
+		'飞机' traffic_way UNION ALL SELECT 
+		'火车' traffic_way UNION ALL SELECT 
+		'客车' traffic_way UNION ALL SELECT 
+		'自驾' traffic_way UNION ALL SELECT 
+		'私家车' traffic_way ) t1 LEFT JOIN tb_prevent_control_report t2
+		ON t1.traffic_way = t2.traffic_way 
+		LEFT JOIN tb_place t3 ON t2.where_from_code =t3.`code`
+		LEFT JOIN tb_place t4 ON t3 .parent_code = t4.`code` 
+		WHERE t2.where_from_code &gt; 0 AND t4.`code` &lt;&gt; 360700
+		 AND t2.where_from_code &lt; 900000 
+		 GROUP BY t1.traffic_way
+    </select>
+    
+     <!-- 外来人员省内外占比 -->
+    <select id="queryCountByCode" resultType="long">
+		SELECT COUNT(1)
+		FROM tb_prevent_control_report a 
+		LEFT JOIN tb_place b ON a.where_from_code = b.`code`
+		LEFT JOIN tb_place c ON b.parent_code = c.`code`
+		LEFT JOIN tb_place d ON c.parent_code = d.`code`
+		WHERE d.`code` &lt; 900000 AND a.where_from_code &gt; 0 AND c.`code` &lt;&gt; 360700
+				<choose>
+		    		<when test="flag == 1">
+		       		  AND d.`code` = 360000
+		    		</when>
+		    		<otherwise>
+		        	  AND d.`code` &lt;&gt; 360000
+		    		</otherwise>
+				</choose>
+    </select>
+    
+    <insert id="addPlace">
+		INSERT INTO tb_place(`name`,`code`)
+		VALUES(#{name},#{code})
+    </insert>
+    
+    <!-- 统计外来人员（赣州地区以外的）总数 -->
+    <select id="queryCountForeign" resultType="long">
+		SELECT COUNT(1)
+		FROM tb_prevent_control_report a 
+		LEFT JOIN tb_place b ON a.where_from_code = b.`code`
+		LEFT JOIN tb_place c ON b.parent_code = c.`code`
+		WHERE a.where_from_code &gt; 0 AND c.`code` &lt;&gt; 360700
+		AND a.where_from_code &lt; 900000
+    </select>
+    
+    <!-- 根据身份证查询最新防控报备的到哪里去信息 -->
+    <select id="queryWhereGo" resultType="java.lang.String">
+		SELECT a.where_go FROM tb_prevent_control_report a WHERE a.identity_card= #{identityCard}
+		ORDER BY a.create_time DESC LIMIT 1
+    </select>
+    
+    <!-- 根据用户id查询用户防控报备列表 -->
+    <select id="queryListByUserId" resultType="map">
+    	SELECT * FROM tb_prevent_control_report a WHERE a.user_id = #{userId}
+		ORDER BY a.id DESC LIMIT #{index},#{pageSize}
+    </select>
+    
+    <!-- 根据用户id查询用户防控报备统计数-->
+    <select id="queryCountByUserId" resultType="int">
+    	SELECT COUNT(1) FROM tb_prevent_control_report a WHERE a.user_id = #{userId}
+    </select>
+    
+     <!-- 根据用户id查询用户防控报备详情 -->
+    <select id="queryInfoByUserId" resultType="map">
+    	SELECT * FROM tb_prevent_control_report a WHERE a.user_id = #{userId} AND a.id = #{id}
+    </select>
+    
+    
+    
+</mapper>

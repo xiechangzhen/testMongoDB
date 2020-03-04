@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.dao.sport.QuestionSurveyDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.yymt.entity.sport.QuestionSurveyEntity" id="questionSurveyMap">
+        <result property="id" column="id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="userName" column="user_name"/>
+        <result property="identityCard" column="identity_card"/>
+        <result property="seeDoctor" column="see_doctor"/>
+        <result property="userJob" column="user_job"/>
+        <result property="isFever" column="is_fever"/>
+        <result property="temperature" column="temperature"/>
+        <result property="unComfortable" column="un_comfortable"/>
+        <result property="other" column="other"/>
+        <result property="isPneumonia" column="is_pneumonia"/>
+        <result property="beenWuhan" column="been_wuhan"/>
+        <result property="contactWuhan" column="contact_wuhan"/>
+        <result property="guestWuhan" column="guest_wuhan"/>
+    </resultMap>
+
+<sql id="Base_Column_List" >
+id AS id,
+create_time AS createTime,
+user_name AS userName,
+identity_card AS identityCard,
+see_doctor AS seeDoctor,
+user_job AS userJob,
+is_fever AS isFever,
+temperature AS temperature,
+un_comfortable AS unComfortable,
+other AS other,
+is_pneumonia AS isPneumonia,
+been_wuhan AS beenWuhan,
+contact_wuhan AS contactWuhan,
+guest_wuhan AS guestWuhan,
+</sql>
+
+	<!-- 根据用户 id查询问卷调查列表-->
+	<select id="queryListByUserId" resultType="map">
+	   SELECT * FROM tb_question_survey a  WHERE a.user_id = #{userId} 
+	   ORDER BY a.id DESC LIMIT #{index},#{pageSize}
+	</select>
+	
+	<!-- 根据用户 id查询问卷调查数量 -->
+	<select id="queryCountByUserId" resultType="int">
+		SELECT COUNT(1) FROM tb_question_survey a  WHERE a.user_id = #{userId}
+	</select>
+	
+	
+	
+</mapper>

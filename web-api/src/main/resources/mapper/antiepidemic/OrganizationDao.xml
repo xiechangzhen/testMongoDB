@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.modules.common.dao.antiepidemic.OrganizationDao">
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="java.util.LinkedHashMap" id="OrganizationDevicesMap">
+        <id property="Id" column="Id"/>
+        <result property="Name" column="Name"/>
+        <collection property="Devices" column="Id" select="selDevicesByOrgId"
+                    ofType="java.util.LinkedHashMap">
+        </collection>
+    </resultMap>
+
+    <resultMap type="java.util.LinkedHashMap" id="OrganizationClassificationMap">
+        <id property="Id" column="Id"/>
+        <result property="Code" column="Code"/>
+        <result property="Name" column="Name"/>
+        <result property="Extra" column="Extra"/>
+        <result property="CreateTime" column="CreateTime"/>
+        <result property="Creator" column="Creator"/>
+        <association property="classification" column="ClassificationId" javaType="java.util.LinkedHashMap">
+            <id column="Id" property="Id"/>
+            <result column="Name" property="Name"/>
+            <result column="Level" property="Level"/>
+            <result column="Extra" property="Extra"/>
+        </association>
+    </resultMap>
+
+    <!--获取小区列表-->
+    <select id="selList" parameterType="string" resultMap="OrganizationDevicesMap">
+        select Id,Name from Organization
+        <where>
+            <if test="name !=null and name != ''">
+                Name LIKE '%'+#{name}+'%'
+            </if>
+        </where>
+    </select>
+
+    <!--根据小区id查询卡点信息-->
+    <select id="selDevicesByOrgId" parameterType="int"
+            resultType="java.util.LinkedHashMap">
+      select
+        deo.DeviceId as Id,
+        de.DevID as DevID,
+        de.RemoteIP as RemoteIP,
+        de.[Desc] as Name,
+        de.IsOneline as Status,
+        de.Longitude as Longitude,
+        de.Latitude as Latitude,
+        de.NvrID as NvrID,
+        de.NvrChannel as NvrChannel,
+        ('rtsp://'+isnull( de.Account ,'')+':'+isnull( de.Password ,'')+'@'+isnull( de.RemoteIP ,'')+':'
+        +cast(isnull( de.Port ,'') as varchar )+'/h264/ch1/sub/av_stream') as SensorUrl
+      from DeviceOrganization deo
+      left join Device de on deo.DeviceId = de.DevID
+      where deo.OrganizationId = #{Id}
+    </select>
+
+    <!--根据小区名字查询小区信息-->
+    <select id="sqlOrganizationInfoByOrganizationName" parameterType="string" resultMap="OrganizationClassificationMap">
+      select * from Organization
+      <if test="organizationName != null and organizationName !=''">
+          where Name LIKE '%'+#{organizationName}+'%'
+      </if>
+    </select>
+</mapper>

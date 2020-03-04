@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.dao.sport.FeelingsCommentGreatsDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.yymt.entity.sport.FeelingsCommentGreatsEntity" id="feelingsCommentGreatsMap">
+        <result property="id" column="id"/>
+        <result property="feelingsCommentId" column="feelings_comment_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="feelingsId" column="feelings_id"/>
+        <result property="greatsCreateTime" column="greats_create_time"/>
+    </resultMap>
+    
+    <select id="queryCommentGreatByCommentIdAndFeelingsId" resultType="java.lang.Integer">
+        select count(DISTINCT feelings_comment_id,user_id,feelings_id)
+        from tb_feelings_comment_greats
+        where feelings_comment_id = #{feelingsCommentId}
+        and feelings_id = #{feelingsId}
+    </select>
+</mapper>

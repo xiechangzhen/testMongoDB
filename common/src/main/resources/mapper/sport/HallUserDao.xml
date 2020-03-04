@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.dao.sport.HallUserDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.yymt.entity.sport.HallUserEntity" id="hallUserMap">
+        <result property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="hallId" column="hall_id"/>
+    </resultMap>
+    <select id="listHallUser" resultType="java.util.Map">
+        select
+          th.id as hallId,
+          th.hall_name as hallName,
+          th.hall_images as hallImages,
+          th.hall_is_open as hallIsOpen,
+          th.hall_address as hallAddress
+        from tb_hall_user thu left join tb_hall th on thu.hall_id = th.id
+        where thu.user_id = #{userId} and th.hall_status = 1
+    </select>
+
+
+</mapper>

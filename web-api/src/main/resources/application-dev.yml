@@ -1,0 +1,60 @@
+spring:
+    datasource:
+        type: com.alibaba.druid.pool.DruidDataSource
+        driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
+        druid:
+            first:
+                url: jdbc:sqlserver://10.60.0.10:1433;DatabaseName=StereoTest
+                username: sa
+                password: yyt123!@#
+            second:
+                url: jdbc:sqlserver://10.60.0.10:1433;DatabaseName=StereoTest
+                username: sa
+                password: yyt123!@#
+            initial-size: 10
+            max-active: 100
+            min-idle: 10
+            max-wait: 60000
+            pool-prepared-statements: true
+            max-pool-prepared-statement-per-connection-size: 20
+            time-between-eviction-runs-millis: 60000
+            min-evictable-idle-time-millis: 300000
+            validation-query: SELECT 1 FROM DUAL
+            test-while-idle: true
+            test-on-borrow: false
+            test-on-return: false
+            stat-view-servlet:
+              enabled: true
+              url-pattern: /druid/*
+                #login-username: admin
+                #login-password: admin
+              filter:
+                stat:
+                  log-slow-sql: true
+                  slow-sql-millis: 1000
+                  merge-sql: true
+                wall:
+                  config:
+                    multi-statement-allow: true
+    data:
+      mongodb:
+        host: 127.0.0.1
+        port: 27017
+        database: test
+
+#文件上传路径
+web.upload.path: /java-project/es/
+spring.mvc.static-path-pattern: /**
+spring.resources.static-locations: classpath:/META-INF/resources/,classpath:/resources/,classpath:/static/,classpath:/public/,file:${web.upload.path}
+
+logging:
+  path: /logs/es/web-api/
+
+########启动或关闭swagger###########
+swagger.show: true
+
+##########代理设置,测试开发环境不需要设置代理，isProxy: false###################
+proxy:
+    isProxy: false
+    proxyHost: 192.168.110.253
+    proxyPort: 23456

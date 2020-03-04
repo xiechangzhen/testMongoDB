@@ -1,0 +1,74 @@
+spring:
+    datasource:
+        type: com.alibaba.druid.pool.DruidDataSource
+        driverClassName: com.mysql.jdbc.Driver
+        druid:
+            url: jdbc:mysql://127.0.0.1:3306/sport?allowMultiQueries=true&useUnicode=true&characterEncoding=UTF-8
+            username: root
+            password: aaa111
+            initial-size: 10
+            max-active: 100
+            min-idle: 10
+            max-wait: 60000
+            pool-prepared-statements: true
+            max-pool-prepared-statement-per-connection-size: 20
+            time-between-eviction-runs-millis: 60000
+            min-evictable-idle-time-millis: 300000
+            validation-query: SELECT 1 FROM DUAL
+            test-while-idle: true
+            test-on-borrow: false
+            test-on-return: false
+            stat-view-servlet:
+                enabled: true
+                url-pattern: /druid/*
+                #login-username: admin
+                #login-password: admin
+            filter:
+                stat:
+                    log-slow-sql: true
+                    slow-sql-millis: 1000
+                    merge-sql: true
+                wall:
+                    config:
+                        multi-statement-allow: true
+
+#文件上传路径
+web.upload.path: E:/java-project/es/
+spring.mvc.static-path-pattern: /**
+spring.resources.static-locations: classpath:/META-INF/resources/,classpath:/resources/,classpath:/static/,classpath:/public/,file:${web.upload.path}
+
+#秒嘀
+sms:
+  url: https://api.miaodiyun.com
+  operation: /20150822/industrySMS/sendSMS
+  accountSid:  af68caed12c741a5860b1f56e6e86b23
+  authToken: 24635b1b95fe4481b47f8147c6f24ce8
+#Lucene
+lucene:
+     index-dir: ${web.upload.path}lucene/index
+     index-temp: ${web.upload.path}lucene/indextemp
+
+logging:
+  path: /logs/es/
+
+##########代理设置,测试开发环境不需要设置代理，isProxy: false###################
+proxy:
+    isProxy: false
+    proxyHost: 192.168.110.253
+    proxyPort: 23456
+#个推推送
+#极光推送
+jpush:
+    appKey: fa650b80bf26f6dd1155699a
+    masterSecret: f417c4c653a0c4c4c4eff5b0
+    url: https://api.jpush.cn/v3/push
+#融云
+rcloud:
+    url: http://api.cn.ronghub.com/user/getToken.json
+    appKey: e0x9wycfe4meq
+    appSecret: nRvsMkOUuy
+swagger:
+    isEnable: true
+#是否加密数据
+data:
+  encryption: true

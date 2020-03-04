@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>公共服务</title>
+    <link rel="stylesheet" type="text/css" href="../../../css/aui.css"/>
+    <link rel="stylesheet" type="text/css" href="../../../css/common.css" />
+    <style type="text/css">
+    .empty{
+      margin: auto;margin-top: 76px;
+    }
+    .empty div{
+      color: #282828;font-size: 14px;padding-top: 24px;
+    }
+    </style>
+</head>
+<body>
+  <div class="empty">
+    <img src="../../../image/Emptycontent-picture.png" width="147.5" height="113" alt="">
+    <div>
+      <span>没有找到你想要的东西</span>
+    </div>
+  </div>
+</body>
+</html>
+<script type="text/javascript" src="../../../script/api.js"></script>
+<script type="text/javascript">
+var searchStr;
+var apiheadheight=0;
+apiready = function () {
+    apiheadheight=parseInt(api.getPrefs({
+        sync: true,
+        key: 'headerH'
+    }));
+}
+
+</script>

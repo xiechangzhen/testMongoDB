@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>公共服务</title>
+    <link rel="stylesheet" type="text/css" href="../../../css/aui.css" />
+    <link rel="stylesheet" type="text/css" href="../../../css/common.css" />
+    <style type="text/css">
+        html,
+        body {
+            margin: 0px;
+            padding: 0px;
+        }
+        /*搜索条*/
+
+        .aui-searchbar {
+            background-color: #409AFF;
+            padding-left: 16px;
+        }
+
+        .aui-searchbar-input {
+            border-radius: 1.25rem;
+        }
+
+        #search-input {
+            font-size: 12px;
+            color: ##989898;
+        }
+
+        .back {
+            margin-right: 8px;
+        }
+
+        .entermap {
+            padding-left: 5px;
+            padding-right: 15px;
+            font-size: 16px;
+            color: #ffffff;
+        }
+
+        .search-history {
+            padding-top: 18px;
+        }
+
+        .history-title {
+            color: #656565;
+            font-size: 12px;
+            padding-left: 20px;
+            padding-bottom: 16px;
+        }
+
+        .history-con {
+            width: 90%;
+        }
+
+        .history-con ul {
+            margin: auto;
+            list-style: none;
+        }
+
+        .history-con li {
+            float: left;
+            margin-left: 20px;
+            display: inline;
+            height: 37px;
+        }
+
+        .btn-c {
+            background-color: #f2f2f2;
+            border: none;
+            color: #656565;
+            text-align: center;
+            vertical-align: middle;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 12px;
+            cursor: pointer;
+            height: 25px;
+            border-radius: 25px;
+        }
+
+        .history-del {
+            width: 100%;
+            float: left;
+            margin-top: 38px;
+        }
+
+        .history-del table {
+            width: 100%;
+            float: left;
+        }
+
+        .history-del .t1 {
+            width: 50%;
+            text-align: right;
+            font-size: 12px;
+            color: #989898;
+        }
+
+        .history-del .t2 {
+            width: 50%;
+            padding-left: 12px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="wrap">
+        <header id="header">
+            <div class="aui-searchbar" id="search">
+                <div class="back" onclick="api.closeWin()">
+                    <img src="../../../image/publicservice/Return-white-btn.png" width="8.5" height="12" alt="">
+                </div>
+                <div class="aui-searchbar-input aui-border-radius" style="padding-right:8px;">
+                    <img style="margin-right: 8px;margin-top:8px" src="../../../image/publicservice/search-icon.png" width="12" height="12" alt="">
+                    <img style="margin-right: 8px;" src="../../../image/border.png" alt="">
+                    <form action="">
+                        <input type="search" placeholder="输入搜索的内容" id="search-input" value="">
+                    </form>
+                    <img id="delword" style="margin-top: 8px;display:none;" onclick="setblur()" src="../../../image/publicservice/delete-btn.png" width="12" height="12" alt="">
+                </div>
+                <div class="entermap" id="entermap" onclick="BtSearch()">
+                    <span>搜索</span>
+                </div>
+            </div>
+        </header>
+      <!--  <header id="header" style="position:relative;width:100%;background-color:#409aff">
+            <table id="search" cellspacing="0" cellpadding="0" align="center" style="width:100%; height:48px;">
+                <tr>
+                    <td width="16px;">&nbsp;</td>
+                    <td width="16px">
+                        <img src="../../../image/arr-l.png" style="height:16px;width:16px;" onclick="back();">
+                    </td>
+                    <td width="16px;">&nbsp;</td>
+                    <td>
+                        <table cellspacing="0" cellpadding="0" align="center" height="29px;" style="width:100%;background-color:#FFFFFF; border-radius:20px;">
+                            <tr>
+                                <td width="3%">&nbsp;</td>
+                                <td width="12px"><img src="../../../image/publicservice/search-icon.png" style="margin-top:3px;" /></td>
+                                <td width="3%">&nbsp;</td>
+                                <td>
+                                    <form id="searchForm" >
+                                        <input type="text" id="search-input" style="width:90%; font-size:12px; height:29px;" placeholder="请输入搜索内容" />
+                                    </form>
+                                </td>
+                                <td width="5%" id="delword" onclick="setblur()" style="display:none;"><img src="../../../image/delete.png" style="margin-top:3px;" /></td>
+                                <td width="3%">&nbsp;</td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td width="16px;">&nbsp;</td>
+                    <td width="10%" align="center"><span class="cancel" onclick="submitInputContent();">搜索</span></td>
+                    <td width="16px;">&nbsp;</td>
+                </tr>
+            </table>
+        </header>-->
+        <div id="main">
+            <div class="search-history" id="search-history">
+                <div class="history-title">
+                    历史搜索
+                </div>
+                <div class="history-con">
+                    <ul id="searchdata">
+                        <li><button type="button" name="button" class="btn-c" onclick="searchbutton('篮球')">篮球</button></li>
+                        <li><button type="button" name="button" class="btn-c">亚运会</button></li>
+                        <li><button type="button" name="button" class="btn-c">赣州青少年运动会</button></li>
+                        <li><button type="button" name="button" class="btn-c">赣州青少年运动会</button></li>
+                        <li><button type="button" name="button" class="btn-c">赣州体育</button></li>
+                        <li><button type="button" name="button" class="btn-c">乒乓球</button></li>
+                        <li><button type="button" name="button" class="btn-c">游泳</button></li>
+                    </ul>
+                </div>
+                <div class="history-del" onclick="Delhistorysearch()">
+                    <table>
+                        <tr>
+                            <td class="t1">删除记录</td>
+                            <td class="t2"><img src="../../../image/publicservice/Deleterecord.png" width="9" height="12" alt=""></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
+<script type="text/javascript" id="yytDESScript" src="../../../script/yytdes.js" data="3"></script>
+<script type="text/javascript" src="../../../script/api.js"></script>
+<script type="text/javascript" src="../../../script/zepto.js"></script>
+<script type="text/javascript" src="../../../script/common.js"></script>
+<script type="text/javascript">
+    var searchStr;
+    var searchHeadHeight = 0;
+    apiready = function() {
+        $api.fixStatusBar($api.dom('#header'));
+        searchHeadHeight = $api.offset($api.byId('header')).h;
+        searchStr = api.getPrefs({
+            sync: true,
+            key: 'searchStr'
+        });
+        window.onkeydown = function(event) {
+            if (event.keyCode == 13) {
+                BtSearch();
+            }
+        }
+        InitEvent();
+        InitSearchHistory();
+    }
+
+    function InitEvent() {
+        var searchinput = $api.byId('search-input');
+        $api.addEvt(searchinput, 'blur', function() { //失去焦点
+            var searchvalue = searchinput.value;
+            if (searchvalue.length > 0) {
+                $api.byId('delword').style.display = 'block';
+            } else {
+                $api.byId('delword').style.display = 'none';
+            }
+        });
+
+        $api.addEvt(searchinput, 'focus', function() { //获得焦点
+            var searchvalue = searchinput.value;
+            if (searchvalue.length > 0) {
+                $api.byId('delword').style.display = 'block';
+            } else {
+                $api.byId('delword').style.display = 'none';
+            }
+        });
+        $api.addEvt(searchinput, 'focus', function() { //获得焦点
+            var searchvalue = searchinput.value;
+            if (searchvalue.length > 0) {
+                $api.byId('delword').style.display = 'block';
+            } else {
+                $api.byId('delword').style.display = 'none';
+            }
+        });
+    }
+
+    function setblur() {
+        var searchinput = $api.byId('search-input');
+        searchinput.value = "";
+        searchinput.blur();
+        $api.byId('delword').style.display = 'none';
+        api.closeFrame({
+            name: 'search-empty'
+        });
+        api.closeFrame({
+            name: 'search-result'
+        });
+
+    }
+
+    function InitSearchHistory() {
+        //console.log(searchStr);
+        if (searchStr == "" || searchStr == null || searchStr == undefined || searchStr == "null") {
+            $api.byId('searchdata').innerHTML = "";
+            $api.byId('search-history').style.display = "none";
+            $api.byId('search-input').value = "";
+            return;
+        }
+        $api.byId('search-history').style.display = "block";
+        var searchArray = searchStr.substring(1, searchStr.length - 1).split('|');
+        var html = "";
+
+        for (var i = searchArray.length - 1; i >= 0; i--) {
+            html += "<li><button type=\"button\" name=\"button\" class=\"btn-c\" onclick=\"searchbutton('" + searchArray[i] + "')\">" + searchArray[i] + "</button></li>";
+        }
+        $api.byId('searchdata').innerHTML = html;
+    }
+
+    function Delhistorysearch() {
+        api.openFrame({
+            name: 'dialogwithcallback',
+            url: '../../controls/dialogwithcallback.html',
+            rect: {
+                x: 0,
+                y: 0,
+                w: 'auto',
+                h: 'auto'
+            },
+            pageParam: {
+                text: "确定要删除搜索记录吗",
+                leftText: "取消",
+                rightText: "确认",
+                previousName: "publicservicesearch",
+                previousType: "window",
+                rightMethodName: "delsearchback()",
+            },
+            bounces: false
+        });
+    }
+
+    function delsearchback() {
+        searchStr = "";
+        api.setPrefs({
+            key: 'searchStr',
+            value: ''
+        });
+        InitSearchHistory();
+    }
+
+    function checksearchStr(searchvalue) {
+        var searchArray = searchStr.split('|');
+        for (var i = 0; i < searchArray.length; i++) {
+
+        }
+    }
+
+    function Addhistorysearch(searchvalue) {
+        if (searchStr == "" || searchStr == null || searchStr == undefined || searchStr == "null") {
+            searchStr = "|" + searchvalue + "|";
+        } else {
+            //|aa|af|2a|gg3|
+            var rep = '|' + searchvalue + '|';
+            if (searchStr.indexOf(rep) >= 0) {
+                searchStr = searchStr.replace(rep, '|');
+            }
+            searchStr = searchStr + searchvalue + "|";
+        }
+        api.setPrefs({
+            key: 'searchStr',
+            value: searchStr
+        });
+        InitSearchHistory();
+    }
+
+    function openResultFrame(searchvalue) {
+        api.openFrame({
+            name: 'search-result',
+            url: './search-result.html',
+            rect: {
+                x: 0,
+                y: searchHeadHeight,
+                w: 'auto',
+                h: 'auto'
+            },
+            pageParam: {
+                searchStr: searchvalue,
+                headheight: searchHeadHeight
+            },
+            bounces: true,
+            bgColor: 'rgba(0,0,0,0)',
+            vScrollBarEnabled: true,
+            hScrollBarEnabled: true
+        });
+    }
+
+    function BtSearch() {
+        var searchvalue = $api.byId('search-input').value;
+        if (searchvalue == "" || searchvalue == null || searchvalue == undefined || searchvalue == "null") {
+            alert("查询内容不能为空！");
+            return
+        }
+        Search(searchvalue);
+    }
+
+    function Search(v) {
+        api.closeFrame({
+            name: 'search-result'
+        });
+        openResultFrame(v);
+        Addhistorysearch(v);
+    }
+
+    function searchbutton(v) {
+        var searchtxt = $api.byId('search-input');
+        $api.attr(searchtxt, 'value', v);
+        $api.attr(searchtxt, 'placeholder', '');
+        Search(v);
+    }
+</script>

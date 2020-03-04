@@ -1,0 +1,458 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=0, width=device-width" />
+    <title>赣州智慧体育APP</title>
+    <link rel="stylesheet" type="text/css" href="./css/aui.css" />
+    <link rel="stylesheet" type="text/css" href="./css/common.css" />
+    <link rel="stylesheet" type="text/css" href="./css/communityinfo.css" />
+    <link rel="stylesheet" type="text/css" href="./css/aui-slide.css" />
+    <style type="text/css">
+        .aui-slide-page-wrap {
+            height: 25px;
+            line-height: 25px;
+            bottom: 0px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .aui-slide-page-text {
+            opacity: 1.0;
+            font-size: 11px;
+        }
+
+        #app {
+            position: fixed;
+            top: 0px;
+            height: 49px;
+            width: 100%;
+        }
+
+        #app table {
+            width: 100%;
+            height: 100%;
+            background: rgba(1, 1, 1, 0.7);
+            /*#525252*/
+        }
+
+        #app .t1 {
+            height: 49px;
+            padding-left: 16px;
+        }
+
+        #app .t2 {
+            color: #ffffff;
+            font-size: 16px;
+            vertical-align: middle;
+            padding-right: 15px;
+        }
+
+        #app .t3 {
+            text-align: right;
+            padding-right: 16px;
+        }
+
+        #app .button {
+            background-color: #409aff;
+            border: none;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 12px;
+            cursor: pointer;
+            height: 29px;
+        }
+
+        #bottom {
+            width: 100%;
+            position: fixed;
+            bottom: 16px;
+            height: 36px;
+        }
+
+        #bottom div {
+            width: 90%;
+            margin: 0px auto;
+        }
+
+        #bottom .button {
+            background-color: #409aff;
+            border: none;
+            color: #fffefe;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            cursor: pointer;
+            height: 36px;
+            z-index: 9999;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <div class='middle_outer'>
+        <div class='middle_inner' id="main">
+            <div id="aui-slide">
+                <div class="aui-slide-wrap" id="images">
+                    <div class="aui-slide-node">
+                        <img src="./image/ps-bg.png" />
+                    </div>
+
+                </div>
+                <div class="aui-slide-page-wrap">
+                    <!--分页容器-->
+                </div>
+                <div class="aui-slide-page-text" id="pagetext">
+                    9999阅读
+                </div>
+            </div>
+            <ul id="info">
+                <script id="info-template" type="text/x-dot-template">
+                    <li class="title">{{=it.corporation_name}}</li>
+                    <li onclick="call('{{=it.corporation_contact}}')"><i class="tel"></i>{{=it.positionName}}：{{=it.corporation_leader}}&nbsp;&nbsp;&nbsp;&nbsp;{{=it.corporation_contact}}</li>
+                    <li><i class="address"></i>{{=it.corporation_address}}</li>
+                    <li class="line"></li>
+                </script>
+            </ul>
+            <div class="type" id="detail-con">
+                <span>协会介绍</span>
+                <div class="detail" id="detail">
+
+                </div>
+                <div class="open" id="open" onclick="opendetail()" style="display:none;">
+                    展开全部
+                </div>
+            </div>
+            <div id="act-detail">
+                <div class="aui-tab" id="tab1" style="width:100%;border-bottom:1px solid #dddddd;">
+                    <div class="aui-tab-item tapmode aui-active">赛事培训</div>
+                    <div class="aui-tab-item tapmode">荣誉信息</div>
+                    <div class="aui-tab-item tapmode">团体成员(<i id="membercout">0</i>)</div>
+                </div>
+                <div id="tab1-con">
+                  <div id="tab1-con1">
+                      <script id="Game-template" type="text/x-dot-template">
+                          {{ for(var i = 0, len = it.length; i< len; i++) { }}
+                          <div class="game">
+                              <div class="sign">
+                                  <img src="{{=getgamestatusimg(it[i].isFinished,it[i].serverTime,it[i].activity_start_time)}}" width="80" height="29" alt="">
+                              </div>
+                              <div>
+                                  <div class="gametitle">
+                                      {{=it[i].gamesTitle}}
+                                  </div>
+                                  <div class="gamecontent">
+                                      {{=getcontentStr(it[i].gamesContent)}}
+                                      <div class="gametime">
+                                          {{=getDateFormation(it[i].gamesCreateTime)}}
+                                      </div>
+                                  </div>
+
+                              </div>
+
+                              <div class="gameline"></div>
+                        </div>
+                        {{ } }}
+                      </script>
+              </div>
+              <div id="tab1-con2" class="aui-hide">
+                  <script id="Honor-template" type="text/x-dot-template">
+                      {{ for(var i = 0, len = it.length; i< len; i++) { }}
+                      <div class="honor">
+                          <div class="honortitle">
+                              {{=it[i].newsTitle}}
+                          </div>
+                          <div class="honorcontent">
+                              {{=getcontentStr(it[i].newsSummary)}}
+                          </div>
+                          <div class="honortime">
+                              {{=getDateFormation(it[i].newsCreateTime)}}
+                          </div>
+                          <div class="honorline"></div>
+                     </div>
+                       {{ } }}
+                    </script>
+              </div>
+              <div id="tab1-con3" class="aui-hide">
+              <table class="member" id="member-con">
+
+              </table>
+              <script id="Member-template" type="text/x-dot-template">
+                  {{ for(var i = 0, len = it.length; i< len; i++) { }} <tr>
+                      <td class="t1"> <img src="./image/Member-icon.png" alt=""></td>
+                      <td class="t2">{{=it[i].group_menber_name}}</td>
+                      </tr>
+                      {{ } }}
+              </script>
+          </div>
+                </div>
+       </div>
+       <div class="aui-toast">
+         信息不存在
+       </div>
+    </div>
+    </div>
+    <div id="app">
+        <table border="0" cellspacing="0" cellpadding="0">
+            <tr>
+                <td class="t1"><img src="./image/logo02.png" width="32" height="32" alt=""></td>
+                <td class="t2">体育让梦想成真</td>
+                <td class="t3">
+                    <button type="button" name="button" class="button" onclick="downloadapp()">立即下载</button>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div id="bottom">
+        <div>
+            <button type="button" name="button" class="button" onclick="downloadapp()">打开APP查看你想要的更多内容</button>
+        </div>
+
+    </div>
+</body>
+<script type="text/javascript" id="yytDESScript" src="./js/yytdes.js" data="0"></script>
+<script type="text/javascript" src="./js/api.js"></script>
+<script type="text/javascript" src="./js/jquery-3.3.1.min.js"></script>
+<script type="text/javascript" src="./js/doT.min.js"></script>
+<script type="text/javascript" src="./js/common.js"></script>
+<script type="text/javascript" src="./js/aui-tab.js" charset="utf-8"></script>
+<script type="text/javascript" src="./js/aui-slide.js"></script>
+<script type="text/javascript">
+    function InitslideData(pv, images) {
+        $api.byId('pagetext').innerHTML = pv + "阅读";
+        var html = "";
+        if (images != null && images != "" && images != 'null') {
+            var imagesArray = images.split(',');
+            for (var i = 0; i < imagesArray.length; i++) {
+                html += "<div class=\"aui-slide-node\"><img src=\"" + imagesArray[i] + "\" /></div>"
+            }
+            $api.byId('images').innerHTML = html;
+        }
+        var slide = new auiSlide({
+            container: document.getElementById("aui-slide"),
+            // "width":300,
+            "height": 223,
+            "speed": 600,
+            "autoPlay": 3000, //自动播放
+            "loop": true,
+            "pageShow": true,
+            "pageStyle": 'dot',
+            'dotPosition': 'center',
+            //'textArray': ['10000阅读', '10000阅读', '10000阅读']
+        })
+    }
+
+    function initTab() {
+        var tab = new auiTab({
+            element: document.getElementById("tab1")
+        }, function(ret) {
+            if (ret) {
+                //  定义获取对象的所有兄弟节点函数
+                function siblings(elm) {
+                    var a = [];
+                    var p = elm.parentNode.children;
+                    for (var i = 0, pl = p.length; i < pl; i++) {
+                        if (p[i] !== elm) a.push(p[i]);
+                    }
+                    return a;
+                };
+                var index = ret.index;
+                var activeC = document.getElementById("tab1-con" + index);
+                activeC.className = "";
+                for (var i = 0; i < siblings(activeC).length; i++) {
+                    siblings(activeC)[i].className = "aui-hide";
+                }
+            }
+
+        });
+    }
+
+    function call(tel) {
+        api.call({
+            type: 'tel_prompt',
+            number: '10086'
+        });
+    }
+
+    function getQueryVariable(variable) {
+        var query = window.location.search.substring(1);
+        var vars = query.split("&");
+        for (var i = 0; i < vars.length; i++) {
+            var pair = vars[i].split("=");
+            if (pair[0] == variable) {
+                return pair[1];
+            }
+        }
+        return 50;
+    }
+    $(document).ready(function() {
+        var id = getQueryVariable("id");
+        InitData(id);
+    });
+
+    function InitData(id) {
+        ajaxRequest('sport/corporation/info/' + id, 'POST', {}, function(ret, err) {
+            if (ret.code == 0) {
+                //alert(decryptByDESModeEBC(ret.data));
+                var data = JSON.parse(decryptByDESModeEBC(ret.data));
+                var main = $api.byId('info');
+                var tpl = $api.byId('info-template').text;
+                var tempFn = doT.template(tpl);
+                main.innerHTML = tempFn(data.corporation);
+                if(data.corporation.corporation_introduce!=null){
+                  detail = htmlspecialchars_decode(data.corporation.corporation_introduce);//转换成html代码
+                }
+                //detail = data.corporation.corporation_introduce;
+                if (detail != null) {
+                    $api.byId('detail').innerHTML = detail.substring(0, 50) + "...";
+                    $api.byId('open').style.display = detail.length <= 50 ? 'none' : 'block'; //判断是否显示"展开全部"
+                }
+                InitslideData(data.corporation.pv, data.corporation.corporation_images);
+                InitMembers(id);
+                InitGames(id);
+                Inithonor(id);
+                initTab();
+                $("title").html(data.corporation.corporation_name);//修改title显示
+            } else {
+              $(".aui-toast").show();
+              setTimeout(function(){
+                  $(".aui-toast").hide();
+              }, 2000)
+            }
+        });
+    }
+
+    function InitMembers(id) {
+        ajaxRequest('sport/corporation/listMembers/' + id, 'POST', {}, function(ret, err) {
+            var Member = $api.byId('member-con');
+            if (ret.code == 0) {
+                //alert(decryptByDESModeEBC(ret.data));
+                var data = JSON.parse(decryptByDESModeEBC(ret.data));
+                if (data.members == undefined || data.members == null || data.members.length == 0) {
+                    Member.innerHTML = GetEmptyDiv();
+                    return;
+                }
+                $api.byId('membercout').innerHTML = data.members.length;
+
+                var tpl = $api.byId('Member-template').text;
+                var tempFn = doT.template(tpl);
+                Member.innerHTML = tempFn(data.members);
+            } else {
+                Member.innerHTML = GetEmptyDiv();
+            }
+        });
+    }
+
+    function InitGames(id) {
+        var param = '{"page":1,"limit":9999,"columnId":21,"corporationId":' + id + '}';
+        ajaxRequest('sport/games/list', 'POST', param, function(ret, err) {
+            var games = $api.byId('tab1-con1');
+            if (ret.code == 0) {
+                //alert(decryptByDESModeEBC(ret.data));
+                var data = JSON.parse(decryptByDESModeEBC(ret.data));
+                if (data.page.list == undefined || data.page.list == null || data.page.list.length == 0) {
+                    games.innerHTML = GetEmptyDiv();
+                    return;
+                }
+                var tpl = $api.byId('Game-template').text;
+                var tempFn = doT.template(tpl);
+                games.innerHTML = tempFn(data.page.list);
+
+            } else {
+                games.innerHTML = GetEmptyDiv();
+            }
+        });
+    }
+
+    function Inithonor(id) {
+        var param = '{"newsColumn":22,"newsStatus":2,"corporationId":' + id + '}';
+        ajaxRequest('news/list', 'POST', param, function(ret, err) {
+            var Honor = $api.byId('tab1-con2');
+            if (ret.code == 0) {
+                var data = JSON.parse(decryptByDESModeEBC(ret.data));
+                if (data.page.list.length == 0) {
+                    Honor.innerHTML = GetEmptyDiv();
+                    return;
+                }
+                var tpl = $api.byId('Honor-template').text;
+                var tempFn = doT.template(tpl);
+                Honor.innerHTML = tempFn(data.page.list);
+            } else {
+                Honor.innerHTML = GetEmptyDiv();
+            }
+        });
+    }
+    var detail;
+
+    function opendetail() {
+        var openstr = $api.byId('open').innerHTML.trim();
+        if (openstr == "展开全部") {
+            $api.byId('detail').innerHTML = detail;
+            $api.byId('open').innerHTML = "收起";
+        } else {
+            $api.byId('detail').innerHTML = detail.substring(0, 50) + "...";
+            $api.byId('open').innerHTML = "展开全部";
+        }
+
+    }
+
+    function getgamestatusimg(status, servertime, activity_start_time) {
+        if (status == 0) {
+            if (activity_start_time && servertime) {
+                var servertimestr = servertime.split(' ')[0];
+                if (compareDate(servertimestr, getDateFormation(activity_start_time, "yyyy-MM-dd"))) {
+                    return "./image/signwill.png"; //即将报名
+                } else {
+                    return "./image/signing.png"; //报名中
+                }
+            } else {
+                return "./image/signwill.png"; //即将报名
+            }
+        } else {
+            return "./image/signed.png";
+        }
+    }
+    //比较日期大小
+    function compareDate(checkStartDate, checkEndDate) {
+        var startdate = new Date(checkStartDate.replace(/\-/g, "\/"));
+        var enddate = new Date(checkEndDate.replace(/\-/g, "\/"));
+        if (startdate >= enddate) {
+            return false; //报名中
+        } else {
+            return true; //即将开始
+        }
+    }
+
+    function getcontentStr(detail) {
+        if (detail == null || detail == undefined) {
+            return '';
+        }
+        var realdetail = repalceHtml(detail);
+        return realdetail.length <= 22 ? realdetail : realdetail.substring(0, 22) + "......";
+    }
+
+    function repalceHtml(str) {
+        var dd = str.replace(/<\/?.+?>/g, "");
+        var dds = dd.replace(/ /g, ""); //dds为得到后的内容
+        return dds;
+    }
+
+    function GetEmptyDiv() {
+        var html = "<div class=\"emptydata\">暂无数据</div>";
+        return html;
+    }
+    function htmlspecialchars_decode(str) {
+        str = str.replace(/%26amp;/g, "\&");
+        str = str.replace(/%26lt;/g, "\<");
+        str = str.replace(/%26gt;/g, "\>");
+        str = str.replace(/%26quot;/g, "\"");
+        str = str.replace(/&nbsp;/g, " ");
+        return str;
+    }
+</script>
+
+</html>

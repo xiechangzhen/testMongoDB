@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.dao.sport.DeviceDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.yymt.entity.sport.DeviceEntity" id="deviceMap">
+        <result property="smartwatchDevId" column="smartwatch_dev_id"/>
+        <result property="manuId" column="manu_id"/>
+        <result property="devStaus" column="dev_staus"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <insert id="insertDeviceEntity" parameterType="com.yymt.entity.sport.DeviceEntity">
+        INSERT INTO tb_device values(#{smartwatchDevId},#{manuId},#{devStaus},#{createTime},#{updateTime},#{remark});
+     </insert>
+
+    <select id="selectBySmartWatchId" parameterType="com.yymt.entity.sport.DeviceEntity" resultType="java.lang.Long">
+        SELECT count(*) from tb_device where smartwatch_dev_id = #{smartwatchDevId};
+    </select>
+</mapper>

@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.dao.sport.FeelingsDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.yymt.entity.sport.FeelingsEntity" id="feelingsMap">
+        <result property="id" column="id"/>
+        <result property="feelingsComment" column="feelings_comment"/>
+        <result property="userId" column="user_id"/>
+        <result property="isAnonymous" column="is_anonymous"/>
+        <result property="backgroundImage" column="background_image"/>
+        <result property="feelingsCreatetime" column="feelings_createtime"/>
+        <result property="feelingsReadCount" column="feelings_read_count"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <select id="feelingsDetail" resultType="java.util.Map">
+        SELECT
+            tf.*, tu.user_avatar,
+            tu.nick_name,
+            tu.real_name,
+            tu.user_type,
+            user_avatar
+        FROM
+            tb_feelings tf,
+            tb_user tu
+        WHERE
+            tf.user_id = tu.user_id
+        AND tf.id = #{id}
+    </select>
+
+    <!--APP心情列表-->
+<select id="queryAPPFeelingPage" resultType="java.util.Map">
+    SELECT id AS id,feelings_comment AS feelingsComment,tf.user_id AS userId,is_anonymous AS isAnonymous
+    ,background_image AS backgroundImage,feelings_createtime AS feelingsCreatetime,feelings_read_count AS feelingsReadCount,remark
+    ,IF(tmp1.greatsNum,tmp1.greatsNum,0) AS greatsNum
+    ,IF(tmp2.user_id,1,0) AS isGreats,
+    tu.nick_name,tu.user_type,
+    IF(tu.user_type=1,tu.real_name,tu.nick_name) AS realName
+    FROM `tb_feelings` tf
+    LEFT JOIN tb_user tu on tf.user_id = tu.user_id
+        LEFT JOIN (
+                      SELECT feelings_id,COUNT(1) AS greatsNum FROM tb_feelings_greats
+                      GROUP BY feelings_id
+                  )tmp1 ON tmp1.feelings_id = tf.id
+        LEFT JOIN (
+                      SELECT feelings_id,user_id FROM tb_feelings_greats
+                        <where>
+                            <if test="loginUserId != null and loginUserId != '' ">
+                                AND user_id = #{loginUserId}
+                            </if>
+                        </where>
+                      GROUP BY feelings_id
+                  )tmp2 ON tmp2.feelings_id = tf.id
+    <where>
+        <if test="userId != null and userId != '' ">
+            AND tf.user_id = #{userId}
+        </if>
+    </where>
+</select>
+
+    <!--后台心情列表-->
+<select id="queryFeelingPage" resultType="java.util.Map">
+    SELECT * FROM(
+        SELECT tf.id,feelings_comment as feelingsComment,tu.nick_name AS userName
+            ,tf.feelings_createtime AS feelingsCreatetime
+            ,IF(tfc.replyNum,tfc.replyNum,0) AS replyNum
+            ,tfc.lastReplyTime,tfc.lastReplyId,tu1.nick_name AS lastReplyUser
+            ,IF(tr.revealNum,1,0) AS feelingStatus
+            ,IF(tr.revealNum,tr.revealNum,0) AS revealNum
+        FROM tb_feelings tf
+            LEFT JOIN tb_user tu ON tu.user_id = tf.user_id
+            LEFT JOIN (SELECT
+                                       SUBSTRING_INDEX(
+                                               GROUP_CONCAT(comment_createtime ORDER BY comment_createtime DESC),
+                                               ',',
+                                               1
+                                       ) AS lastReplyTime,
+                                       SUBSTRING_INDEX(
+                                               GROUP_CONCAT(from_user_id ORDER BY from_user_id DESC),
+                                               ',',
+                                               1
+                                       ) AS lastReplyId,
+                           feelings_id,count(*) AS replyNum
+                       FROM tb_feelings_comment
+                       where parent_id is null
+                       GROUP BY feelings_id) AS tfc ON tfc.feelings_id = tf.id
+            LEFT JOIN tb_user tu1 ON tu1.user_id = tfc.lastReplyId
+            LEFT JOIN (select reveal_content_id,count(*) AS revealNum from tb_reveal where reveal_type=1 GROUP BY reveal_content_id) AS tr ON tf.id = tr.reveal_content_id
+        ) AS tmp
+    <where>
+        <if test="feelingStatus != null and feelingStatus != '' ">
+            AND feelingStatus = #{feelingStatus}
+        </if>
+        <if test="keyword != null and keyword != '' ">
+            AND (feelingsComment LIKE CONCAT('%',CONCAT(#{keyword}, '%'))
+            or userName LIKE CONCAT('%',CONCAT(#{keyword}, '%'))
+            or lastReplyUser LIKE CONCAT('%',CONCAT(#{keyword}, '%'))
+            )
+        </if>
+    </where>
+</select>
+</mapper>

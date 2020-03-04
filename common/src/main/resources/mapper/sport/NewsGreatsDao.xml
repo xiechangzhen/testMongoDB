@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.dao.sport.NewsGreatsDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.yymt.entity.sport.NewsGreatsEntity" id="newsGreatsMap">
+        <result property="newsId" column="news_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="greatsTime" column="greats_time"/>
+    </resultMap>
+
+    <delete id="cancelGreat" parameterType="com.yymt.entity.sport.NewsGreatsEntity">
+        DELETE FROM tb_news_greats WHERE user_id = #{userId} AND news_id = #{newsId}
+    </delete>
+    <select id="queryGreatCountByNewsId" resultType="java.lang.Integer">
+      select count(DISTINCT news_id,user_id) as count from tb_news_greats where news_id = #{id}
+    </select>
+
+    <select id="like" resultType="java.util.Map">
+        select tn.news_title,tn.news_content,tn.news_create_time,tng.news_id,tn.news_nav_image,temp.count
+        from tb_news_greats tng
+        INNER JOIN tb_news tn on tng.news_id = tn.id
+        LEFT JOIN(
+            SELECT news_id,count(1) as count
+            FROM tb_news_greats
+            GROUP BY news_id
+        ) temp on temp.news_id = tng.news_id
+        WHERE tn.news_status = 2
+        <choose>
+            <when test="isFriend">
+                AND tng.user_id = #{friendId}
+            </when>
+            <otherwise>
+                AND tng.user_id = #{userId}
+            </otherwise>
+        </choose>
+    </select>
+</mapper>

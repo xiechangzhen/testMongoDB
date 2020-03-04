@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.dao.sport.IndustryPersonDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.yymt.entity.sport.IndustryPersonEntity" id="industryPersonMap">
+        <result property="id" column="id"/>
+        <result property="realName" column="real_name"/>
+        <result property="sex" column="sex"/>
+        <result property="identityNumber" column="identity_number"/>
+        <result property="photo" column="photo"/>
+        <result property="contact" column="contact"/>
+        <result property="status" column="status"/>
+        <result property="createTime" column="create_time"/>
+        <result property="auditorId" column="auditor_id"/>
+        <result property="authorId" column="author_id"/>
+        <result property="auditTime" column="audit_time"/>
+        <result property="modifyTime" column="modify_time"/>
+        <result property="remark" column="remark"/>
+        <result property="sportLevelString" column="sportLevelString"/>
+        <association property="authorSysUser" javaType="com.yymt.entity.sys.SysUserEntity">
+            <id property="userId" column="author_sys_user_id"/>
+            <result property="username" column="author_sys_username"/>
+            <result property="deptName" column="author_sys_deptName"/>
+        </association>
+        <association property="auditorSysUser" javaType="com.yymt.entity.sys.SysUserEntity">
+            <id property="userId" column="auditor_sys_user_id"/>
+            <result property="username" column="auditor_sys_username"/>
+            <result property="deptName" column="auditor_sys_deptName"/>
+        </association>
+        <collection property="industrySportsLevels" ofType="com.yymt.entity.sport.IndustrySportsLevelEntity">
+            <result property="personType" column="person_type"/>
+            <result property="industryPersonId" column="industry_person_id"/>
+            <result property="sportId" column="sport_id"/>
+            <result property="levelId" column="level_id"/>
+            <result property="sportName" column="sportName"/>
+            <association property="sportsmanLevel" javaType="com.yymt.entity.sport.SportsmanLevelEntity">
+                <id property="id" column="sportsmanLevelId"/>
+                <result property="levelName" column="sportsmanLevelName"/>
+                <result property="levelType" column="sportsmanLevelType"/>
+            </association>
+        </collection>
+    </resultMap>
+
+    <select id="listIndustryPerson" resultType="java.util.Map">
+        SELECT
+        tip.id,
+        tip.real_name,
+        tip.contact,
+        tip.photo,
+        tip.sex,
+        tip.modify_time AS updateTime,
+        GROUP_CONCAT(ts.sport_name) as sport_name,
+        GROUP_CONCAT("\"",ts.id,"\"") as sport_id,
+        GROUP_CONCAT(tsl.level_name) as level_name,
+        GROUP_CONCAT("\"",tisl.level_id,"\"") as level_id,
+        GROUP_CONCAT("\"",tisl.person_type,"\"") as person_type
+        FROM
+        tb_industry_person tip
+        INNER JOIN tb_industry_sports_level tisl ON tip.id = tisl.industry_person_id
+        LEFT JOIN tb_sports ts ON tisl.sport_id = ts.id
+        LEFT JOIN tb_sportsman_level tsl ON tisl.level_id = tsl.id
+        WHERE tip.status = 1
+        GROUP BY
+        tip.id
+        <if test="type != null">
+            HAVING LOCATE(CONCAT("\"",#{type},"\""),person_type) > 0
+        </if>
+        <if test="type != null and sportId != null ">
+            and LOCATE(CONCAT("\"",#{sportId},"\""),sport_id) > 0
+        </if>
+        <if test="type == null and sportId != null ">
+            HAVING LOCATE(CONCAT("\"",#{sportId},"\""),sport_id) > 0
+        </if>
+        <if test="type != null or sportId != null">
+            <if test="levelId != null">
+                and LOCATE(CONCAT("\"",#{levelId},"\""),level_id) > 0
+            </if>
+        </if>
+        <if test="type == null and sportId == null">
+            <if test="levelId != null">
+                HAVING LOCATE(CONCAT("\"",#{levelId},"\""),level_id) > 0
+            </if>
+        </if>
+        <!--tip.id
+        select tip.*,ts.sport_name,tsl.level_name
+        FROM tb_industry_person tip
+        LEFT JOIN tb_sports ts on tip.sport_id = ts.id
+        LEFT JOIN tb_sportsman_level tsl on tsl.id = tip.level_id
+        <where>
+            <if test="type != null">
+                tip.person_type = #{type}
+            </if>
+            <if test="sportId != null ">
+                and  sport_id = #{sportId}
+            </if>
+            <if test="levelId != null">
+                and level_id = #{levelId}
+            </if>
+        </where>-->
+    </select>
+
+    <select id="selectInfoById" parameterType="java.lang.Integer" resultType="java.util.Map">
+        select tip.*,
+        GROUP_CONCAT(ts.sport_name) as sportProject,
+        GROUP_CONCAT(tsl.level_name) as grade,
+        GROUP_CONCAT(tsl.level_type) as sportType
+        from tb_industry_person tip
+        left join tb_industry_sports_level tisl on tip.id = tisl.industry_person_id
+        left join tb_sports ts on ts.id = tisl.sport_id
+        left join tb_sportsman_level tsl on tisl.level_id = tsl.id
+        where tip.id = #{id}
+
+    </select>
+
+    <select id="getIndustryPersonListPage" resultMap="industryPersonMap">
+        SELECT ip.id, ip.real_name, ip.sex, ip.photo, ip.status, ip.contact, ip.auditor_id, ip.audit_time
+        , ip.author_id, ip.create_time, ip.identity_number, ip.modify_time
+        , GROUP_CONCAT(
+        CONCAT(sl.level_name,spt.sport_name,
+        IF(sl.level_type=0,'运动员',IF(sl.level_type=1,'教练员',IF(sl.level_type=2,'裁判员','社会指导员'))))) AS sportLevelString
+        , GROUP_CONCAT(sl.level_type) AS sportLevelTypes
+        FROM tb_industry_person ip
+        LEFT JOIN tb_industry_sports_level isl ON ip.id = isl.industry_person_id
+        LEFT JOIN tb_sports spt ON isl.sport_id = spt.id
+        LEFT JOIN tb_sportsman_level sl ON isl.level_id = sl.id
+        <where>
+            <if test="ipStatus != null and ipStatus != ''">
+                AND ip.status = #{ipStatus}
+            </if>
+            <if test="sql_filter != null and sql_filter != '' ">
+                AND ${sql_filter}
+            </if>
+        </where>
+        GROUP BY ip.id
+        <trim prefix="HAVING" prefixOverrides="AND |OR ">
+            <if test="levelType != null and levelType != ''">
+                AND LOCATE(#{levelType},sportLevelTypes) > 0
+            </if>
+            <if test="keyword != null and keyword != ''">
+                AND (
+                ip.real_name LIKE CONCAT('%',#{keyword},'%')
+                OR ip.identity_number LIKE CONCAT('%',#{keyword},'%')
+                OR LOCATE(#{keyword}, sportLevelString) > 0
+                )
+            </if>
+        </trim>
+    </select>
+
+    <select id="getIndustryPersonById" resultMap="industryPersonMap">
+        SELECT ip.id, ip.real_name, ip.sex, ip.photo, ip.status, ip.contact, ip.auditor_id, ip.audit_time
+        , ip.author_id, ip.create_time, ip.identity_number, ip.remark, ip.modify_time
+        , isl.person_type , isl.industry_person_id, isl.sport_id, isl.level_id
+        , spt.sport_name AS sportName
+        , sl.id AS sportsmanLevelId, sl.level_name AS sportsmanLevelName, sl.level_type AS sportsmanLevelType
+        , su.user_id AS author_sys_user_id, su.username AS author_sys_username
+        , su2.user_id AS auditor_sys_user_id, su2.username AS auditor_sys_username
+        , sd.name AS author_sys_deptName, sd2.name AS auditor_sys_deptName
+        FROM tb_industry_person ip
+        LEFT JOIN tb_industry_sports_level isl ON ip.id = isl.industry_person_id
+        LEFT JOIN tb_sports spt ON isl.sport_id = spt.id
+        LEFT JOIN tb_sportsman_level sl ON isl.level_id = sl.id
+        LEFT JOIN sys_user su ON ip.author_id = su.user_id
+        LEFT JOIN sys_dept sd ON su.dept_id = sd.dept_id
+        LEFT JOIN sys_user su2 ON ip.auditor_id = su2.user_id
+        LEFT JOIN sys_dept sd2 ON su2.dept_id = sd2.dept_id
+        WHERE ip.id = #{id}
+    </select>
+
+    <select id="getIndustryPersonListByIds" resultMap="industryPersonMap">
+        SELECT ip.id, ip.real_name, ip.sex, ip.photo, ip.status, ip.contact, ip.auditor_id, ip.audit_time
+        , ip.author_id, ip.create_time, ip.identity_number, ip.modify_time
+        , GROUP_CONCAT(
+        CONCAT(sl.level_name,spt.sport_name,
+        IF(sl.level_type=0,'运动员',IF(sl.level_type=1,'教练员',IF(sl.level_type=2,'裁判员','社会指导员'))))) AS sportLevelString
+        FROM tb_industry_person ip
+        LEFT JOIN tb_industry_sports_level isl ON ip.id = isl.industry_person_id
+        LEFT JOIN tb_sports spt ON isl.sport_id = spt.id
+        LEFT JOIN tb_sportsman_level sl ON isl.level_id = sl.id
+        WHERE ip.status = 1 AND ip.id IN
+        <foreach item="item" index="index" collection="ids"
+                 open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        GROUP BY ip.id
+    </select>
+
+    <select id="getIndustryPersonListAll" resultMap="industryPersonMap">
+        SELECT ip.id, ip.real_name, ip.sex, ip.photo, ip.status, ip.contact, ip.auditor_id, ip.audit_time
+        , ip.author_id, ip.create_time, ip.identity_number, ip.modify_time
+        , GROUP_CONCAT(
+          CONCAT(sl.level_name,spt.sport_name,
+            IF(sl.level_type=0,'运动员',IF(sl.level_type=1,'教练员',IF(sl.level_type=2,'裁判员','社会指导员'))))) AS sportLevelString
+        FROM tb_industry_person ip
+        LEFT JOIN tb_industry_sports_level isl ON ip.id = isl.industry_person_id
+        LEFT JOIN tb_sports spt ON isl.sport_id = spt.id
+        LEFT JOIN tb_sportsman_level sl ON isl.level_id = sl.id
+        WHERE ip.status = 1
+        GROUP BY ip.id
+    </select>
+
+    <select id="auditCount" resultType="java.lang.Integer">
+        select count(1) from tb_industry_person where status = 0
+    </select>
+
+    <select id="auditCount" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM (SELECT ip.id, ip.real_name
+        , GROUP_CONCAT(
+        CONCAT(sl.level_name,spt.sport_name,
+        IF(sl.level_type=0,'运动员',IF(sl.level_type=1,'教练员',IF(sl.level_type=2,'裁判员','社会指导员'))))) AS sportLevelString
+        , GROUP_CONCAT(sl.level_type) AS sportLevelTypes
+        FROM tb_industry_person ip
+        LEFT JOIN tb_industry_sports_level isl ON ip.id = isl.industry_person_id
+        LEFT JOIN tb_sports spt ON isl.sport_id = spt.id
+        LEFT JOIN tb_sportsman_level sl ON isl.level_id = sl.id
+        WHERE ip.status = 0
+        <if test="sql_filter != null and sql_filter != '' ">
+            AND ${sql_filter}
+        </if>
+        GROUP BY ip.id
+        <trim prefix="HAVING" prefixOverrides="AND |OR ">
+            <if test="levelType != null and levelType != ''">
+                AND LOCATE(#{levelType},sportLevelTypes) > 0
+            </if>
+            <if test="keyword != null and keyword != ''">
+                AND (
+                ip.real_name LIKE CONCAT('%',#{keyword},'%')
+                OR LOCATE(#{keyword}, sportLevelString) > 0
+                )
+            </if>
+        </trim>
+        ) table1
+    </select>
+</mapper>

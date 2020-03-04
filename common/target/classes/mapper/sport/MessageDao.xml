@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.dao.sport.MessageDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.yymt.entity.sport.MessageEntity" id="messageMap">
+        <result property="id" column="id"/>
+        <result property="leaveMessage" column="leave_message"/>
+        <result property="fromUserId" column="from_user_id"/>
+        <result property="toUserId" column="to_user_id"/>
+        <result property="status" column="status"/>
+        <result property="createTime" column="create_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <select id="selectMessagePage" resultType="java.util.Map">
+        select temp.*,nick_name as to_nick_name,user_avatar as to_user_avatar from (
+	select id,leave_message,from_user_id,to_user_id,tm.status,tm.create_time,remark,nick_name as from_nick_name,user_avatar as from_user_avatar
+	from tb_message tm,tb_user tu
+	where  tm.from_user_id = tu.user_id and ((tm.from_user_id = #{userId1} and tm.to_user_id = #{userId2}) or (tm.from_user_id = #{userId2} and tm.to_user_id = #{userId1}))
+) temp LEFT JOIN tb_user tu on temp.to_user_id = tu.user_id ORDER BY create_time DESC
+    </select>
+    
+    <select id="queryMessageCountByDay" resultType="java.lang.Integer">
+        select count(1) from tb_message
+        where DATE_FORMAT(create_time,"%Y%m%d") = DATE_FORMAT(NOW(),"%Y%m%d")
+        and from_user_id = #{fromUserId} and to_user_id = #{toUserId}
+    </select>
+</mapper>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.dao.sport.HelpCommentDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.yymt.entity.sport.HelpCommentEntity" id="helpCommentMap">
+        <result property="id" column="id"/>
+        <result property="helpId" column="help_id"/>
+        <result property="commentContent" column="comment_content"/>
+        <result property="commentCreatetime" column="comment_createtime"/>
+        <result property="fromUserId" column="from_user_id"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="isBestAnswer" column="is_best_answer"/>
+    </resultMap>
+
+    <!--2018年7月13日：增加父评论-->
+    <select id="selectHelpCommentPage" resultType="java.util.Map">
+        SELECT tu1.real_name as parent_real_name,tu1.user_type as parent_user_type,tu1.nick_name as parent_nick_name,thc1.comment_content as parent_comment,tmp.*
+        FROM(
+                select thc.*,nick_name,user_avatar,tu.user_type,tu.real_name
+                from tb_help_comment thc,tb_user tu
+                where thc.from_user_id = tu.user_id
+                      and thc.help_id = #{id}
+                ORDER BY thc.is_best_answer desc
+            )tmp
+            LEFT JOIN tb_help_comment thc1 ON tmp.parent_id = thc1.id
+            LEFT JOIN tb_user tu1 ON tu1.user_id = thc1.from_user_id
+    </select>
+    <!--后台求助的评论列表-->
+    <select id="commentList" resultType="java.util.Map">
+        SELECT thc.id AS id,comment_content AS commentContent
+        ,comment_createtime AS commentCreateTime,is_solve AS isSolve
+        ,tu.nick_name,user_avatar
+        ,tu.real_name,tu.user_type
+        FROM tb_help_comment thc
+        LEFT JOIN tb_user tu ON thc.from_user_id = tu.user_id
+        LEFT JOIN tb_help th ON thc.help_id = th.id
+        WHERE thc.parent_id IS NULL AND th.id = #{helpId}
+        ORDER BY thc.id DESC
+    </select>
+
+</mapper>

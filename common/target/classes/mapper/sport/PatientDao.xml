@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.dao.sport.PatientDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.yymt.entity.sport.PatientEntity" id="patientMap">
+        <result property="id" column="id"/>
+        <result property="no" column="no"/>
+        <result property="diagnosisDate" column="diagnosis_date"/>
+        <result property="lng" column="lng"/>
+        <result property="lat" column="lat"/>
+        <result property="address" column="address"/>
+        <result property="remark" column="remark"/>
+        <result property="description" column="description"/>
+        <result property="type" column="type"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id AS id,
+        no AS no,
+        diagnosis_date AS diagnosisDate,
+        lng AS lng,
+        lat AS lat,
+        address AS address,
+        remark AS remark,
+        description AS description,
+        type AS type,
+    </sql>
+</mapper>

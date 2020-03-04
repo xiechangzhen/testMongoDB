@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.dao.sport.CorporationGreatsDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.yymt.entity.sport.CorporationGreatsEntity" id="corporationGreatsMap">
+        <result property="corporationId" column="corporation_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="greatsTime" column="greats_time"/>
+    </resultMap>
+
+    <select id="queryGreatCountByCorporationId" resultType="java.lang.Integer">
+        select count(1) as count from tb_corporation_greats where corporation_id = #{id}
+    </select>
+
+    <select id="like" resultType="java.util.Map">
+
+        SELECT
+        tc.id,corporation_name,DATE_FORMAT(corporation_founding_time,'%Y-%m-%d') AS corporation_founding_time,corporation_leader_postion,corporation_leader,corporation_contact,corporation_introduce,corparation_area,
+        corporation_address,personal_vip_count,longitude,latitude,corporation_images,GROUP_CONCAT("'",tcs.sport_id,"'") as sprotsarray,
+        GROUP_CONCAT(ts.sport_name) AS sportsname,
+        truncate(6370996.81 * ACOS(
+        COS(latitude * PI() / 180) * COS(#{latitude} * PI() / 180) * COS(
+        longitude * PI() / 180 - #{longitude} * PI() / 180
+        ) + SIN(latitude * PI() / 180) * SIN(#{latitude} * PI() / 180)
+        ),2) as distance,
+        tc.page_view as pv,
+        tcp.position_name
+        from tb_corporation_greats tcg
+        INNER JOIN tb_corporation tc on tcg.corporation_id = tc.id
+        INNER JOIN tb_user tu on tu.user_id = tcg.user_id
+        LEFT JOIN tb_corporation_sports tcs on tcs.corporation_id = tc.id
+        LEFT JOIN tb_sports ts on tcs.sport_id = ts.id
+        LEFT JOIN tb_corporation_position tcp on tcp.id = tc.corporation_leader_postion
+        <where>
+            tc.corporation_status = 1
+            <choose>
+                <when test="isFriend">
+                    AND tcg.user_id = #{friendId}
+                </when>
+                <otherwise>
+                    AND tcg.user_id = #{userId}
+                </otherwise>
+            </choose>
+        </where>
+        GROUP BY tc.id
+        <!--
+
+        select * from tb_corporation_greats tcg
+        INNER JOIN (
+            SELECT
+                tc.id,corporation_name,DATE_FORMAT(corporation_founding_time,'%Y-%m-%d') AS corporation_founding_time,corporation_leader_postion,corporation_leader,corporation_contact,corporation_introduce,corparation_area,
+                corporation_address,personal_vip_count,longitude,latitude,corporation_images,remark,truncate(6370996.81 * ACOS(
+                COS(latitude * PI() / 180) * COS(#{latitude} * PI() / 180) * COS(
+                longitude * PI() / 180 - #{longitude} * PI() / 180
+                ) + SIN(latitude * PI() / 180) * SIN(#{latitude} * PI() / 180)
+                ),2) as distance,GROUP_CONCAT("'",tcs.sport_id,"'") as sprotsarray,
+                GROUP_CONCAT(ts.sport_name) AS sportsname,
+                tc.page_view as pv
+                from tb_corporation tc
+                LEFT JOIN tb_corporation_sports tcs on tc.id = tcs.corporation_id
+                LEFT JOIN tb_sports ts on tcs.sport_id = ts.id
+        ) corporationtemp on corporationtemp.id = tcg.corporation_id
+        LEFT JOIN(
+            SELECT corporation_id,count(1) FROM tb_corporation_greats tcg1
+            <where>
+                <choose>
+                    <when test="isFriend">
+                        tcg1.user_id = #{friendId}
+                    </when>
+                    <otherwise>
+                        tcg1.user_id = #{userId}
+                    </otherwise>
+                </choose>
+            </where>
+            GROUP BY corporation_id,user_id
+        )temp on temp.corporation_id = tcg.corporation_id
+        where
+        <choose>
+            <when test="isFriend">
+                tcg.user_id = #{friendId}
+            </when>
+            <otherwise>
+                tcg.user_id = #{userId}
+            </otherwise>
+        </choose>-->
+    </select>
+
+    <!--查询某个社团下所有点赞的用户名-->
+    <select id="listCorporationGreatUser" resultType="java.lang.String">
+        select tcg.user_id
+        from tb_corporation_greats tcg
+        INNER JOIN tb_user tu on tcg.user_id = tu.user_id
+        where corporation_id = #{corporationId}
+        and tu.user_status in(1,2,3,4)
+    </select>
+</mapper>

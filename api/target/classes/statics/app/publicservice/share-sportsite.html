@@ -1,0 +1,374 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=0, width=device-width" />
+    <title>赣州智慧体育APP</title>
+    <link rel="stylesheet" type="text/css" href="./css/aui.css" />
+    <link rel="stylesheet" type="text/css" href="./css/common.css" />
+    <link rel="stylesheet" type="text/css" href="./css/siteinfo.css" />
+    <link rel="stylesheet" type="text/css" href="./css/aui-slide.css" />
+    <style type="text/css">
+        .aui-slide-page-wrap {
+            height: 25px;
+            line-height: 25px;
+            bottom: 0px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .aui-slide-page-text {
+            opacity: 1.0;
+            font-size: 11px;
+        }
+
+        #app {
+            position: fixed;
+            top: 0px;
+            height: 49px;
+            width: 100%;
+        }
+
+        #app table {
+            width: 100%;
+            height: 100%;
+            background: rgba(1, 1, 1, 0.7);
+            /*#525252*/
+        }
+
+        #app .t1 {
+            height: 49px;
+            padding-left: 16px;
+        }
+
+        #app .t2 {
+            color: #ffffff;
+            font-size: 16px;
+            vertical-align: middle;
+            padding-right: 15px;
+        }
+
+        #app .t3 {
+            text-align: right;
+            padding-right: 16px;
+        }
+
+        #app .button {
+            background-color: #409aff;
+            border: none;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 12px;
+            cursor: pointer;
+            height: 29px;
+        }
+
+        #bottom {
+            position: fixed;
+            bottom: 16px;
+            z-index: 9999;
+            width: 100%;
+        }
+
+        #bottom div {
+            width: 90%;
+            margin: 0px auto;
+        }
+
+        #bottom .button {
+            background-color: #409aff;
+            border: none;
+            color: #fffefe;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            cursor: pointer;
+            height: 36px;
+            z-index: 9999;
+            width: 100%;
+        }
+
+        .price_tb .td1 {
+            width: 80px;
+        }
+
+        .price_tb .td2 {
+            width: 105px;
+        }
+
+        .price_tb .td3 {
+            text-align: left;
+            font-size: 12px;
+        }
+        .labelclass {
+            float: left;
+            padding-top: 5px;
+            font-family: '微软雅黑';
+            font-size: 14px;
+            color: #282828;
+            line-height: 35px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class='middle_outer'>
+        <div class='middle_inner' id="main">
+            <div id="aui-slide">
+                <div class="aui-slide-wrap" id="images">
+                    <div class="aui-slide-node">
+                        <img src="./image/ps-bg.png" />
+                    </div>
+
+                </div>
+                <div class="aui-slide-page-wrap">
+                    <!--分页容器-->
+                </div>
+                <div class="aui-slide-page-text" id="pagetext">
+                    10001阅读
+                </div>
+            </div>
+            <ul id="info">
+
+            </ul>
+            <div class="hr">
+
+            </div>
+            <div id="service" style="display:;">
+                <script id="service-template" type="text/template">
+                    <div  class="service" style="display:;">
+                        <i class="serviceicon"></i><span>场馆服务</span>
+                        <span style="float:right;margin-right:16px;" >更多
+                        <img  src="./image/more-btn.png" style="display:inline-block;width:12px;  height:9px;" />
+                      </span>
+                    </div>
+                    <div id="servicelist" style="margin:0 16px;">
+                        <table cellspacing="0" cellpadding="0" width="100%" align="center">
+                            {{ for(var i = 0, len = it.hallServe.length; i< len; i++) { }}
+                            {{if(i==len-1){ }}
+                            <tr class="labelclass" style="width:100%;">
+                                {{ }else{ }}
+                                <tr class="labelclass" style="width:100%;border-bottom:1px solid #EEEEEE;">
+                                    {{ } }}
+                                    <td width="80%;">{{=it.hallServe[i].serveName}}</td>
+                                    <td width="20%;" style="color:#409aff;">￥{{=it.hallServe[i].servePrice}}</td>
+                                    <td align="right" width="20px;">&nbsp;</td>
+                                </tr>
+                                {{ } }}
+                        </table>
+                    </div>
+                    <div class="hr"></div>
+                </script>
+            </div>
+            <div id="shop" style="display:;">
+                <script id="shop-template" type="text/template">
+                    <div  class="shop" style="display:;">
+                        <i></i><span>附近商家</span>
+                        <span style="float:right;margin-right:16px;" >更多
+                      <img  src="./image/more-btn.png" style="display:inline-block;width:12px;  height:9px;" />
+                    </span>
+                    </div>
+                    <div id="shoplist" style="margin:0 28px;">
+                        <table cellspacing="0" cellpadding="0" width="100%" align="center" style="margin:16px 16px 12px 0;">
+                            <tr>
+                                <td width="30%">
+                                    <img style="height:80px;" src="{{=it.nearListStore[0].storeLogo==null||it.nearListStore[0].storeLogo==''?'./image/logo02.png':it.nearListStore[0].storeLogo.split(',')[0]}}" onerror="Javascript:this.src='./image/logo02.png'"/>
+                                </td>
+                                <td width="5%">&nbsp;</td>
+                                <td width="30%" style="font-size:16px;color:#232323;">
+                                    {{if(it.nearListStore.length>1){ }}
+                                    <img src="{{=it.nearListStore[1].storeLogo==null||it.nearListStore[1].storeLogo==''?'./image/logo02.png':it.nearListStore[1].storeLogo.split(',')[0]}}" style="height:80px;" /> {{ } }}
+                                </td>
+                                <td width="5%">&nbsp;</td>
+                                <td width="30%">
+                                    {{if(it.nearListStore.length>2){ }}
+                                    <img src="{{=it.nearListStore[2].storeLogo==null||it.nearListStore[2].storeLogo==''?'./image/logo02.png':it.nearListStore[2].storeLogo.split(',')[0]}}" style="height:80px;" /> {{ } }}
+                                </td>
+                            </tr>
+                            <tr style="color:#232323;font-size:14px;line-height:20px;">
+                                <td align="center">{{=it.nearListStore[0].storeName}}</td>
+                                <td width="5%">&nbsp;</td>
+                                <td align="center">{{=(it.nearListStore.length>1?it.nearListStore[1].storeName:"")}}</td>
+                                <td width="5%">&nbsp;</td>
+                                <td align="center">{{=(it.nearListStore.length>2?it.nearListStore[2].storeName:"")}}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="hr">
+                    </div>
+                </script>
+            </div>
+            <div class="price">
+                <i></i><span>项目套餐</span>
+            </div>
+            <div class="price_tb">
+                <table id="price_tb">
+                    <script id="price-template" type="text/x-dot-template">
+                        {{ for(var i = 0, len = it.length; i< len; i++) { }}
+                        <tr>
+                            <td class="td1">{{=it[i].sport_name}}</td>
+                            <td class="td2">{{=it[i].provide_equipment==0?"不提供器材":"提供器材"}}</td>
+                            <td class="td3"><span>{{=it[i].price}}</span></td>
+                            </tr>
+                            {{ } }}
+                    </script>
+
+                </table>
+            </div>
+
+            <div class="detail">
+                <i></i><span>详细介绍</span>
+            </div>
+            <div class="content" id="content">
+
+            </div>
+            <div class="aui-toast">
+                信息不存在
+            </div>
+        </div>
+    </div>
+
+    <script id="site-template" type="text/x-dot-template">
+        <li class="title" id="title">{{=it.hall_name}}</li>
+        <li><i class="tel"></i><span style="margin-right:30px;">{{=it.hall_leader}}</span> {{=it.hall_contact}}</li>
+        <li><i class="address"></i>{{=it.hall_address}}</li>
+        <li><i class="date"></i>{{=it.hall_open_week}}</li>
+        <li><i class="project"></i>{{=it.sportsname==null||it.sportsname==""?"":it.sportsname.replace(/,/g,'、')}}</li>
+    </script>
+    <div id="app">
+        <table border="0" cellspacing="0" cellpadding="0">
+            <tr>
+                <td class="t1"><img src="./image/logo02.png" width="32" height="32" alt=""></td>
+                <td class="t2">体育让梦想成真</td>
+                <td class="t3">
+                    <button type="button" name="button" class="button" onclick="downloadapp()">立即下载</button>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div id="bottom">
+        <div>
+            <button type="button" name="button" class="button" onclick="downloadapp()">打开APP查看你想要的更多内容</button>
+        </div>
+    </div>
+</body>
+<script type="text/javascript" id="yytDESScript" src="./js/yytdes.js" data="0"></script>
+<script type="text/javascript" src="./js/api.js"></script>
+<script type="text/javascript" src="./js/jquery-3.3.1.min.js"></script>
+<script type="text/javascript" src="./js/doT.min.js"></script>
+<script type="text/javascript" src="./js/common.js"></script>
+<script type="text/javascript" src="./js/aui-slide.js"></script>
+
+<script type="text/javascript">
+    function htmlspecialchars_decode(str) {
+        str = str.replace(/%26amp;/g, "\&");
+        str = str.replace(/%26lt;/g, "\<");
+        str = str.replace(/%26gt;/g, "\>");
+        str = str.replace(/%26quot;/g, "\"");
+        str = str.replace(/&nbsp;/g, " ");
+        return str;
+    }
+
+    function InitDataSlide(pv, images) {
+        $api.byId('pagetext').innerHTML = pv + "阅读";
+        var html = "";
+        if (images != null && images != "" && images != 'null') {
+            var imagesArray = images.split(',');
+            for (var i = 0; i < imagesArray.length; i++) {
+                html += "<div class=\"aui-slide-node\"><img src=\"" + imagesArray[i] + "\" /></div>"
+            }
+            $api.byId('images').innerHTML = html;
+        }
+        var slide = new auiSlide({
+            container: document.getElementById("aui-slide"),
+            // "width":300,
+            "height": 220,
+            "speed": 600,
+            "autoPlay": 3000, //自动播放
+            "loop": true,
+            "pageShow": true,
+            "pageStyle": 'dot',
+            'dotPosition': 'center',
+            //'textArray': ['10000阅读', '10000阅读', '10000阅读']
+        })
+    }
+
+    function getQueryVariable(variable) {
+        var query = window.location.search.substring(1);
+        var vars = query.split("&");
+        for (var i = 0; i < vars.length; i++) {
+            var pair = vars[i].split("=");
+            if (pair[0] == variable) {
+                return pair[1];
+            }
+        }
+        return 1;
+    }
+    $(document).ready(function() {
+        var id = getQueryVariable("id");
+        //id=1000;
+        InitData(id);
+    });
+
+    function InitData(id) {
+        ajaxRequest('sport/hall/info/' + id, 'POST', {}, function(ret, err) {
+            if (ret.code == 0) {
+                //alert(decryptByDESModeEBC(ret.data));
+                var data = JSON.parse(decryptByDESModeEBC(ret.data));
+                var main = $api.byId('info');
+                var tpl = $api.byId('site-template').text;
+                var tempFn = doT.template(tpl);
+                main.innerHTML = tempFn(data.hall);
+                //$api.byId('content').innerHTML = data.hall.hall_introduction;
+                $api.byId('content').innerHTML = data.hall.hall_introduction == null ? "" : htmlspecialchars_decode(data.hall.hall_introduction);
+
+                var price_tb = $api.byId('price_tb');
+                var tpl1 = $api.byId('price-template').text;
+                var tempFn1 = doT.template(tpl1);
+                price_tb.innerHTML = tempFn1(data.price);
+
+                //场馆服务显示 2018-12-29add
+
+                if (data.hallServe.length > 0) {
+                    // 编译模板函数
+                    var tempFn2 = doT.template($api.byId('service-template').innerHTML);
+                    // 使用模板函数生成HTML文本
+                    $api.append($api.byId('service'), tempFn2(data));
+                }
+
+                //附近商家显示 2018-12-29add
+                if (data.nearListStore.length > 0) {
+
+                    // 编译模板函数
+                    var tempFn3 = doT.template($api.byId('shop-template').innerHTML);
+                    // 使用模板函数生成HTML文本
+                    $api.append($api.byId('shop'), tempFn3(data));
+                }
+                InitDataSlide(data.hall.pv, data.hall.hall_images);
+                $("title").html(data.hall.hall_name); //修改title显示
+            } else {
+                $(".aui-toast").show();
+                setTimeout(function() {
+                    $(".aui-toast").hide();
+                }, 2000)
+
+            }
+        });
+    }
+
+    function GetSiteTime(open_am, close_am, open_pm, close_pm) {
+        var result = "";
+        if (open_am != null && open_am != "null" && close_am != null && close_am != "null") {
+            result += "上午" + open_am + "-" + close_am;
+        }
+        if (open_pm != null && open_pm != "null" && close_pm != null && close_pm != "null") {
+            result += ",下午" + open_pm + "-" + close_pm;
+        }
+        return result;
+    }
+</script>
+
+</html>

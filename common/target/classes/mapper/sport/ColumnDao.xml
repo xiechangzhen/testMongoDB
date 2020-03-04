@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.dao.sport.ColumnDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.yymt.entity.sport.ColumnEntity" id="columnMap">
+        <result property="id" column="id"/>
+        <result property="columnParentId" column="column_parent_id"/>
+        <result property="columnName" column="column_name"/>
+        <result property="columnIsShow" column="column_is_show"/>
+        <result property="columnNaviPic" column="column_navi_pic"/>
+        <result property="columnStatus" column="column_status"/>
+        <result property="columnIsDelete" column="column_is_delete"/>
+        <result property="columnCreateTime" column="column_create_time"/>
+        <result property="columnCreateBy" column="column_create_by"/>
+        <result property="columnModifyTime" column="column_modify_time"/>
+        <result property="columnModifiedBy" column="column_modified_by"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <!-- 通过父栏目的value获取子栏目 -->
+    <select id="getChildColumnByParentValue" resultType="java.util.Map">
+        SELECT tc2.id,tc2.column_name AS columnName,tc1.column_name AS parentColumnName FROM `tb_column` tc1
+            RIGHT JOIN tb_column tc2 ON tc2.column_parent_id = tc1.id
+        WHERE tc1.column_value = #{parentValue}  and  tc2.column_is_show = 1
+    </select>
+
+    <!-- 获取子栏目 -->
+    <select id="getChildColumnList" resultType="java.util.Map">
+        SELECT tc2.id,tc2.column_name AS columnName,tc1.column_name AS parentColumnName,tc1.id AS parentColumnId FROM `tb_column` tc1
+            RIGHT JOIN tb_column tc2 ON tc2.column_parent_id = tc1.id
+        <where>
+            tc2.column_parent_id > 0
+            <if test="keyword != null and keyword != '' ">
+                AND (tc2.column_name LIKE CONCAT('%',CONCAT(#{keyword}, '%'))
+                or tc1.column_name LIKE CONCAT('%',CONCAT(#{keyword}, '%'))
+                )
+            </if>
+        </where>
+        order by tc2.column_create_time desc
+    </select>
+
+</mapper>

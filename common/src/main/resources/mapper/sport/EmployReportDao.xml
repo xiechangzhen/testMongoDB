@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.dao.sport.EmployReportDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.yymt.entity.sport.EmployReportEntity" id="employReportMap">
+        <result property="id" column="id"/>
+        <result property="contact" column="contact"/>
+        <result property="address" column="address"/>
+        <result property="temperature" column="temperature"/>
+        <result property="isquarantine" column="isQuarantine"/>
+        <result property="isarrive" column="isArrive"/>
+        <result property="createtime" column="createTime"/>
+        <result property="employid" column="employId"/>
+        <result property="longitude" column="longitude"/>
+        <result property="latitude" column="latitude"/>
+    </resultMap>
+
+    <sql id="Base_Column_List" >
+        id AS id,
+        contact AS contact,
+        address AS address,
+        temperature AS temperature,
+        isQuarantine AS isquarantine,
+        isArrive AS isarrive,
+        createTime AS createtime,
+        employId AS employid,
+        longitude AS longitude,
+        latitude AS latitude,
+    </sql>
+
+    <select id="queryList" resultType="java.util.Map">
+        select
+        ter.id AS id,
+        ter.contact AS contact,
+        address AS address,
+        temperature AS temperature,
+        isQuarantine AS isquarantine,
+        isArrive AS isarrive,
+        createTime AS createtime,
+        employId AS employid,
+        longitude AS longitude,
+        latitude AS latitude,
+        te.`name`,te.`name`
+        from tb_employ_report ter
+        INNER JOIN tb_employ te on ter.employId = te.id
+        <where>
+            1 = 1
+            <if test="queryDate != null and queryDate != ''">
+                and DATE_FORMAT(ter.createTime,'%Y-%m-%d') = #{queryDate}
+            </if>
+            <if test="keyword != null and keyword != ''">
+                and (ter.employId  LIKE CONCAT('%',CONCAT(#{keyword}, '%'))
+                or te.name LIKE CONCAT('%',CONCAT(#{keyword}, '%'))
+                )
+            </if>
+        </where>
+    </select>
+</mapper>

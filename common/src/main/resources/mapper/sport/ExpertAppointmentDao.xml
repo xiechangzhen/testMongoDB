@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.dao.sport.ExpertAppointmentDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.yymt.entity.sport.ExpertAppointmentEntity" id="expertAppointmentMap">
+        <result property="id" column="id"/>
+        <result property="appointmentRealName" column="appointment_real_name"/>
+        <result property="appointmentAge" column="appointment_age"/>
+        <result property="appointmentSex" column="appointment_sex"/>
+        <result property="appointmentMobile" column="appointment_mobile"/>
+        <result property="appointmentProfession" column="appointment_profession"/>
+        <result property="appointmentProblemDescription" column="appointment_problem_description"/>
+        <result property="appointmentStartDate" column="appointment_start_date"/>
+        <result property="appointmentEndDate" column="appointment_end_date"/>
+        <result property="appointmentStatus" column="appointment_status"/>
+        <result property="appointmentExpertUserId" column="appointment_expert_user_id"/>
+        <result property="appointmentUserId" column="appointment_user_id"/>
+        <result property="appointmentComment" column="appointment_comment"/>
+        <result property="appointmentScore" column="appointment_score"/>
+        <result property="appointmentCommentTime" column="appointment_comment_time"/>
+        <result property="createTime" column="create_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+    <!--获取普通用户/专家预约列表-->
+    <select id="selectExpertAppointmentPage" resultType="java.util.Map">
+        select *,
+        tu.user_avatar as expert_header,
+        teu.user_avatar as user_header
+        from tb_expert_appointment tea,tb_user tu,tb_user teu
+        where tea.appointment_expert_user_id = tu.user_id
+        and teu.user_id = tea.appointment_user_id
+        <choose>
+            <when test="direction == 0">
+                and tea.appointment_user_id = #{id}
+                <if test="status != ''">
+                    and tea.appointment_status = #{status}
+                </if>
+            </when>
+            <otherwise>
+                and tea.appointment_expert_user_id = #{id}
+                <if test="status != ''">
+                    <choose>
+                        <when test="status == 0">
+                            and tea.appointment_status = 0
+                        </when>
+                        <when test="status == 3">
+                            and tea.appointment_status = 3
+                        </when>
+                        <otherwise>
+                            and tea.appointment_status in(1,2)
+                        </otherwise>
+                    </choose>
+                </if>
+            </otherwise>
+        </choose>
+    </select>
+    <!--获取专家预约评价列表-->
+    <select id="selectExpertAppointmentCommentPage" resultType="java.util.Map">
+        SELECT tu.nick_name AS nickName,tu.user_avatar AS userAvatar
+        ,tea.id,appointment_status AS appointmentStatus,appointment_expert_user_id AS appointmentExpertUserId
+        ,appointment_user_id AS appointmentUserId,appointment_comment AS appointmentComment,appointment_score AS appointmentScore
+        ,appointment_comment_time AS appointmentCommentTime
+        FROM tb_expert_appointment tea
+        LEFT JOIN tb_user tu ON tu.user_id = tea.appointment_user_id
+        WHERE appointment_status = 2
+        <if test="expertId != null and expertId != ''">
+          AND appointment_expert_user_id = #{expertId}
+        </if>
+    </select>
+    <!--获取专家预约评价详情：评星统计 -->
+    <select id="getCommentScore" resultType="java.util.Map">
+        SELECT tu.real_name,tu.nick_name
+            ,IF(one,one,0) AS one
+            ,IF(two,two,0) AS two
+            ,IF(three,three,0) AS three
+            ,IF(four,four,0) AS four
+            ,IF(five,five,0) AS five
+            ,IF(commentNum,commentNum,0) AS commentNum
+        FROM tb_user tu
+            LEFT JOIN(
+                         SELECT appointment_expert_user_id AS appointmentExpertUserId,
+                                sum(case when appointment_score = 1 then 1 else 0 end) as one,
+                                sum(case when appointment_score = 2 then 1 else 0 end) as two,
+                                sum(case when appointment_score = 3 then 1 else 0 end) as three,
+                                sum(case when appointment_score = 4 then 1 else 0 end) as four,
+                                sum(case when appointment_score = 5 then 1 else 0 end) as five
+                         FROM tb_expert_appointment
+                         WHERE appointment_status = 2
+                         GROUP BY appointment_expert_user_id
+                     )AS tmp1 ON tmp1.appointmentExpertUserId = tu.user_id
+            LEFT JOIN (
+                          SELECT appointment_expert_user_id AS appointmentExpertUserId,COUNT(1) AS commentNum
+                          FROM tb_expert_appointment
+                          WHERE appointment_status = 2
+                          GROUP BY appointment_expert_user_id
+                      )AS tmp2 ON tmp1.appointmentExpertUserId = tmp2.appointmentExpertUserId
+        WHERE tu.user_id = #{expertId}
+    </select>
+</mapper>

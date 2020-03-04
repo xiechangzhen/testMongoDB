@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.dao.sport.ForumsGreatsDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.yymt.entity.sport.ForumsGreatsEntity" id="forumsGreatsMap">
+        <result property="forumsId" column="forums_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <select id="queryGreatCountByForumsId" resultType="java.lang.Integer">
+        select count(DISTINCT forums_id,user_id) as count from tb_forums_greats where forums_id = #{id}
+    </select>
+
+    <select id="like" resultType="java.util.Map">
+        select tf.id, tu1.user_avatar,tu1.user_id,tu1.nick_name,tf.content,tf.images,tf.create_time,tf.page_view
+        from tb_forums_greats tfg
+        INNER JOIN tb_forums tf on tf.id = tfg.forums_id
+		INNER JOIN tb_user tu1 on tf.user_id = tu1.user_id
+        INNER JOIN tb_user tu on tu.user_id = tfg.user_id
+        WHERE
+        <choose>
+            <when test="isFriend">
+                tfg.user_id = #{friendId}
+            </when>
+            <otherwise>
+                tfg.user_id = #{userId}
+            </otherwise>
+        </choose>
+
+    </select>
+</mapper>

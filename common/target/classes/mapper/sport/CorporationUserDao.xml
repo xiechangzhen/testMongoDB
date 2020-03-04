@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.dao.sport.CorporationUserDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.yymt.entity.sport.CorporationUserEntity" id="corporationUserMap">
+        <result property="id" column="id"/>
+        <result property="corporationId" column="corporation_id"/>
+        <result property="userId" column="user_id"/>
+    </resultMap>
+    <select id="listUserCorporation" resultType="java.util.Map">
+       select tcu.id,tcu.corporation_id,corporation_name,corporation_images,IF(temp.count,temp.count,0) as totalGreat
+       from tb_corporation_user tcu
+       INNER JOIN tb_corporation tc
+       on tcu.corporation_id = tc.id
+			 LEFT JOIN(
+					select corporation_id, count(1) as count from tb_corporation_greats GROUP BY corporation_id
+				) temp on temp.corporation_id = tcu.corporation_id
+       where corporation_status = 1 AND user_id = #{id};
+    </select>
+</mapper>

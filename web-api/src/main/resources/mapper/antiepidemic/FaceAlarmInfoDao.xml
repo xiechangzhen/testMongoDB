@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.modules.common.dao.antiepidemic.FaceAlarmInfoDao">
+
+
+    <!--根据告警Id获取告警详情-->
+    <select id="queryInfoById" parameterType="string" resultType="map">
+        select
+          faip.[Id] as Id,
+          faip.[Content] as Content,
+          faip.[TimeStamp] as TimeStamp,
+          faip.[DataType] as DataType,
+          dev.[DevID] as DevID,
+          dev.[Desc] as DevName
+        from FaceAlarmInfoParse faip
+        left join Device dev on faip.RemoteIP = dev.RemoteIP
+        where faip.Id = #{id}
+    </select>
+
+    <!--根据卡点ip和时间获取告警信息-->
+    <select id="selInfoByDayAndRemoteIP" parameterType="map" resultType="com.yymt.modules.common.entity.antiepidemic.FaceAlarmInfoParseEntity">
+        select [Content],[TimeStamp],
+        dbo.FaceAlarmInfo_GetViolationStatus([TimeStamp]) as ViolationStatus
+        from FaceAlarmInfoParse
+        where [DataType] = #{DataType}
+        and [RemoteIP] = #{remoteIP}
+        and dbo.FaceAlarmInfo_parseTimestampToDate([TimeStamp]) = #{day}
+    </select>
+
+    <!--根据卡点ip和开始结束时间获取告警信息-->
+    <select id="selInfoByStartTimeAndEndTimeAndRemoteIPs" parameterType="map" resultType="faceAlarmInfoParseEntity" statementType="CALLABLE">
+        {call FaceAlarmInfo_selInfoByStartTimeAndEndTimeAndRemoteIPs(
+		#{DataType,mode=IN},#{orgName,mode=IN},#{startTime,mode=IN},#{endTime,mode=IN})}
+    </select>
+
+    <select id="selContent" resultType="string">
+        select Content from FaceAlarmInfo where Type = 'DeepGlint_Structuring_Data'
+    </select>
+
+    <select id="selAll" resultType="com.yymt.modules.common.entity.antiepidemic.FaceAlarmInfoParseMongoEntity">
+        select Id,Content,DataType,RemoteIP,TimeStamp from FaceAlarmInfoParse
+    </select>
+
+</mapper>

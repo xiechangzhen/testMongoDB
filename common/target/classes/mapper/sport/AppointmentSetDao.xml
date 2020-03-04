@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.dao.sport.AppointmentSetDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.yymt.entity.sport.AppointmentSetEntity" id="appointmentSetMap">
+        <result property="id" column="id"/>
+        <result property="morning" column="morning"/>
+        <result property="afternoon" column="afternoon"/>
+        <result property="night" column="night"/>
+        <result property="minute" column="minute"/>
+        <result property="week" column="week"/>
+        <result property="expertId" column="expert_id"/>
+        <result property="fee" column="fee"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+
+</mapper>

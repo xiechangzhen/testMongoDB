@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+<title>新闻资讯</title>
+<style>
+body { margin:0px; padding:0px;}
+.header { background-color:#525252; padding: 8px 0px; width:100%; margin-bottom:8px;}
+.thumbnail { width:100%; border-top: 1px #DDDDDD solid;	padding-top:20px; padding-bottom:20px; text-align:center;}
+.title { width:100%; font-family:'微软雅黑'; font-size:20px; color:#000000; line-height:25px; text-align:center;overflow:hidden;}
+.articleAttr { font-family:'微软雅黑'; font-size:14px; color:#999999; line-height:25px;}
+.content { margin:0 auto;margin: 10px;word-break: break-all;overflow:hidden;}
+.content-color{color:#999;font-size: 14px;}
+.seperator{ border-bottom:1px #DDDDDD solid; width:100%;}
+#title{word-break: break-all;overflow:hidden;padding: 10px 10px 10px 10px}
+.hint { background-color:#FF0033; border-radius:100px; padding:5px; font-size:10px; color:#FFFFFF; position:absolute; top:-5px; right:0px;}
+.font01 { font-family:'幼圆'; color:#FFFFFF; font-size:16px;}
+.btn01 { font-family:'幼圆'; color:#FFFFFF; font-size:16px; border-radius:5px; background-color:#1479c1; padding:6px 8px;}
+.btn02 { font-family:'幼圆'; color:#FFFFFF; font-size:16px; border-radius:5px; background-color:#1479c1; padding:8px 0; width:95%; margin:0 auto; text-align:center;}
+.bottom { width:100%; margin-bottom:15px; margin-top:8px;}
+</style>
+</head>
+<body>
+<div class="header">
+  <table width="95%" border="0" cellspacing="0" cellpadding="0" style="margin:0 auto;">
+    <tr>
+      <td width="10%"><img src="images/logo.png" style="width:100%;" /></td>
+      <td width="6%">&nbsp;</td>
+      <td><span class="font01">解忧就上心服务</span></td>
+      <td width="30%" align="right"><span class="btn01" onClick="openDownload();">立即打开</span></td>
+    </tr>
+  </table>
+</div>
+<div id="newsDetail" style="display: none">
+<!--<div class="thumbnail">
+	<img :src="newsNavImage" id="thumbnail" style="height: 200px;"/>
+</div>-->
+<div class="title">
+    <table style="width: 100%">
+        <tr>
+            <td id="title" v-text="news.newsTitle"></td>
+        </tr>
+    </table>
+	<!--<div id="title" v-text="news.newsTitle" style="word-break: break-all;padding: 15px 15px 15px 15px"></div>-->
+</div>
+<table border="0" cellspacing="0" cellpadding="0" align="center" style="width:95%;margin-top:15px; margin-bottom:25px;">
+  <tr>
+    <td align="left" style="width:33% "><span class="articleAttr">作者：
+        <label id="author" v-if="news.authorType == 1">{{news.nickName}}</label>
+        <label id="author" v-else>{{news.real_name}}</label>
+    </label></span></td>
+    <td style="width:30% "><span class="articleAttr newsStatus">状态：<label id="newsStatus"></label></span></td>
+    <td align="right" style="width:34%;min-width:110px "><span class="articleAttr"><label id="publishDate" v-text="news.newsCreateTime"></label></span></td>
+  </tr>
+</table>
+<div class="content content-color un-pass">原因：</div>
+<div class="content content-color un-pass" v-text="news.remark" style="margin-bottom: 25px;"></div>
+<div class="content content-color">文章：</div>
+<div id="content" class="content content-color">
+</div>
+<div class="seperator">&nbsp;</div>
+<!--<table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-top:20px; margin-bottom:20px;">
+  <tr>
+    <td>&nbsp;</td>
+    <td width="10%" align="center" style="position:relative;">
+	  <img src="images/heart.png" style="width:70%" />
+	  <span id="favorNum" class="hint" v-text="news.greats">15</span>
+	</td>
+    <td width="10%" align="center"><img id="starPic" src="images/star.png" style="width:70%" /></td>
+  </tr>
+</table>-->
+</div>
+<div class="bottom">
+  <div class="btn02" onClick="openDownload();">打开APP查看更多科普文章</div>
+</div>
+<script src="../../libs/jquery.min.js"></script>
+<script src="../../libs/vue.min.js"></script>
+<script src="../../plugins/layer/layer.js"></script>
+<script src="../../js/common.js"></script>
+<script>
+    var vm = new Vue({
+        el:'#newsDetail',
+        data:{
+            newsId:0,
+            newsType:-1,//用于控制是否显示状态
+            newsNavImage:0,
+            news: {},
+            width:0,
+            markType:0
+        },
+        created: function () {
+            this.init();
+        },
+        methods: {
+            init:function () {
+                var newsId = T.p('id');
+                this.newsType= T.p('type');
+                this.width = T.p('width');
+                this.markType = T.p("markType");
+                console.log(newsId);
+                this.newsId = newsId;
+                if(!isBlank(newsId)){
+                    this.getInfo();
+                }else {
+                    parent.layer.msg("新闻不存在");
+                }
+            },
+            getInfo: function(){
+                $.getJSON("../../../app/news/info/"+this.newsId+"/"+this.markType, function(r){
+                    if(isBlank(r) || isBlank(r.news)){
+                        parent.layer.msg("新闻不存在");
+                    }else {
+                        vm.news = r.news;
+                        vm.news.newsContent = restoreHtmlSpecialChars(r.news.newsContent);
+                       /*if(isBlank(r.news.newsNavImage)){
+                            vm.newsNavImage = baseURL+'/images/default-sm.png';
+                        }else {
+                            vm.newsNavImage = r.news.newsNavImage;
+                        }*/
+                        if(r.news.newsStatus == 1){//审核状态 待审核
+                            $(".newsStatus").show();
+                            $("#newsStatus").text("待审核");
+                            $(".un-pass").hide();
+                        }else if(r.news.newsStatus == 2){//审核状态 通过
+                            if(vm.newsType == 0){
+                                $(".newsStatus").show();
+                                $("#newsStatus").text("审核通过");
+                                $("#newsStatus").css("color","green")
+                            }else{
+                                $(".newsStatus").hide();
+                                $("#newsStatus").text("");
+                            }
+                            $(".un-pass").hide();
+                        }else if(r.news.newsStatus == 3){//审核状态 不通过
+                            $(".newsStatus").show();
+                            $("#newsStatus").text("未通过").css("color","red");
+                            $(".un-pass").show();
+                        }
+                        $("#newsDetail").show();
+                        if(vm.width == null){
+                            vm.width = window.screen.width;
+                        }
+                        console.log(vm.width);
+                        $("#content").html(vm.news.newsContent);
+                        $("#content").find("img").each(function(){
+                            $(this).css("max-width",(vm.width*0.9)+"px");
+                        });
+                        $("#content").find("p").each(function(){
+                            $(this).css("margin",0);
+                        });
+                    }
+                });
+            }
+        }
+    });
+    $(document).ready(function(){
+
+    });
+	function openDownload(){
+		window.open("http://www.yymt.com/zgxfw/index.html");
+	}
+</script>
+</body>
+</html>

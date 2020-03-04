@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.dao.sport.AppointmentScheduleDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.yymt.entity.sport.AppointmentScheduleEntity" id="appointmentScheduleMap">
+        <result property="id" column="id"/>
+        <result property="expertId" column="expert_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="appointmentDate" column="appointment_date"/>
+        <result property="appointmentWeek" column="appointment_week"/>
+        <result property="appointmentPeriod" column="appointment_period"/>
+        <result property="appointmentStartTime" column="appointment_start_time"/>
+        <result property="appointmentEndTime" column="appointment_end_time"/>
+        <result property="isChecked" column="is_checked"/>
+        <result property="chooseTime" column="choose_time"/>
+    </resultMap>
+    
+    <select id="queryDistinctExpertSchedule" resultType="java.lang.String">
+        SELECT DISTINCT appointment_date FROM `tb_appointment_schedule`
+        WHERE appointment_start_time > NOW()
+        AND expert_id = #{expertId}
+    </select>
+</mapper>

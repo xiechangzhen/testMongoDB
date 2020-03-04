@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.dao.sport.GuideDao">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.yymt.entity.sport.GuideEntity" id="guideMap">
+        <result property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="file" column="file"/>
+        <result property="status" column="status"/>
+        <result property="createTime" column="create_time"/>
+        <result property="auditTime" column="audit_time"/>
+        <result property="authorId" column="author_id"/>
+        <result property="auditorId" column="auditor_id"/>
+    </resultMap>
+
+    <select id="getGuideListByIds" resultMap="guideMap">
+        SELECT guide.id, guide.name, guide.file, guide.create_time
+        FROM tb_guide guide
+        WHERE guide.id IN
+        <foreach item="item" index="index" collection="ids"
+                 open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+    <select id="queryGuidePage" resultMap="guideMap">
+        select * from tb_guide
+        <where>
+            1=1
+            <if test="status != null and status != ''">
+                and status = #{status}
+            </if>
+            <if test="name != null and name != '' ">
+                and name like concat  ('%',#{name},'%')
+            </if>
+            <if test="createTime != null and createTime != ''">
+                and create_time like concat('%',#{createTime},'%')
+            </if>
+            <if test="sql_filter != null and sql_filter != '' ">
+                and ${sql_filter}
+            </if>
+        </where>
+        order  by create_time desc
+    </select>
+
+    <update id="allAudit" >
+        update tb_guide set status = #{status},auditor_id = #{auditorId}
+        where id in
+        <foreach collection="ids" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
+    <select id="auditCount" resultType="java.lang.Integer">
+        select count(*) from tb_guide
+        <where>
+            status = 1
+            <if test="name != null and name != '' ">
+                and name like concat  ('%',#{name},'%')
+            </if>
+            <if test="createTime != null and createTime != ''">
+                and create_time like concat('%',#{createTime},'%')
+            </if>
+            <if test="sql_filter != null and sql_filter != '' ">
+                and ${sql_filter}
+            </if>
+        </where>
+    </select>
+
+</mapper>

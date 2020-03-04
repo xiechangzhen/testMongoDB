@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.dao.sport.DeviceAlarmDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.yymt.entity.sport.DeviceAlarmEntity" id="deviceAlarmMap">
+        <result property="id" column="id"/>
+        <result property="devId" column="dev_id"/>
+        <result property="devAlarmTime" column="dev_alarm_time"/>
+        <result property="devAlarmType" column="dev_alarm_type"/>
+        <result property="devAlarmCreate" column="dev_alarm_create"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+
+</mapper>

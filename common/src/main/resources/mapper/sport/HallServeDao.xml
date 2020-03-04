@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yymt.dao.sport.HallServeDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.yymt.entity.sport.HallServeEntity" id="hallServeMap">
+        <result property="id" column="id"/>
+        <result property="hallId" column="hall_id"/>
+        <result property="serveName" column="serve_name"/>
+        <result property="serveType" column="serve_type"/>
+        <result property="serveSport" column="serve_sport"/>
+        <result property="servePrice" column="serve_price"/>
+        <result property="serveTips" column="serve_tips"/>
+        <result property="beginTime" column="begin_time"/>
+        <result property="endTime" column="end_time"/>
+        <result property="remark" column="remark"/>
+        <result property="serveStatus" column="serve_status"/>
+        <result property="auditUserId" column="audit_user_id"/>
+        <result property="auditTime" column="audit_time"/>
+        <result property="createUserId" column="create_user_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateUserId" column="update_user_id"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="pageView" column="page_view"/>
+    </resultMap>
+
+    <!--app场馆服务列表-->
+    <select id="listHallServe" resultType="java.util.Map">
+        select
+        id,
+        serve_tips as serveTips,
+        serve_price as servePrice,
+        hall_id as hallId,
+        serve_name as serveName,
+        serve_type as serveType,
+        serve_sport as serveSport,
+        begin_time as beginTime,
+        end_time as endTime,
+        serve_status as serveStatus,
+        create_time as createTime,
+        page_view as pageView
+        from tb_hall_serve
+        where hall_id = #{hallId}
+        <if test="serveStatus != null">
+            and serve_status = #{serveStatus}
+        </if>
+        <if test="userId != null and userId != '' ">
+            and create_user_id = #{userId}
+        </if>
+    </select>
+
+    <!--app查询附近的场馆服务-->
+    <select id="nearHallserve" resultType="java.util.Map">
+        select
+        id,
+        serve_name as serveName,
+        serve_price as servePrice
+
+        from tb_hall_serve
+        where serve_status = 1 and hall_id = #{hallId}
+    </select>
+
+    <!--app查询附近的场馆有场馆服务的场馆-->
+    <select id="nearHall" resultType="java.util.Map">
+        select * from (
+            select
+            th.id as hallId,
+            th.hall_name as hallName,
+            th.hall_address as hallAddress,
+            th.hall_longitude as longitude,
+            th.hall_latitude as latitude,
+            th.hall_images as hallImages,
+            th.hall_contact as phone,
+            ths.serve_status as serveStatus,
+            ths.serve_sport as serveSport,
+            truncate(6370996.81 * ACOS(
+            COS(th.hall_latitude * PI() / 180) * COS(#{latitude} * PI() / 180) * COS(
+            th.hall_longitude * PI() / 180 - #{longitude} * PI() / 180
+            ) + SIN(th.hall_latitude * PI() / 180) * SIN(#{latitude} * PI() / 180)
+            )/1000,2) AS distance
+            from tb_hall_serve ths left join tb_hall th on ths.hall_id = th.id
+            where th.hall_status = 1
+        )tem
+        where serveStatus = 1
+        <if test="sportId != null and sportId != '' ">
+            and serveSport = #{sportId}
+        </if>
+        <if test="distance != null and distance != '' ">
+            and distance <![CDATA[ <= ]]> 5
+        </if>
+        group by hallId order by distance
+    </select>
+
+    <!--后台场馆服务列表-->
+    <select id="listHallAdmin" resultType="java.util.Map">
+        select
+        ths.id,
+        ths.serve_name as serveName,
+        th.hall_name as hallName,
+        th.hall_address as hallAddress,
+        su.real_name as createUser,
+        ths.create_time as createTime,
+        ths.serve_status as serveStatus,
+        IF(tr.revealNum,tr.revealNum,0) AS revealNum
+        from tb_hall_serve ths left join tb_hall th on ths.hall_id = th.id
+        left join tb_user su on ths.create_user_id = su.user_id
+        LEFT JOIN (
+            select
+            reveal_content_id,count(1) AS revealNum
+            from tb_reveal where reveal_type=4 and reveal_status != 2 GROUP BY reveal_content_id
+        ) AS tr ON ths.id = tr.reveal_content_id
+        where  ths.serve_status <![CDATA[ >= ]]> 0
+        <if test="revealNum != null and revealNum != '' ">
+            and revealNum > 0
+        </if>
+        <if test="serveStatus != null and serveStatus != '' ">
+            and ths.serve_status = #{serveStatus}
+        </if>
+        <if test="keyword != null and keyword != '' ">
+            and (th.hall_name like concat('%',#{keyword},'%')
+            or ths.serve_name like concat('%',#{keyword},'%')
+            or su.username like concat('%',#{keyword},'%')
+            )
+        </if>
+        <if test="createTime != null and createTime != '' ">
+            and ths.create_time like concat('%',#{createTime},'%')
+        </if>
+    </select>
+
+    <!--后台被举报场馆服务数量-->
+    <select id="reportCount" resultType="java.lang.Integer">
+        select
+        count(1)
+        from tb_hall_serve ths left join tb_hall th on ths.hall_id = th.id
+        left join tb_user su on ths.create_user_id = su.user_id
+        LEFT JOIN (
+        select
+        reveal_content_id,count(1) AS revealNum
+        from tb_reveal where reveal_type=4 and reveal_status != 2 GROUP BY reveal_content_id
+        ) AS tr ON ths.id = tr.reveal_content_id
+        where revealNum > 0
+        <if test="keyword != null and keyword != '' ">
+            and (th.hall_name like concat('%',#{keyword},'%')
+            or ths.serve_name like concat('%',#{keyword},'%')
+            or su.username like concat('%',#{keyword},'%')
+            )
+        </if>
+        <if test="createTime != null and createTime != '' ">
+            and ths.create_time like concat('%',#{createTime},'%')
+        </if>
+    </select>
+
+    <!--后台待审核场馆服务数量-->
+    <select id="count" resultType="java.lang.Integer">
+        select count(*)
+        from tb_hall_serve ths left join tb_hall th on ths.hall_id = th.id
+        left join tb_user su on ths.create_user_id = su.user_id
+        where ths.serve_status = 0
+        <if test="keyword != null and keyword != '' ">
+            and (th.hall_name like concat('%',#{keyword},'%')
+            or ths.serve_name like concat('%',#{keyword},'%')
+            or su.username like concat('%',#{keyword},'%')
+            )
+        </if>
+        <if test="createTime != null and createTime != '' ">
+            and ths.create_time like concat('%',#{createTime},'%')
+        </if>
+    </select>
+
+    <!--后台通过id查找场馆服务-->
+    <select id="hallServeById" resultType="java.util.Map">
+        select
+        ths.id,
+        ths.serve_name as serveName,
+        th.hall_name as hallName,
+        th.hall_address as hallAddress,
+        th.hall_contact as phone,
+        th.id as hallId,
+        tu.real_name as createUser,
+        tu.user_id as userId,
+        ths.create_time as createTime,
+        ths.serve_status as serveStatus,
+        ths.serve_type as serveType,
+        ths.serve_sport as serveSport,
+        ths.begin_time as beginTime,
+        ths.end_time as endTime,
+        ths.serve_price as servePrice,
+        ths.remark as remark,
+        ths.serve_tips as serveTips,
+        su.username as auditUser,
+        ths.page_view as pageView,
+        ths.audit_time as auditTime
+        from tb_hall_serve ths left join tb_hall th on ths.hall_id = th.id
+        left join sys_user su on ths.audit_user_id = su.user_id
+        left join tb_user tu on ths.create_user_id = tu.user_id
+        where ths.id = #{id}
+    </select>
+
+    <select id="getHallServeListByIds" resultMap="hallServeMap">
+        SELECT hs.id, hs.serve_name, hs.serve_price, hs.serve_type,
+        hs.create_time, hs.update_time, hs.page_view
+        FROM tb_hall_serve hs
+        WHERE hs.serve_status = 1 AND hs.id IN
+        <foreach item="item" index="index" collection="ids"
+                 open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <update id="updateByHallId" parameterType="java.util.Map">
+        update tb_hall_serve set serve_status = #{serveStatus}
+         where hall_id = #{hallId} and create_user_id = #{createUserId}
+          and serve_status = #{status}
+    </update>
+
+</mapper>
