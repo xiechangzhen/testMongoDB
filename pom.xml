@@ -49,7 +49,7 @@
 		<aliyun.oss.version>2.5.0</aliyun.oss.version>
 		<qcloud.cos.version>4.4</qcloud.cos.version>
 		<swagger.version>2.7.0</swagger.version>
-		<poi.version>3.16</poi.version>
+		<poi.version>3.17</poi.version>
 	</properties>
 
 	<dependencies>
